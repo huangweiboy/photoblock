@@ -1,0 +1,171 @@
+
+
+.photoblock-button {
+  width: 150px;
+  cursor: pointer;
+}
+
+.photoblock-modal-close {
+  background-color: #cc0000;
+  color: #ffffff;
+  border: 0;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;    
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+}
+
+.photoblock-modal {
+  background-color: rgba(0,0,0,0.85);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: url("../img/watercolor.jpg");
+  height: 100vh;
+  width: 100vw;
+
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+  
+#photoblock-modal-content {
+  background-color: #fff;
+  padding: 10px;
+  width: 100%;
+  max-width: 350px;
+  height: 100%;
+  max-height: 425px;
+  position: relative;
+  display: flex;
+  border-radius: 5px;
+  background-color: #fff;
+
+
+}
+
+
+  #photoblock-modal-content * {
+    font-family: sans-serif;
+    font-size: 1.5rem;
+  } 
+  
+  .photoblock-inner-content {
+    font-size: 1.5rem;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+  }
+
+  #photoblock-drop-area {
+    border: 2px dashed #00c6f6;
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .photoblock-drop-area-highlight {
+    background-color: #00c6f6;
+  }
+  
+  #photoblock-modal-content .photoblock-drop-info {
+    font-size: 0.85rem;
+    margin-top:20px;
+  }
+
+  #photoblock-button-label {
+    display: inline-block;
+    text-align: center;
+    padding: 10px;
+    background: #fdd106;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 0;
+    margin-top: auto;
+  }
+  
+  #photoblock-button-label:hover {
+    background: #00c6f6;
+  }
+  
+  #photoblock-files {
+    display: none;
+  }
+  
+  #photoblock-photo-wrapper {
+    width: 330px;
+    height: 330px;
+    background-color: #000000;
+    overflow: hidden;
+  }
+
+  #photoblock-photo {
+    width: 100%;
+    height: 100%;
+    opacity: 0.6;
+    object-fit: cover;
+  }
+
+  #photoblock-cells {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 330px;
+    height: 330px;
+    padding: 0;
+    border-collapse: separate;
+    border-spacing: 20px 20px;
+  }
+
+  #photoblock-modal-content .photoblock-cell {
+    width: 86px;
+    height: 86px;
+    margin: 0px;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  #photoblock-modal-content .photoblock-cell img {
+    width: 50px;
+    border-radius: 50%;
+  }
+
+  #photoblock-modal-content .photoblock-cell-animated {
+    animation: pulse 2s infinite;
+  }
+
+  #photoblock-modal-content .photoblock-cell-highlighted {
+    animation: none;
+    background-color: #ffd200;
+  }
+
+  #photoblock-modal-content .photoblock-cell-selected img {
+    border-radius: 0;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255,210,0, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 30px rgba(255,210,0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255,210,0, 0);
+    }
+  }
+  
+  
+  
