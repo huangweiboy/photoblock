@@ -27,7 +27,8 @@ SOFTWARE.
 
 
 // We're importing the store Class here so we can test against it in the constructor
-import Store from '../store/store.js';
+import Store from '../store/store';
+import Localizer from './localizer';
 
 export default class Component {
     constructor(props = {}) {
@@ -37,7 +38,12 @@ export default class Component {
         // class or setting it to an empty by default. This is so nothing breaks if someone
         // forgets to set it.
         self.render = self.render || function() {};
-        self.log = function() {};
+        
+        self.log = (...args) => {
+            console.log(...args);
+        }
+
+        self.localizer = new Localizer();
 
         // If there's a store passed in, subscribe to the state change
         if(props.store instanceof Store) { 

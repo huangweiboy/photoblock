@@ -1,89 +1,67 @@
 "use strict";
 
 import DOM from './core/dom.js';
-import Component from './core/component';
 import store from './store/index';
-import FileSaver from "file-saver";
-import PhotoBlockModal from "./components/modal";
-import PhotoBlockBtn from "./img/photoblock-btn.png";
-import PhotoBlockXmp from "./components/xmp";
-import GridTemplate from "./templates/grid.html";
-import "./css/photoblock.css";
+import PhotoBlockModal from './components/modal';
+import Loader from './components/loader';
+import Locked from './components/locked';
+import Unlocked from './components/unlocked';
+import Xmp from "./components/xmp";
+
+import photoBlockFrame from "./img/photoblock-frame.svg";
+import photoBlockIcon from "./img/photoblock-icon.svg";
+import "./photoblock.css";
 
 
-export default class PhotoBlock extends Component {
+export default class PhotoBlock {
 
-  constructor(containerId) {
-
-    super({
-      store,
-      element: document.querySelector(`#${containerId}`)
-    })
-
-    this.containerId = containerId;
-  }
-
-  render() {
-    let self = this;
-    self.log('photoblock..render');
+  constructor(containerId, callback, options) {
     
-    let className = 'photoblock-button';
-    self.element.innerHTML = '';
-    self.element.appendChild(DOM.img({ className: className, src: PhotoBlockBtn, alt: "PhotoBlock" }));  
-    if (!store.state.modal) {
-      store.state.modal = new PhotoBlockModal();
-    }
-    self.element.querySelector(`.${className}`).addEventListener("click", (e) => {
-      store.dispatch('showModal', {});
-
-      //store.state.modal.render();
-      // PhotoBlock.modal = new PhotoBlockModal(function(event, data) {
-
-      //   switch(event) {
-      //     case "FILE_UPLOAD":
-      //       self.processFileUpload(data);
-      //       break;
-      //   }
-      // })
-
-      // PhotoBlock.modal.launch();
-    }); 
+    this.containerId = containerId;
+    this.options = options || {};
+    this.element = null;
+    this.xmp = new Xmp();
+    this.contexts = this.xmp.getPhotoContexts();
+    this.modal = null;
+    this.loader = null;
+    this.locked = null;
+    this.unlocked = null;
+    this.context = null;
+    
+    callback(this);
   }
 
-  _update() {
+  render(context) {
     let self = this;
-    self.log('photoblock.._update');
 
-    if (store.state.started === true) {
-      self.log('photoblock.._init..click');
-      
-      self.modal.render();
-    }
+    if ((self.element == null) || (context !== self.context.name)) {      
+      if (self.contexts.hasOwnProperty(context)) {
+        self.context = self.contexts[context];
+        store.dispatch('setContext', { context: self.context });
+        self.modal = new PhotoBlockModal();
+        self.loader = new Loader(self.modal);
+        self.locked = new Locked(self.modal);
+        self.unlocked = new Unlocked(self.modal);
+      }
+
+      self.element = document.querySelector(`#${self.containerId}`);
+      self.element.innerHTML = '';
+      let wrapper = DOM.div({ className: 'photoblock-wrapper'}); 
+      self.element.appendChild(wrapper); 
+      wrapper.appendChild(DOM.img({ className: 'photoblock-button photoblock-icon', src: photoBlockIcon, alt: 'PhotoBlock Icon' }));  
+      wrapper.appendChild(DOM.img({ className: 'photoblock-button photoblock-frame', src: photoBlockFrame, alt: 'PhotoBlock Frame' }));  
+
+      if (self.currentContext !== null) {
+        let buttonElements = wrapper.querySelectorAll(`.photoblock-button`);
+        for(let b=0; b<buttonElements.length; b++) {
+          buttonElements[b].addEventListener('click', (e) => {
+            store.dispatch('showModal', {});
+          });
+        }   
+      } else {
+        wrapper.appendChild(DOM.div({ className: 'photoblock-error-context' }, 'Error: No context specified'));
+      }
+    }  
   }
-
-  processFileUpload(data) {
-
-    // Display the photo
-    PhotoBlock.modal.content.insertAdjacentHTML("beforeend", GridTemplate);
-    let photo = document.getElementById("photoblock-photo");
-    photo.src = data.imgData;
-
-    // Parse photo for PhotoBlock
-    let photoblockXmp = new PhotoBlockXmp();
-    photoblockXmp.parsePhoto(data.buffer);
-    // console.log(jpegXmp.getPhotoContext("Ethereum"));
-    // console.log(jpegXmp.getPhotoContext("Bitcoin"));
-    // console.log(jpegXmp.getPhotoContext("Litecoin"));
-    console.log(photoblockXmp.getPhotoContexts());
-    //let result = jpegXmp.addPhotoAccount(buffer, "Bitcoin", { address: "510101010101010101", publicKey: "xxxxxxxxxxxxxxxxxxxxxxx"});
-    // let blob = photoblockXmp.addPhotoAccount(data.buffer, "Ethereum", {
-    //     address: "Happy Birthday Mummy",
-    //     publicKey: "xxxxxxxxxxxxxxxxxxxxxxx"
-    // });
-    // if (blob !== null) {
-    //     FileSaver.saveAs(blob, "PhotoBlock.jpg");
-    // }
-  }
-
 
 }

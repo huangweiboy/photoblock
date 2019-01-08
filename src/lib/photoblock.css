@@ -1,0 +1,709 @@
+@import url("https://fonts.googleapis.com/css?family=Lato");
+
+
+/* http://meyerweb.com/eric/tools/css/reset/   v4.0 | 20180602    License: none (public domain)  */
+#photoblock-modal * {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+  line-height: 1;
+  box-sizing: border-box;
+  z-index: 9998;
+}
+/* HTML5 display-role reset for older browsers */
+#photoblock-modal article, 
+#photoblock-modal aside, 
+#photoblock-modal details, 
+#photoblock-modal figcaption, 
+#photoblock-modal figure,
+#photoblock-modal footer, 
+#photoblock-modal header, 
+#photoblock-modal hgroup, 
+#photoblock-modal main, 
+#photoblock-modal menu, 
+#photoblock-modal nav, 
+#photoblock-modal section {
+  display: block;
+}
+/* HTML5 hidden-attribute fix for newer browsers */
+#photoblock-modal *[hidden] {
+    display: none;
+}
+
+#photoblock-modal ol, 
+#photoblock-modal ul {
+  list-style: none;
+}
+#photoblock-modal blockquote, 
+#photoblock-modal q {
+  quotes: none;
+}
+#photoblock-modal blockquote:before, 
+#photoblock-modal blockquote:after,
+#photoblock-modal q:before, 
+#photoblock-modal q:after {
+  content: '';
+  content: none;
+}
+
+/* End Reset */
+
+
+#photoblock-modal {
+  background-color: rgba(0, 0, 0, 0.85);
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100vh;
+  width: 100vw;
+
+  position: fixed;
+  left: 0;
+  top: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+
+#photoblock-modal-content,
+#photoblock-modal-content * {
+  font-family: 'LatoWeb', sans-serif;
+  font-size: 1rem;
+}
+
+.photoblock-wrapper,
+.photoblock-frame {
+  width: 140px;
+  height: 170px;
+}
+
+.photoblock-wrapper {
+  position: relative;
+  background-color: #ffffff;
+  z-index: 0;
+}
+
+.photoblock-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.photoblock-icon {
+  width: 122px;
+  height: 122px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 9px;
+  z-index: 9;
+  cursor: pointer;
+}
+
+.photoblock-error-context {
+  color: #cc0000;
+  position: absolute;
+  top: 175px;
+  left: 0;
+  width: 100%;
+  height: 100px;
+}
+
+#photoblock-close-button {
+  background-image: url("img/cancel.svg");
+  background-size: contain;
+  background-color: transparent;
+  border: 0;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+}
+
+
+
+#photoblock-modal-content {
+  background-color: #fff;
+  position: fixed;
+  width: 350px;
+  height: 425px;
+  display: flex;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+}
+
+#photoblock-modal #photoblock-context-wrapper {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  top: 11px;
+  left: 11px;
+  background-image: url("img/triangle.svg");
+  background-position: 0 0;
+  background-size: 60px 60px;
+  background-repeat: no-repeat;
+  z-index: 9999;
+}
+
+#photoblock-modal #photoblock-context {
+  width: 60px;
+  height: 60px;
+  background-position: 0 5px;
+  background-size: 30px 30px;
+  background-repeat: no-repeat;
+  z-index: 9999;
+}
+
+
+#photoblock-inner-content {
+  width: 330px;
+  max-width: 330px;
+  height: 330px;
+  max-height: 330px;
+  margin: 10px;
+  padding: 0;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+#photoblock-inner-content #photoblock-loader-wrapper {
+  background-color: #f3f3f3;
+  border: 1px solid #cccccc;
+  height: 100%;
+}
+
+#photoblock-loader-intro {
+  display: flex;
+  flex-direction: row;
+  height: 40px;
+  margin-top: 10px;
+}
+
+#photoblock-loader-intro p {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+#photoblock-loader-intro p:last-child {
+  flex-basis: 65%;
+}
+
+#photoblock-info-button {
+  background-image: url("img/photoblock-horz.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  width: 180px;
+  height: 30px;  
+  cursor: pointer;
+  border: 0;
+  margin: 0 auto; 
+}
+
+#photoblock-inner-content .photoblock-loader-section {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  
+  cursor: pointer;
+  margin: 0 10px;
+}
+
+#photoblock-inner-content #photoblock-drop-area {
+  height: 140px;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  margin-top: 10px;
+  padding: 30px 0;
+  /* box-shadow: 0 4px 2px -2px rgba(0,0,0,0.4); */
+}
+
+
+#photoblock-inner-content #photoblock-inner-content #photoblock-form-area {
+  height: 130px;
+}
+
+#photoblock-form-area input {
+  margin: 10px 20px 10px 10px;
+  max-width: 80%;
+  border-radius: 5px;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  font-size: 1.3rem;
+  line-height: 1.3rem;
+  padding: 8px;
+}
+
+#photoblock-form-area > div {
+  display: flex;
+  flex-direction: row;
+}
+
+#photoblock-inner-content .photoblock-loader-section > p {
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+#photoblock-inner-content .photoblock-loader-section > p:first-child {
+  margin: 0 10px 10px 10px;
+  font-weight: 500;
+}
+
+#photoblock-inner-content .photoblock-loader-section > p > span {
+  font-weight: 800;
+}
+
+.photoblock-drop-area-highlight {
+  background-color: #00c6f6;
+}
+
+#photoblock-button-label {
+  display: inline-block;
+  font-size: 1.25rem;
+  text-align: center;
+  padding: 10px;
+  background: #fdd106;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 0;
+  margin: 20px auto 10px auto;
+}
+
+#photoblock-button-label:hover {
+  background: #00c6f6;
+}
+
+#photoblock-files {
+  display: none;
+}
+
+#photoblock-photo-wrapper {
+  position: fixed;
+  width: 330px;
+  height: 330px;
+  background-color: #000000;
+  overflow: hidden;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+     -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
+          user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome and Opera */
+}
+
+#photoblock-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoblock-locked {
+  opacity: 0.25;
+  filter: grayscale(100%);
+}
+
+.photoblock-unlocked {
+  opacity: 0.6;
+}
+
+#photoblock-cells {
+  position: absolute;
+  top: 10px;
+  left: 80px;
+  width: 170px;
+  height: 170px;
+  padding: 0;
+  border-collapse: separate;
+}
+
+#photoblock-cells .photoblock-cell {
+  margin: 0px;
+  color: #fff;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  width: 33.33%;
+}
+
+#photoblock-cells .photoblock-cell div {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto;
+  border-radius: 0;
+  background-repeat: no-repeat;
+  animation: none;
+}
+
+#photoblock-cells .photoblock-cell-animated div {
+  border-radius: 50%;
+  /* required for circular animation */
+  animation: photoblock-pulse 2s infinite;
+}
+/*
+#photoblock-cells .photoblock-cell-animated div.pbemoji-sprite {
+}
+*/
+#photoblock-cells .photoblock-cell div.photoblock-cell-default {
+  background-image: url("img/smile-emoji.svg");
+  background-size: contain;
+}
+
+#photoblock-cells div.photoblock-cell-badge {
+  float:right;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  z-index: 999;
+  background-color: #666666;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 12px;
+  animation: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#photoblock-cells div.photoblock-cell-badge-ready {
+  background-color: #00cc00;
+}
+
+#photoblock-emoji-intro {
+  position: absolute;
+  top: 190px;
+  width: 290px;
+  height: 200px;
+  margin: 10px 20px;
+}
+#photoblock-emoji-intro div { 
+  margin-bottom: 20px;
+}
+
+#photoblock-emoji-intro p {
+  margin-left: 2.6rem;
+  color: #ffffff;
+  font-size: 1rem;
+  line-height: 1.4rem;
+}
+
+#photoblock-emoji-intro img {
+  float: left;
+  width: 2rem;
+  filter: brightness(0) saturate(100%) invert(55%) sepia(72%) saturate(1728%) hue-rotate(151deg) brightness(101%) contrast(102%);
+}
+
+
+
+.pbemoji {
+  margin: 0 auto;
+  text-align: center;
+}
+
+#photoblock-wallpaper-wrapper,
+#photoblock-emoji-wrapper {
+  overflow: hidden;
+  overscroll-behavior: none;
+  position: absolute;
+  top: 340px;
+  left: 1px;
+  width: 328px;
+  height: 0;
+  padding: 0;
+  line-height: 0;
+  transition-property: top, height;
+  transition-duration: 0.5s, 0.5s;
+}
+
+#photoblock-wallpaper-wrapper {
+  left: 11px;
+}
+
+#photoblock-emoji-wrapper.photoblock-emoji-slide {
+  top: 181px;
+  height: 148px;
+}
+
+#photoblock-wallpaper-wrapper.photoblock-wallpaper-slide {
+  top: 13px;
+  left: 11px;
+  width: 326px;
+  height: 324px;
+}
+
+#photoblock-wallpaper-tabs,
+#photoblock-emoji-tabs {
+  background: #00c6f6; 
+  padding: 0;
+  height: 28px;
+  text-align: center;
+}
+
+#photoblock-emoji-tabs div {
+  background-color: transparent;
+  background-repeat: no-repeat;
+  margin: 5px 0 5px 15px;
+  padding:0; 
+  width: 18px;
+  height: 18px;
+  cursor:pointer; 
+  display:inline-block;
+}
+
+#photoblock-wallpaper-tabs div:first-child,
+#photoblock-emoji-tabs div:first-child {
+  margin-left: 0;
+}
+
+#photoblock-wallpaper-close {
+  float: right;
+  margin: 4px 10px;
+  font-size: 20px;
+  line-height: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#photoblock-wallpaper-scroll,
+#photoblock-emoji-scroll {
+  height: 120px;
+  background-color: #ffffff;
+  overflow: auto;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+#photoblock-wallpaper-scroll {
+  height: 300px;
+}
+
+#photoblock-emoji-scroll button {
+  background-color: transparent;
+  margin: 7px 9px;
+  border: 0;
+  padding: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-block;
+  cursor: pointer;
+}
+
+#photoblock-emoji-scroll h3 {
+  margin: 10px 7px;
+  font-size: 1.1rem;
+}
+
+#photoblock-controls {
+  position: absolute;
+  top: 350px;
+  left: 10px;
+  width: 330px;
+  height: 100px;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#photoblock-controls .photoblock-controls-column {
+  width: 110px;
+  height: 65px;
+}
+
+#photoblock-controls-left {
+  padding-left: 10px;
+  text-align: left;
+}
+
+#photoblock-controls-center {
+  text-align: center;
+}
+
+#photoblock-controls-right {
+  padding-right: 10px;
+  text-align: right;
+}
+
+#photoblock-controls .photoblock-primary-action {
+  border-radius: 50%;
+  padding: 0;
+  border: 0;
+  width: 65px;
+  height: 65px;
+  margin: 0 auto;
+  cursor: pointer;
+  background: -moz-linear-gradient(-45deg, #00c6f6 40%, #fbd00a 60%);
+  /* FF3.6-15 */
+  background: -webkit-linear-gradient(-45deg, #00c6f6 40%, #fbd00a 60%);
+  /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(135deg, #00c6f6 40%, #fbd00a 60%);
+  /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  background-size: 400% 400%;
+  animation: photoblock-gradient 20s ease infinite;
+}
+
+#photoblock-controls .photoblock-primary-action-disabled {
+  background: -moz-linear-gradient(-45deg, #999999 40%, #aaaaaa 60%);
+  /* FF3.6-15 */
+  background: -webkit-linear-gradient(-45deg,  #999999 40%, #aaaaaa 60%);
+  /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(135deg,  #999999 40%, #aaaaaa 60%);
+  /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  animation: none;
+  cursor: not-allowed;
+}
+
+#photoblock-action-next>div {
+  background-image: url("img/right.svg");
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+}
+
+#photoblock-controls .photoblock-primary-action img {
+  height: 55px;
+  margin: 5px;
+}
+
+#photoblock-controls .photoblock-secondary-action {
+  background-size: contain;
+  background-color: #ffffff;
+  padding: 0;
+  border: 0;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+
+#photoblock-action-wallpaper {
+  width: 50px;
+  height: 50px;
+  background-image: url("img/wallpaper.svg");
+  background-repeat: no-repeat;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+#photoblock-action-reset {
+  background-image: url("img/reset.svg");
+}
+
+#photoblock-action-help {
+  background-image: url("img/help.svg");
+}
+
+#photoblock-action-back {
+  background-image: url("img/left.svg");
+}
+
+#photoblock-wallpaper-scroll.photoblock-wallpaper-masonry {
+	display: -ms-flexbox;
+	-ms-flex-direction: column;
+	-ms-flex-wrap: wrap;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	height: 100vw;
+	font-size: 0; 
+}
+
+#photoblock-wallpaper-scroll.photoblock-wallpaper-masonry img { 
+	width: 33.3%;
+  transition: .8s opacity;
+  margin: 2px;
+  cursor: pointer;
+}
+
+#photoblock-wallpaper-scroll.photoblock-wallpaper-masonry:hover img:hover {
+	opacity: 0.8;
+}
+
+#photoblock-controls-left.photoblock-secondary-action {
+  margin: 0 20px 0 0;
+}
+
+#photoblock-controls-right.photoblock-secondary-action {
+  margin: 0 0 0 20px;
+}
+
+#photoblock-emojitab-acti {
+  background-image: url("img/tab-acti.svg");
+}
+
+#photoblock-emojitab-anim {
+  background-image: url("img/tab-anim.svg");
+}
+
+#photoblock-emojitab-flag {
+  background-image: url("img/tab-flag.svg");
+}
+
+#photoblock-emojitab-food {
+  background-image: url("img/tab-food.svg");
+}
+
+#photoblock-emojitab-obje {
+  background-image: url("img/tab-obje.svg");
+}
+
+#photoblock-emojitab-peop {
+  background-image: url("img/tab-peop.svg");
+}
+
+#photoblock-emojitab-smil {
+  background-image: url("img/tab-smil.svg");
+}
+
+#photoblock-emojitab-symb {
+  background-image: url("img/tab-symb.svg");
+}
+
+#photoblock-emojitab-trav {
+  background-image: url("img/tab-trav.svg");
+}
+
+
+
+@keyframes photoblock-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 210, 0, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 30px rgba(255, 210, 0, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 210, 0, 0);
+  }
+}
+
+@keyframes photoblock-gradient {
+  0% {
+    background-position: 0% 50%
+  }
+
+  50% {
+    background-position: 100% 50%
+  }
+
+  100% {
+    background-position: 0% 50%
+  }
+}

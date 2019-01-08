@@ -1,18 +1,23 @@
 const fs = require("fs");
+const path = require("path");
 const {
     JSDOM
 } = require("jsdom");
 require("colors");
 const Spritesmith = require('spritesmith');
+const imagemin = require('imagemin');
+const imageminPngquant = require('imagemin-pngquant');
 
 const sprite = () => {
     let pack = {
         name: "photoblock",
         source: "build/11",
-        dest: "src/lib/emoji/11",
+        dest: "src/lib/components/emoji/11",
         size: 72
     };
 
+    // Ensure dest and child folders exist
+    mkDirByPathSync(pack.dest + '/img');
 
     const modifierCodes = ["1f3fb", "1f3fc", "1f3fd", "1f3fe", "1f3ff"];
     const blankCode = "2b1c";
@@ -21,6 +26,7 @@ const sprite = () => {
 
     let emojis = [];
     let maxItems = 0;
+    let counter = 0;
 
     // Replace image dataURI's in file prior to processing otherwise out-of-memory errors occur 
     JSDOM.fromFile(`${pack.source}/unicode/emoji-list.html`, {})
@@ -61,7 +67,7 @@ const sprite = () => {
                     let name = table.rows[row].children[3].textContent.replace('⊛ ','');
                     name = name.charAt(0).toUpperCase() + name.slice(1);
                     let keywords = table.rows[row].children[4].textContent.split(" | ");
-                    keywords.unshift(name.replace("flag: ", ""));
+                    keywords.unshift(name.replace("flag: ", "").replace("Flag: ", ""));
                     let filePath = `${pack.source}/${pack.size}x${pack.size}/${code}.png`;
 
                     // Skip missing files and entries beginning with person because they are identical to man/woman chosen at random
@@ -124,11 +130,10 @@ const sprite = () => {
                 })
                 .then(() => {
 
-                    let containerClass = 'photoblock-emoji-container';
+                    let containerClass = 'pbemoji';
                     let element = 'button';
                     let html = '';
                     let css = '';
-                    let runs = 0;
                     for (let c=0;c<emojis.length;c++) {
  
                         let currEmojis = emojis[c].items;
@@ -142,21 +147,21 @@ const sprite = () => {
                             let variant = variants[v];
                             let spriteFiles = [];
                             let thisHtml = '';
-                            currEmojis.map((emoji) => {
+                            let categoryName = categoryKey + (variant !== '' ? '-' + variant : '');
+                            currEmojis.map((emoji, index) => {
                                 let code = emoji.code;
                                 if ((variant !== '') && (emoji.skin !== null)) {
                                     code = emoji.skin.replace('X', variant);
                                 }
                                 let filePath = `${pack.source}/${pack.size}x${pack.size}/${code}.png`;
                                 spriteFiles.push(filePath);
-                                thisHtml += `<${element} id="U-${code}" title="${emoji.name}"></${element}>`;
+                                thisHtml += `<${element} id="U-${code}" class="${containerClass}-sprite ${containerClass}-${categoryName} ${containerClass}-${index}" title="${emoji.name}"></${element}>`;
                             });
 
-                            let categoryName = categoryKey + (variant !== '' ? '-' + variant : '');
-                            emojis[c].html += `<h3 id="photoblock-${categoryName}">${emojis[c].label}</h3><div class="${containerClass} ${containerClass}-${categoryName}">`;
+                            emojis[c].html += `<h3 id="photoblock-${categoryName}">${emojis[c].label}</h3><div>`;
                             emojis[c].html += thisHtml;
                             emojis[c].html += '</div>';
-                            emojis[c].css += `.${containerClass}-${categoryName} ${element} {background-image: url('sprite/${categoryName}.png');background-size:${ maxItems * 100}%;}`;
+                            emojis[c].css += `\n.${containerClass}-${categoryName}{background-image: url('img/${categoryName}.png');}`;
 
 
                 
@@ -164,6 +169,8 @@ const sprite = () => {
                             while(spriteFiles.length < maxItems) {
                                 spriteFiles.push(`${pack.source}/${pack.size}x${pack.size}/${blankCode}.png`); // 
                             }
+
+                            counter++;
                             // Generate our spritesheet
                             Spritesmith.run({
                                 src: spriteFiles,
@@ -174,9 +181,21 @@ const sprite = () => {
                                 if (err) {
                                     throw err;
                                 }
+                                fs.writeFileSync(pack.dest + '/img/' + categoryName + '.png', result.image);
                                 console.log(`\n-- Creating sprite sheet ${categoryName}.png\n`.yellow);
-                                fs.writeFileSync(pack.dest + '/sprite/' + categoryName + '.png', result.image);
-                                
+                                counter--;
+                                if (counter == 0) {          
+                                    console.log('\n-- Starting compression of sprite sheets');                                   
+                                    (async () => {
+                                        let pngs = await imagemin([pack.dest + '/img/*.png'], pack.dest + '/img', {
+                                            plugins: [
+                                                imageminPngquant({quality: '65-80'})
+                                            ]
+                                        });
+                                        console.log(`\nCompleted generating ${pack.name} sprites\n\n`.inverse.green);      
+                                    })();
+                                }
+
                             });
                         }
                     }
@@ -186,10 +205,10 @@ const sprite = () => {
                     html += '<div id="photoblock-emoji-wrapper"><div id="photoblock-emoji-tabs">';
                     // Tab navigation
                     for(let c=0;c<emojis.length;c++) {
-                        html += `<a class="${containerClass} ${containerClass}-${emojis[c].key}" href="#photoblock-${emojis[c].key}"><button title="${emojis[c].label}"></button></a> `;
+                        html += `<a class="${containerClass}-sprite ${containerClass}-${emojis[c].key} ${containerClass}-0" href="#photoblock-${emojis[c].key}" title="${emojis[c].label}"></a> `;
                         if (emojis[c].skin) {
                             modifierCodes.map((code) => {
-                                html += `<a class="${containerClass} ${containerClass}-${emojis[c].key}-${code}" href="#photoblock-${emojis[c].key}-${code}"><button title="${emojis[c].label}"></button></a> `;
+                                html += `<a class="${containerClass}-sprite ${containerClass}-${emojis[c].key}-${code} ${containerClass}-1" href="#photoblock-${emojis[c].key}-${code}" title="${emojis[c].label}"></a> `;
                             })
                         }
                     }
@@ -202,33 +221,57 @@ const sprite = () => {
                         delete emojis[c].css;
                     }
                     for(let m=0;m<maxItems;m++) {
-                        css += `.${containerClass}>${element}:nth-child(${m}){background-position: ${(100/(maxItems - 1)*(m-1))}% 0;}`;
+                        css += `\n.${containerClass}-${m}{background-position: ${((100/(maxItems - 1)*m)).toFixed(4)}% 0;}`;
                     }
 
                         // Done with all sprites. Write to files.
                     html += '</div></div></body></html>';
                     fs.writeFileSync(pack.source + '/photoblock-emoji.html', html);
-                    fs.writeFileSync(pack.dest + '/photoblock-emoji.css', css);
+                    fs.writeFileSync(pack.dest + '/photoblock-emoji.css', `.${containerClass}-sprite{background-size:${ maxItems * 100}%;}` + css);
                     fs.writeFileSync(pack.source + '/shared.css', `
                         body{margin:0;padding:0;}
                         .photoblock-emoji-container{margin:0 auto;text-align:center;}
                         #photoblock-emoji-wrapper{overflow:hidden;overscroll-behavior:none;}
                         #photoblock-emoji-tabs{background-color:#ededed;margin-bottom:10px;border-bottom:2px solid #cccccc;text-align:center;padding-bottom:10px;}
-                        button{background-color:transparent;margin:7px;border:0;padding:0;width:1.8rem;height:1.8rem;cursor:pointer;}
+                        a,button{background-color:transparent;margin:7px;border:0;padding:0;width:1.8rem;height:1.8rem;cursor:pointer;display:inline-block;}
                         #photoblock-emoji-scroll{height: 400px;overflow:auto;scroll-behavior: smooth;overscroll-behavior:contain;}
                     `);
-                    fs.writeFileSync(pack.dest + '/photoblock-emoji.json', JSON.stringify(emojis, null, '\t'));
-                    console.log(`\nCompleted generating ${pack.name} sprites\n\n`.inverse.green);      
+                    fs.writeFileSync(pack.dest + '/photoblock-emoji.js', 'export default ' + JSON.stringify(emojis, null, '\t'));
 
 
                 });
 
         })
 
-
-
-
-    //console.log(`\nCompiling ${pack.name}.svg...`.inverse.yellow);
+        // https://stackoverflow.com/questions/31645738/how-to-create-full-path-with-nodes-fs-mkdirsync
+        function mkDirByPathSync(targetDir, { isRelativeToScript = false } = {}) {
+            const sep = path.sep;
+            const initDir = path.isAbsolute(targetDir) ? sep : '';
+            const baseDir = isRelativeToScript ? __dirname : '.';
+          
+            return targetDir.split(sep).reduce((parentDir, childDir) => {
+              const curDir = path.resolve(baseDir, parentDir, childDir);
+              try {
+                fs.mkdirSync(curDir);
+              } catch (err) {
+                if (err.code === 'EEXIST') { // curDir already exists!
+                  return curDir;
+                }
+          
+                // To avoid `EISDIR` error on Mac and `EACCES`-->`ENOENT` and `EPERM` on Windows.
+                if (err.code === 'ENOENT') { // Throw the original parentDir error on curDir `ENOENT` failure.
+                  throw new Error(`EACCES: permission denied, mkdir '${parentDir}'`);
+                }
+          
+                const caughtErr = ['EACCES', 'EPERM', 'EISDIR'].indexOf(err.code) > -1;
+                if (!caughtErr || caughtErr && curDir === path.resolve(targetDir)) {
+                  throw err; // Throw if it's just the last created dir.
+                }
+              }
+          
+              return curDir;
+            }, initDir);
+          }
 
 };
 

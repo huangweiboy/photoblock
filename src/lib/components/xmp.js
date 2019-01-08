@@ -26,20 +26,20 @@ const TAG_XPACKET = "xpacket";
 const XMP_GUID = "W5M0MpCehiHzreSzNTczkc9d";
 const RESTRICTED_CONTEXTS = "app;ethereum;bitcoin;";
 
-export default class PhotoBlockXmp {
+export default class Xmp {
   constructor() {
 
     this.contexts = {};
     this.xmpPacket = {};
 
     // Built-in handlers
-    this.registerPhotoContext("App", ["name", "userId"], function (account) {
-      console.log(account);
-    });
     this.registerPhotoContext("Ethereum", ["address", "publicKey"], function (account) {
       console.log(account);
     });
     this.registerPhotoContext("Bitcoin", ["address", "publicKey"], function (account) {
+      console.log(account);
+    });
+    this.registerPhotoContext("App", ["name", "userId"], function (account) {
       console.log(account);
     });
   }

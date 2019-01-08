@@ -6,15 +6,19 @@ export default class DOM {
   static button = (...args) => DOM.makeElement(`button`, ...args);
   static div = (...args) => DOM.makeElement(`div`, ...args);
   static h1 = (...args) => DOM.makeElement(`h1`, ...args);
+  static h2 = (...args) => DOM.makeElement(`h2`, ...args);
+  static h3 = (...args) => DOM.makeElement(`h3`, ...args);
+  static h4 = (...args) => DOM.makeElement(`h4`, ...args);
   static header = (...args) => DOM.makeElement(`header`, ...args);
   static p = (...args) => DOM.makeElement(`p`, ...args);
   static span = (...args) => DOM.makeElement(`span`, ...args);
   static img = (...args) => DOM.makeElement(`img`, ...args);
+  static td = (...args) => DOM.makeElement(`td`, ...args);
   static attributeExceptions = [
     `role`,
   ];
   
-  static elid(id) {
+  static elid(id) { 
     return document.getElementById(id);
   }
 
@@ -55,7 +59,7 @@ export default class DOM {
   
     if (Array.isArray(textOrPropsOrChild)) {
       DOM.appendArray(el, textOrPropsOrChild);
-    } else if (textOrPropsOrChild instanceof window.Element) {
+    } else if (textOrPropsOrChild instanceof window.Element) { 
       el.appendChild(textOrPropsOrChild);
     } else if (typeof textOrPropsOrChild === `string`) {
       DOM.appendText(el, textOrPropsOrChild);

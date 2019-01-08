@@ -3,6 +3,6 @@
                         .photoblock-emoji-container{margin:0 auto;text-align:center;}
                         #photoblock-emoji-wrapper{overflow:hidden;overscroll-behavior:none;}
                         #photoblock-emoji-tabs{background-color:#ededed;margin-bottom:10px;border-bottom:2px solid #cccccc;text-align:center;padding-bottom:10px;}
-                        button{background-color:transparent;margin:7px;border:0;padding:0;width:1.8rem;height:1.8rem;cursor:pointer;}
+                        a,button{background-color:transparent;margin:7px;border:0;padding:0;width:1.8rem;height:1.8rem;cursor:pointer;display:inline-block;}
                         #photoblock-emoji-scroll{height: 400px;overflow:auto;scroll-behavior: smooth;overscroll-behavior:contain;}
                     

@@ -1,0 +1,36 @@
+<div id="photoblock-loader-wrapper">
+    <div id="photoblock-loader-intro">
+        <p><button id="photoblock-info-button"></button></p>
+    </div>
+    <div id="photoblock-drop-area" class="photoblock-loader-section">
+        <p>${loader.new}</p>
+        <input type="file" id="photoblock-files" accept="image/jpeg" >                
+        <label id="photoblock-button-label" for="photoblock-files">${loader.select}</label>
+    </div>
+    <div id="photoblock-form-area" class="photoblock-loader-section">
+        <p>${loader.existing}</p>
+        <div>
+            <input type="text" id="photoblock-collection" placeholder="${loader.collection}" />
+            <button id="photoblock-action-wallpaper" class="photoblock-secondary-action"></button>
+        </div>
+    </div>
+    <div id="photoblock-wallpaper-wrapper">
+        <div id="photoblock-wallpaper-tabs">
+            <div id="photoblock-wallpaper-close">X</div>
+        </div>
+        <div id="photoblock-wallpaper-scroll" class="photoblock-wallpaper-masonry"></div>    
+    </div>
+
+    <div id="photoblock-controls">
+        <div id="photoblock-controls-left" class="photoblock-controls-column">
+            <button id="photoblock-action-help" class="photoblock-secondary-action"></button>
+        </div>
+        <div id="photoblock-controls-center" class="photoblock-controls-column">
+            <div id="photoblock-action-next" class="photoblock-primary-action">
+                <div></div>
+            </div>
+        </div>
+        <div id="photoblock-controls-right" class="photoblock-controls-column">
+        </div>
+    </div>
+</div>

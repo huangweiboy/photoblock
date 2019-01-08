@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: path.join(__dirname, "src/docs"),
@@ -16,7 +17,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"]
+        use: ["style-loader", "css-loader?url=false"]
       },
       {
         test: /\.(png|svg|jpg|gif)$/,
@@ -32,9 +33,14 @@ module.exports = {
     ]
   },
   plugins: [
-    new HtmlWebpackPlugin({
+    new HtmlWebpackPlugin({ 
       template: path.join(__dirname, "src/docs/index.html")
-    })
+    }),
+    new CopyWebpackPlugin([
+      { from: 'src/lib/components/emoji/11/img', to: 'img' },
+      { from: 'src/lib/img', to: 'img' },
+      { from: 'src/lib/img/contexts', to: 'img/contexts' }
+    ])
   ],
   resolve: {
     extensions: [".js"]
