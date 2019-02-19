@@ -25,7 +25,7 @@ THE SOFTWARE.
 
 */
 
-module.exports = {
+export default {
   isNotUTF8: isNotUTF8,
   getCharLength: getCharLength,
   getCharCode: getCharCode,

@@ -43,7 +43,7 @@ export default class Store {
                 state[key] = value;
                 
                 // Trace out to the console. This will be grouped by the related action
-                console.log(`state :: ${key}: ${oldValue} => ${value}`);
+                console.log(`state :: ${key}`, oldValue, value );
                 
 
                 return true;
@@ -60,7 +60,7 @@ export default class Store {
      * @returns {boolean}
      * @memberof Store
      */
-    commit(mutationKey, payload) {
+    commit(mutationKey, payload) { 
         let self = this;
 
         // Run a quick check to see if this mutation actually exists
@@ -75,16 +75,17 @@ export default class Store {
         
         // Get a new version of the state by running the mutation and storing the result of it
         let oldState = Object.assign({}, self.state);
-        let newState = self.mutations[mutationKey](oldState, payload);
+        self.mutations[mutationKey](oldState, payload, (newState) => {
+            // Merge the old and new together to create a new state and set it
+            self.state = Object.assign(self.state, newState);
+
+            // Publish the change event for the components that are listening
+            self.events.publish('stateChange', self.state);
+
+            // Reset the status ready for the next operation
+            self.status = 'resting';
+        });
         
-        // Merge the old and new together to create a new state and set it
-        self.state = Object.assign(self.state, newState);
-
-        // Publish the change event for the components that are listening
-        self.events.publish('stateChange', self.state);
-
-        // Reset the status ready for the next operation
-        self.status = 'resting';
         
         return true;
     }

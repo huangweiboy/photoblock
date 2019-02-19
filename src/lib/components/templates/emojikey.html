@@ -1,0 +1,46 @@
+<div id="photoblock-photo-wrapper" class="noselect" unselectable="on" onselectstart="return false;">
+    <img id="photoblock-photo" class="photoblock-emojikey" alt="Photo" />
+    <div id="photoblock-emoji-intro">        
+        <h2>${emojiKey.titleRandom}</h2>
+        <p>${emojiKey.intro}</p>
+        <ul>
+            <li><h3>1. </h3>${emojiKey.step1}</li>
+            <li><h3>2. </h3>${emojiKey.step2}</li>
+            <li><h3>3. </h3>${emojiKey.step3}</li>
+        </ul>
+    </div>
+    <table id="photoblock-emoji-cells">
+        <tr id="photoblock-emoji-cells-r0"></tr>
+        <tr id="photoblock-emoji-cells-r1"></tr>
+        <tr id="photoblock-emoji-cells-r2"></tr>
+    </table>
+    <div id="photoblock-emoji-helptext">
+        <div>
+            <img src="../../img/smile-emoji.svg" alt="Smile emoji" />
+            <h3>${currentTitle}</h3>            
+            <p>
+                ${currentText}
+            </p>
+        </div>
+    </div> 
+    <div id="photoblock-emoji-wrapper">
+        <div id="photoblock-emoji-tabs"></div>
+        <div id="photoblock-emoji-scroll"></div>
+    </div>
+</div>
+<div id="photoblock-controls">
+    <div>
+        <button id="photoblock-action-back" class="photoblock-secondary-action"></button>
+    </div>
+    <div>
+        <button id="photoblock-action-unlock" class="photoblock-primary-action" style="display:none;">
+            <div></div>>
+        </button>
+        <div id="photoblock-action-next" class="photoblock-primary-action">
+            <div></div>
+        </div>
+    </div>
+    <div>
+        <button id="photoblock-action-reset" class="photoblock-secondary-action"></button>
+    </div>
+</div>

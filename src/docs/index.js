@@ -1,6 +1,5 @@
 import PhotoBlock from "../lib/index";
 import "./styles.css";
-//const Jimp = require("jimp/dist")
 
 let photoBlockContainerId = "photoblock-container";
 let photoBlock = new PhotoBlock(photoBlockContainerId, (instance) => {

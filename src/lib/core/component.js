@@ -43,7 +43,8 @@ export default class Component {
             console.log(...args);
         }
 
-        self.localizer = new Localizer();
+        self.localizer = Localizer;
+        self.localizer.setContext(props.store.state.xmp.currentContext);
 
         // If there's a store passed in, subscribe to the state change
         if(props.store instanceof Store) { 

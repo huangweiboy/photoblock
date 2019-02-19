@@ -9,9 +9,8 @@
   font-size: 100%;
   font: inherit;
   vertical-align: baseline;
-  line-height: 1;
   box-sizing: border-box;
-  z-index: 9998;
+  z-index: 930;
 }
 /* HTML5 display-role reset for older browsers */
 #photoblock-modal article, 
@@ -51,6 +50,7 @@
 
 /* End Reset */
 
+/************************ MODAL *************************/
 
 #photoblock-modal {
   background-color: rgba(0, 0, 0, 0.85);
@@ -58,7 +58,7 @@
   background-size: cover;
   height: 100vh;
   width: 100vw;
-
+  z-index: 900;
   position: fixed;
   left: 0;
   top: 0;
@@ -66,8 +66,22 @@
   display: flex;
   justify-content: center;
   align-items: center;
-
 }
+
+#photoblock-modal-close {
+  background-image: url("img/cancel.svg");
+  background-size: contain;
+  background-color: transparent;
+  border: 0;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+}
+
+/******************** MODAL CONTENT **********************/
 
 #photoblock-modal-content,
 #photoblock-modal-content * {
@@ -75,19 +89,36 @@
   font-size: 1rem;
 }
 
-.photoblock-wrapper,
-.photoblock-frame {
+#photoblock-modal-content {
+  background-color: #fff;
+  position: fixed;
+  display: flex;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+}
+
+#photoblock-modal-content,
+#photoblock-photo {
+  width: 350px;
+  height: 475px;
+}
+
+/************************ WIDGET *************************/
+
+#photoblock-widget-wrapper,
+#photoblock-widget-frame {
   width: 140px;
   height: 170px;
 }
 
-.photoblock-wrapper {
+#photoblock-widget-wrapper {
   position: relative;
   background-color: #ffffff;
   z-index: 0;
 }
 
-.photoblock-frame {
+#photoblock-widget-frame {
   position: absolute;
   top: 0;
   left: 0;
@@ -95,7 +126,7 @@
   cursor: pointer;
 }
 
-.photoblock-icon {
+#photoblock-widget-icon {
   width: 122px;
   height: 122px;
   position: absolute;
@@ -106,7 +137,7 @@
   cursor: pointer;
 }
 
-.photoblock-error-context {
+.photoblock-error-message {
   color: #cc0000;
   position: absolute;
   top: 175px;
@@ -115,33 +146,9 @@
   height: 100px;
 }
 
-#photoblock-close-button {
-  background-image: url("img/cancel.svg");
-  background-size: contain;
-  background-color: transparent;
-  border: 0;
-  position: absolute;
-  right: 1rem;
-  top: 1rem;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-}
+/************************ CONTEXT ***********************/
 
-
-
-#photoblock-modal-content {
-  background-color: #fff;
-  position: fixed;
-  width: 350px;
-  height: 425px;
-  display: flex;
-  border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  overflow: hidden;
-}
-
-#photoblock-modal #photoblock-context-wrapper {
+#photoblock-context-wrapper {
   position: absolute;
   width: 60px;
   height: 60px;
@@ -151,7 +158,7 @@
   background-position: 0 0;
   background-size: 60px 60px;
   background-repeat: no-repeat;
-  z-index: 9999;
+  z-index: 950;
 }
 
 #photoblock-modal #photoblock-context {
@@ -160,112 +167,140 @@
   background-position: 0 5px;
   background-size: 30px 30px;
   background-repeat: no-repeat;
-  z-index: 9999;
+  z-index: 950;
 }
 
+/******************** INNER CONTENT *******************/
 
 #photoblock-inner-content {
   width: 330px;
   max-width: 330px;
-  height: 330px;
-  max-height: 330px;
+  height: 380px;
+  max-height: 380px;
   margin: 10px;
   padding: 0;
   background-color: #fff;
   overflow: hidden;
 }
 
-#photoblock-inner-content #photoblock-loader-wrapper {
-  background-color: #f3f3f3;
-  border: 1px solid #cccccc;
-  height: 100%;
-}
+/********************** LOAD *********************/
 
-#photoblock-loader-intro {
+#photoblock-loader-header {
   display: flex;
   flex-direction: row;
   height: 40px;
   margin-top: 10px;
 }
 
-#photoblock-loader-intro p {
+#photoblock-loader-header p {
   display: flex;
   flex-direction: column;
   flex: 1;
 }
 
-#photoblock-loader-intro p:last-child {
+#photoblock-loader-header p:last-child {
   flex-basis: 65%;
 }
 
-#photoblock-info-button {
+#photoblock-logo {
   background-image: url("img/photoblock-horz.svg");
   background-size: contain;
   background-repeat: no-repeat;
   background-color: transparent;
-  width: 180px;
-  height: 30px;  
-  cursor: pointer;
+  width: 80%;
   border: 0;
-  margin: 0 auto; 
+  margin: 10px auto; 
 }
 
-#photoblock-inner-content .photoblock-loader-section {
+#photoblock-modal #photoblock-drop-area {
+  height: 380px;
+  display: flex;
+  padding: 20px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#photoblock-modal-content #photoblock-form-collection {
   display: flex;
   flex-direction: column;
   padding: 20px 0;
-  
   cursor: pointer;
   margin: 0 10px;
 }
 
-#photoblock-inner-content #photoblock-drop-area {
-  height: 140px;
-  background-color: #ffffff;
-  border: 1px solid #cccccc;
-  border-radius: 5px;
-  margin-top: 10px;
-  padding: 30px 0;
-  /* box-shadow: 0 4px 2px -2px rgba(0,0,0,0.4); */
-}
 
-
-#photoblock-inner-content #photoblock-inner-content #photoblock-form-area {
-  height: 130px;
-}
-
-#photoblock-form-area input {
+#photoblock-modal-content #photoblock-form-collection input {
   margin: 10px 20px 10px 10px;
   max-width: 80%;
   border-radius: 5px;
   background-color: #ffffff;
-  border: 1px solid #cccccc;
   border-radius: 5px;
   font-size: 1.3rem;
   line-height: 1.3rem;
   padding: 8px;
 }
 
-#photoblock-form-area > div {
-  display: flex;
-  flex-direction: row;
+#photoblock-modal-content input {
+  border: 2px solid #cccccc;
 }
 
-#photoblock-inner-content .photoblock-loader-section > p {
+#photoblock-modal-content input.photoblock-form-collection-valid {
+  border: 2px solid #00cc00;
+}
+
+#photoblock-modal-content input.photoblock-form-collection-invalid {
+  border: 2px solid #cc0000;
+}
+
+#photoblock-action-wallpaper {
+  background-image: url("img/wallpaper.svg");
+}
+
+#photoblock-action-wallpaper.photoblock-form-collection-valid {
+  background-image: url("img/wallpaper-valid.svg");
+}
+
+#photoblock-action-wallpaper.photoblock-form-collection-invalid {
+  background-image: url("img/wallpaper-invalid.svg");
+}
+
+#photoblock-download-wrapper #photoblock-form-collection {
+  position: absolute;
+  top: 60px;
+  color: #ffffff;
+}
+
+#photoblock-download-wrapper #photoblock-form-collection > p > span {
+  display: none;
+}
+ 
+#photoblock-modal-content #photoblock-form-collection > div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+#photoblock-drop-area a:last-child {
+  color: #000;
+  text-decoration: underline;
+}
+
+#photoblock-form-collection > p {
   text-align: left;
   font-size: 0.9rem;
 }
 
-#photoblock-inner-content .photoblock-loader-section > p:first-child {
+#photoblock-form-collection > p:first-child {
   margin: 0 10px 10px 10px;
   font-weight: 500;
 }
 
-#photoblock-inner-content .photoblock-loader-section > p > span {
+#photoblock-form-collection > p > span {
   font-weight: 800;
 }
 
-.photoblock-drop-area-highlight {
+#photoblock-drop-area.photoblock-drop-area-highlight {
   background-color: #00c6f6;
 }
 
@@ -278,7 +313,12 @@
   cursor: pointer;
   border-radius: 5px;
   border: 0;
-  margin: 20px auto 10px auto;
+  margin: 60px auto 60px auto;
+}
+
+.photoblock-fresh #photoblock-button-label {
+  background: #000000;
+  color: #ffffff;
 }
 
 #photoblock-button-label:hover {
@@ -289,31 +329,38 @@
   display: none;
 }
 
-#photoblock-photo-wrapper {
+
+#photoblock-loader-wrapper,
+#photoblock-photo-wrapper,
+#photoblock-download-wrapper, 
+#photoblock-save-wrapper {
   position: fixed;
   width: 330px;
-  height: 330px;
+  height: 380px;
   background-color: #000000;
   overflow: hidden;
 }
 
-.noselect {
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none; /* Safari */
-   -khtml-user-select: none; /* Konqueror HTML */
-     -moz-user-select: none; /* Firefox */
-      -ms-user-select: none; /* Internet Explorer/Edge */
-          user-select: none; /* Non-prefixed version, currently
-                                supported by Chrome and Opera */
+#photoblock-loader-wrapper {
+  background-color: #e3e3e3;
 }
 
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */}
+
 #photoblock-photo {
-  width: 100%;
-  height: 100%;
+  margin: -10px 0 0 -10px;
   object-fit: cover;
 }
 
-.photoblock-locked {
+.photoblock-emojikey {
   opacity: 0.25;
   filter: grayscale(100%);
 }
@@ -322,17 +369,17 @@
   opacity: 0.6;
 }
 
-#photoblock-cells {
+#photoblock-emoji-cells {
   position: absolute;
-  top: 10px;
-  left: 80px;
-  width: 170px;
-  height: 170px;
+  top: 0;
+  left: 75px;
+  width: 180px;
+  height: 180px;
   padding: 0;
   border-collapse: separate;
 }
 
-#photoblock-cells .photoblock-cell {
+#photoblock-emoji-cells .photoblock-cell {
   margin: 0px;
   color: #fff;
   text-align: center;
@@ -341,35 +388,32 @@
   width: 33.33%;
 }
 
-#photoblock-cells .photoblock-cell div {
-  width: 30px;
-  height: 30px;
+#photoblock-emoji-cells .photoblock-cell div {
+  width: 40px;
+  height: 40px;
   margin: 0 auto;
   border-radius: 0;
   background-repeat: no-repeat;
   animation: none;
 }
 
-#photoblock-cells .photoblock-cell-animated div {
-  border-radius: 50%;
-  /* required for circular animation */
-  animation: photoblock-pulse 2s infinite;
+#photoblock-emoji-cells .photoblock-cell-animated div {
+  border-radius: 50%; /* required for circular animation */
+  background-clip: padding-box; /* required for Chrome */
+  animation: photoblock-pulse 1.5s infinite;
 }
-/*
-#photoblock-cells .photoblock-cell-animated div.pbemoji-sprite {
-}
-*/
-#photoblock-cells .photoblock-cell div.photoblock-cell-default {
+
+#photoblock-emoji-cells .photoblock-cell div.photoblock-cell-default {
   background-image: url("img/smile-emoji.svg");
   background-size: contain;
 }
 
-#photoblock-cells div.photoblock-cell-badge {
+#photoblock-emoji-cells div.photoblock-cell-badge {
   float:right;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  z-index: 999;
+  z-index: 920;
   background-color: #666666;
   color: #ffffff;
   font-size: 12px;
@@ -381,35 +425,74 @@
   justify-content: center;
 }
 
-#photoblock-cells div.photoblock-cell-badge-ready {
+#photoblock-emoji-cells div.photoblock-cell-badge-ready {
   background-color: #00cc00;
+}
+
+#photoblock-emoji-cells div.photoblock-cell-badge-error {
+  background-color: #cc0000;
 }
 
 #photoblock-emoji-intro {
   position: absolute;
-  top: 190px;
+  top: 0;
   width: 290px;
   height: 200px;
+  margin: 100px 20px 0 20px;
+}
+
+#photoblock-emoji-intro * {
+  color: #ffffff;
+  font-size: 1.3rem;
+}
+
+#photoblock-emoji-intro h2 {
+  color: #00c6f6;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom:20px;
+}
+
+#photoblock-emoji-intro li {
+  display: block;
+  margin-top: 20px;
+}
+
+#photoblock-emoji-intro h3 {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+#photoblock-emoji-helptext {
+  position: absolute;
+  top: 200px;
+  width: 290px;
+  height: 160px;
   margin: 10px 20px;
 }
-#photoblock-emoji-intro div { 
+#photoblock-emoji-helptext div { 
   margin-bottom: 20px;
 }
 
-#photoblock-emoji-intro p {
+#photoblock-emoji-helptext p {
   margin-left: 2.6rem;
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.4rem;
 }
+#photoblock-emoji-helptext h3 {
+  margin-left: 2.6rem;
+  font-size: 1.2rem;
+  padding: 5px 0 10px 0;
+  font-weight: bold;
+  color: #00c6f6;
+}
 
-#photoblock-emoji-intro img {
+#photoblock-emoji-helptext img {
   float: left;
   width: 2rem;
   filter: brightness(0) saturate(100%) invert(55%) sepia(72%) saturate(1728%) hue-rotate(151deg) brightness(101%) contrast(102%);
 }
-
-
 
 .pbemoji {
   margin: 0 auto;
@@ -421,7 +504,7 @@
   overflow: hidden;
   overscroll-behavior: none;
   position: absolute;
-  top: 340px;
+  top: 390px;
   left: 1px;
   width: 328px;
   height: 0;
@@ -429,22 +512,17 @@
   line-height: 0;
   transition-property: top, height;
   transition-duration: 0.5s, 0.5s;
-}
-
-#photoblock-wallpaper-wrapper {
-  left: 11px;
+  z-index: 970;
 }
 
 #photoblock-emoji-wrapper.photoblock-emoji-slide {
   top: 181px;
-  height: 148px;
+  height: 198px;
 }
 
 #photoblock-wallpaper-wrapper.photoblock-wallpaper-slide {
-  top: 13px;
-  left: 11px;
-  width: 326px;
-  height: 324px;
+  top: 1px;
+  height: 380px;
 }
 
 #photoblock-wallpaper-tabs,
@@ -458,10 +536,10 @@
 #photoblock-emoji-tabs div {
   background-color: transparent;
   background-repeat: no-repeat;
-  margin: 5px 0 5px 15px;
+  margin: 3px 0 3px 18px;
   padding:0; 
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   cursor:pointer; 
   display:inline-block;
 }
@@ -482,7 +560,6 @@
 
 #photoblock-wallpaper-scroll,
 #photoblock-emoji-scroll {
-  height: 120px;
   background-color: #ffffff;
   overflow: auto;
   scroll-behavior: smooth;
@@ -490,16 +567,20 @@
 }
 
 #photoblock-wallpaper-scroll {
-  height: 300px;
+  height: 350px;
+}
+
+#photoblock-emoji-scroll {
+  height: 170px;
 }
 
 #photoblock-emoji-scroll button {
   background-color: transparent;
-  margin: 7px 9px;
+  margin: 6px 0 6px 14px;
   border: 0;
   padding: 0;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 30px;
+  height: 30px;
   display: inline-block;
   cursor: pointer;
 }
@@ -507,37 +588,19 @@
 #photoblock-emoji-scroll h3 {
   margin: 10px 7px;
   font-size: 1.1rem;
+  font-weight: bold;
 }
 
 #photoblock-controls {
   position: absolute;
-  top: 350px;
+  top: 400px;
   left: 10px;
   width: 330px;
   height: 100px;
-  padding: 0;
+  padding: 0 10px;
   display: flex;
   flex-direction: row;
-  justify-content: center;
-}
-
-#photoblock-controls .photoblock-controls-column {
-  width: 110px;
-  height: 65px;
-}
-
-#photoblock-controls-left {
-  padding-left: 10px;
-  text-align: left;
-}
-
-#photoblock-controls-center {
-  text-align: center;
-}
-
-#photoblock-controls-right {
-  padding-right: 10px;
-  text-align: right;
+  justify-content: space-between;
 }
 
 #photoblock-controls .photoblock-primary-action {
@@ -547,15 +610,20 @@
   width: 65px;
   height: 65px;
   margin: 0 auto;
-  cursor: pointer;
-  background: -moz-linear-gradient(-45deg, #00c6f6 40%, #fbd00a 60%);
+  background: -moz-linear-gradient(-45deg, #00c6f6 40%, #ffd200 60%);
   /* FF3.6-15 */
-  background: -webkit-linear-gradient(-45deg, #00c6f6 40%, #fbd00a 60%);
+  background: -webkit-linear-gradient(-45deg, #00c6f6 40%, #ffd200 60%);
   /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(135deg, #00c6f6 40%, #fbd00a 60%);
+  background: linear-gradient(135deg, #00c6f6 40%, #ffd200 60%);
   /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   background-size: 400% 400%;
   animation: photoblock-gradient 20s ease infinite;
+  cursor: pointer;
+}
+
+#photoblock-controls .photoblock-primary-action img {
+  height: 55px;
+  margin: 5px;
 }
 
 #photoblock-controls .photoblock-primary-action-disabled {
@@ -569,16 +637,30 @@
   cursor: not-allowed;
 }
 
-#photoblock-action-next>div {
-  background-image: url("img/right.svg");
+#photoblock-action-unlock > div,
+#photoblock-action-next > div,
+#photoblock-action-download > div {
   width: 100%;
   height: 100%;
   background-size: contain;
 }
 
-#photoblock-controls .photoblock-primary-action img {
-  height: 55px;
-  margin: 5px;
+#photoblock-action-unlock > div {
+  background-image: url("img/locked.svg");
+}
+
+#photoblock-action-next > div {
+  background-image: url("img/right.svg");
+}
+
+#photoblock-controls #photoblock-action-download {
+  padding: 8px;
+}
+
+#photoblock-action-download > div {
+  background-image: url("img/download.svg");
+  width: 49px;
+  height: 49px;
 }
 
 #photoblock-controls .photoblock-secondary-action {
@@ -591,47 +673,51 @@
   cursor: pointer;
 }
 
+#photoblock-controls .no-click {
+  cursor: default;
+}
+
 #photoblock-action-wallpaper {
   width: 50px;
   height: 50px;
-  background-image: url("img/wallpaper.svg");
-  background-repeat: no-repeat;
+  background-color: transparent;
   cursor: pointer;
-  margin-top: 2px;
 }
 
 #photoblock-action-reset {
   background-image: url("img/reset.svg");
 }
 
-#photoblock-action-help {
-  background-image: url("img/help.svg");
-}
-
 #photoblock-action-back {
   background-image: url("img/left.svg");
 }
 
-#photoblock-wallpaper-scroll.photoblock-wallpaper-masonry {
-	display: -ms-flexbox;
-	-ms-flex-direction: column;
-	-ms-flex-wrap: wrap;
-	display: flex;
-	flex-direction: column;
-	flex-wrap: wrap;
-	height: 100vw;
-	font-size: 0; 
+#photoblock-wallpaper-scroll {
+  display: flex;
+  background-color: #000;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-content: flex-start;
+  padding: 2px;
+  margin: 0 auto;
 }
 
-#photoblock-wallpaper-scroll.photoblock-wallpaper-masonry img { 
-	width: 33.3%;
-  transition: .8s opacity;
-  margin: 2px;
+#photoblock-wallpaper-scroll div { 
+  width: 100px;
+  height: 100px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: block;
+  float: left;
+  flex: 0 0 auto;
+  margin: 0 2px 2px 0;
   cursor: pointer;
+	opacity: 0.6;
 }
 
-#photoblock-wallpaper-scroll.photoblock-wallpaper-masonry:hover img:hover {
-	opacity: 0.8;
+#photoblock-wallpaper-scroll div:hover {
+  opacity: 1.0;
 }
 
 #photoblock-controls-left.photoblock-secondary-action {
@@ -678,7 +764,30 @@
   background-image: url("img/tab-trav.svg");
 }
 
+#photoblock-loader {
+  animation: photoblock-flip-horizontal 4s infinite;
+  width: 100px;
+  top: 50px;
+  left: 120px;
+  position: absolute;
+}
 
+#photoblock-fresh-message span {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.photoblock-new {
+  background-image: linear-gradient(to top, #fddb92 0%, #d1fdff 100%);
+}
+
+.photoblock-fresh {
+  background-image: url("img/fresh-bg.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
 
 @keyframes photoblock-pulse {
   0% {
@@ -705,5 +814,23 @@
 
   100% {
     background-position: 0% 50%
+  }
+}
+
+@keyframes photoblock-flip-horizontal {
+  0%, 25%, 50%, 75%, 100% {
+    animation-timing-function: cubic-bezier(0, 0.5, 0.5, 1);
+  }
+  0% {
+    -webkit-transform: rotateY(0deg) rotateX(0deg);
+    transform: rotateY(0deg) rotateX(0deg);
+  }
+  50% {
+    -webkit-transform: rotateY(180deg) rotateX(0deg);
+    transform: rotateY(180deg) rotateX(0deg);
+  }
+  100% {
+    -webkit-transform: rotateY(0deg) rotateX(0deg);
+    transform: rotateY(0deg) rotateX(0deg);
   }
 }

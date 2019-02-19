@@ -9,63 +9,19 @@ export default new Store({
     state: {
         currentState: PB.STATE_INIT,
         currentContext: null,
+        availableContexts: null,
         isModalVisible: false,
-        wallpaper: null,
-        collectionName: null
+        emojiKey: [],
+        xmp: null,
+        photoEngine: null,
+        fresh: false
     }
+
 });
 
 /*
-        photo: {
-            imgData: null,
-            buffer: null
-        },
-        options: {},
-        emojisChosen: 0,
-        emoji: [
-            {
-                focus: false,
-                value: null,
-                order: -1
-            },
-            {
-                focus: false,
-                value: null,
-                order: -1
-            },
-            {
-                focus: false,
-                value: null,
-                order: -1
-            },
-            {
-                focus: false,
-                value: null,
-                order: -1
-            },
-            {
-                focus: true,
-                value: '1f483-1f3fd',
-                order: 0
-            },
-            {
-                focus: false,
-                value: null,
-                order: -1
-            },
-            {
-                focus: false,
-                value: null,
-                order: -1
-            },
-            {
-                focus: false,
-                value: null,
-                order: -1
-            },
-            {
-                focus: false,
-                value: null,
-                order: -1
-            }
-        ]*/
+        __gateway: PB.IPFS_GATEWAY,
+        __wallpaperId: null,
+        __wallpaperHash: null,
+        __collectionName: ''
+*/

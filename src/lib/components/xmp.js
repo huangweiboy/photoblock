@@ -1,6 +1,6 @@
 "use strict";
 
-import UTF8 from "../vendor/UTF8";
+import UTF8 from "../vendor/utf8";
 
 const JPEG_SOS = 0xFFDA;
 const JPEG_APP1 = 0xFFE1;
@@ -24,78 +24,30 @@ const TAG_RDF_SEQ = NS_RDF + ":Seq";
 const TAG_RDF_LI = NS_RDF + ":li";
 const TAG_XPACKET = "xpacket";
 const XMP_GUID = "W5M0MpCehiHzreSzNTczkc9d";
-const RESTRICTED_CONTEXTS = "app;ethereum;bitcoin;";
 
 export default class Xmp {
-  constructor() {
+  constructor(currentContext, contexts) {
 
-    this.contexts = {};
+    this.contexts = contexts;
+    this.currentContext = currentContext;
     this.xmpPacket = {};
 
-    // Built-in handlers
-    this.registerPhotoContext("Ethereum", ["address", "publicKey"], function (account) {
-      console.log(account);
-    });
-    this.registerPhotoContext("Bitcoin", ["address", "publicKey"], function (account) {
-      console.log(account);
-    });
-    this.registerPhotoContext("App", ["name", "userId"], function (account) {
-      console.log(account);
-    });
   }
-
-
-  registerPhotoContext(contextName, attributes, handler) {
-    let isValid = false;
-    if (contextName 
-      && (contextName !== "") 
-      && !this.contexts[contextName] 
-      && !this.contexts[contextName.toLowerCase()] 
-      && (/^[a-zA-Z()]+$/.test(contextName)) 
-      && attributes
-      && attributes.length 
-      && (attributes.length > 0) 
-      && (typeof handler == "function")) {
-      isValid = true;
-      attributes.map((attribute) => {
-        if ((attribute === null) || (attribute.length === 0) || !(/^[a-zA-Z()]+$/.test(attribute))) {
-          isValid = false;
-        }
-      })
-      if (isValid) {
-        this.contexts[contextName] = {
-          name: contextName,
-          attributes: attributes,
-          accounts: [],
-          handler: handler
-        }
+  
+  getAccounts(buffer) {
+    this._parseBuffer(buffer, true);
+    let hasAccounts = false;
+    let accounts = {};
+    Object.keys(this.contexts).map((context) => {
+      if (this.contexts[context].accounts.length > 0) {
+        hasAccounts = true;
+        accounts[context] = this.contexts[context].accounts;
       }
-    }
-    return isValid;
+    });
+    return hasAccounts ? accounts : null;
   }
 
-  unregisterPhotoContext(contextName) {
-    if (!this.contexts.hasOwnProperty(contextName)) {
-      return false;
-    }
-    if (RESTRICTED_CONTEXTS.indexOf(contextName.toLowerCase() + ";") > -1) return;
-    delete this.contexts[contextName];
-    return true;
-  }
-
-  getPhotoContext(contextName) {
-    return this.contexts.hasOwnProperty(contextName) ? this.contexts[contextName] : null;
-  }
-
-  getPhotoContexts() {
-    return this.contexts;
-  }
-
-  getPhotoAccounts(contextName) {
-    return this.contexts.hasOwnProperty(contextName) ? this.contexts[contextName].accounts : [];
-  }
-
-  addPhotoAccount(buffer, contextName, account) {
+  addAccount(buffer, contextName, account) {
 
     // Validate
     if (!this.contexts.hasOwnProperty(contextName)) {
@@ -103,7 +55,7 @@ export default class Xmp {
     }
 
     // Read the image
-    this._parse(buffer, false);
+    this._parseBuffer(buffer, false);
     if (!this.xmpPacket.hasOwnProperty("doc")) {
       return false;
     }
@@ -124,12 +76,11 @@ export default class Xmp {
         if (acct[attribute] === account[attribute]) {
           isValid = false;
         }
-      });
+      });  
     }
-
     if (isValid) {
       this.contexts[contextName].accounts.push(account);
-      updateXmpPacketDoc(this.xmpPacket.doc, this.contexts);
+      this.xmpPacket.doc = _updateXmpPacketDoc(this.xmpPacket.doc, this.contexts);
 
       if (this.xmpPacket.xmpMarker === null) {
         this.xmpPacket.xmpMarker = this.xmpPacket.sosMarker; // If no XMP packet, insert before start of stream
@@ -151,20 +102,19 @@ export default class Xmp {
       newXmpDV.setUint16(2, xmpBytes.length - 2); // Exclude the marker bytes, but include the length bytes
 
       // Payload = preBytes + new XMP bytes + postBytes
-      let payloadLength = this.xmpPacket.dataLength - this.xmpPacket.xmpLength + newXmpDV.byteLength;
-      let payload = new Uint8Array(payloadLength);
-      payload.set(preBytes, 0)
+//      let payloadLength = this.xmpPacket.dataLength - this.xmpPacket.xmpLength + newXmpDV.byteLength;
+      let payloadLength = preBytes.length + xmpBytes.length + postBytes.length;
+      let payload = new Uint8Array(payloadLength); 
+      console.log('Prebytes', payload, preBytes);
+      payload.set(preBytes, 0);
+      console.log('Xmpbytes', payload, xmpBytes);
       payload.set(xmpBytes, this.xmpPacket.xmpMarker);
+      console.log('Postbytes', payload, postBytes);
       payload.set(postBytes, this.xmpPacket.xmpMarker + newXmpDV.byteLength);
 
       delete this.xmpPacket; // Cleanup
 
-      var blob = new Blob([payload], {
-        type: "octet/stream" 
-      });
-
-      return blob;
-
+      return payload.buffer;
     }
 
     return null;
@@ -174,7 +124,7 @@ export default class Xmp {
     // }
 
 
-    function updateXmpPacketDoc(xmpDoc, contexts) {
+    function _updateXmpPacketDoc(xmpDoc, contexts) {
 
       if (xmpDoc === null) {
         let xmpText =
@@ -241,17 +191,13 @@ export default class Xmp {
           });
         }
       });
+
+      return xmpDoc;
     }
   }
 
 
-
-
-  parsePhoto(buffer) {
-    this._parse(buffer, true);
-  }
-
-  _parse(buffer, readOnly) {
+  _parseBuffer(buffer, readOnly) {
 
     let data = new DataView(buffer);
     let offset = 2;
@@ -266,8 +212,8 @@ export default class Xmp {
     while (true) {
       // Offset is now at marker (4 bytes)
       let start = offset;
-      let id = read16();
-      let length = read16() - 2;
+      let id = _read16();
+      let length = _read16() - 2;
       if ((offset + length) >= data.byteLength) {
         //throw new Error("Jpeg section ran over end of file.");
         break;
@@ -279,7 +225,7 @@ export default class Xmp {
       } else if ((id === JPEG_APP1) && (this.xmpPacket.doc === null)) {
         let str = "";
         try {
-          str = readStr(true);
+          str = _readStr(true);
         } catch (e) {
           // Ignore failures to read strings.
         }
@@ -303,7 +249,7 @@ export default class Xmp {
               text = text.substring(begin, end + TAG_X_XMPMETA.length + 1);
             }
           } catch (e) {
-            // Ignore parsing errors...we can"t do anything if file has bad data
+            // Ignore parsing errors...we can't do anything if file has bad data
           }
 
           if (xmpText !== null) {
@@ -312,14 +258,14 @@ export default class Xmp {
             this.xmpPacket.doc = new DOMParser().parseFromString(xmpText, "text/xml");
 
             // Parse XML and find all accounts in XMP packet
-            parseContextAccounts(this.xmpPacket.doc, this.contexts);
+            _parseContextAccounts(this.xmpPacket.doc, this.contexts);
 
             if (readOnly) {
               delete this.xmpPacket; // Free memory
               break;
             } else {
               // Strip all PhotoBlock references in anticipation of adding more accounts in future calls
-              stripPhotoblockReferences(this.xmpPacket.doc, this.contexts);
+              _stripPhotoblockReferences(this.xmpPacket.doc, this.contexts);
               this.xmpPacket.xmpMarker = start;
               this.xmpPacket.xmpLength = length + 4; // Add 2 bytes for length and 2 bytes for marker at start of packet
               this.xmpPacket.dataLength = data.byteLength;
@@ -336,7 +282,7 @@ export default class Xmp {
     data = null;
 
 
-    function parseContextAccounts(xmpDoc, contexts) {
+    function _parseContextAccounts(xmpDoc, contexts) {
 
       for (let contextName in contexts) {
         if (!contexts.hasOwnProperty(contextName)) {
@@ -380,7 +326,7 @@ export default class Xmp {
                 if (context.accounts.filter((a) => {
                     return a[keyAttribute] === account[keyAttribute]
                   }).length === 0) {
-                  context.accounts.push(account);
+                    context.accounts.push(account);
                 }
               }
             });
@@ -391,7 +337,7 @@ export default class Xmp {
 
     }
 
-    function stripPhotoblockReferences(xmpDoc, contexts) {
+    function _stripPhotoblockReferences(xmpDoc, contexts) {
 
       // Strip all namespace attributes from rdf:Description nodes
       let rdfDescriptions = xmpDoc.getElementsByTagName(TAG_RDF_DESCRIPTION);
@@ -424,13 +370,13 @@ export default class Xmp {
       Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
     */
 
-    function readStr(peek = false) {
+    function _readStr(peek = false) {
       let _offset = offset;
       let bytes = [];
-      let byte = read8();
+      let byte = _read8();
       while (byte != 0 && (offset < data.byteLength)) {
         bytes.push(byte);
-        byte = read8();
+        byte = _read8();
       }
 
       if (byte != 0) {
@@ -444,7 +390,7 @@ export default class Xmp {
       return String.fromCharCode(...bytes);
     }
 
-    function read8(peek = false) {
+    function _read8(peek = false) {
       let value = data.getUint8(offset);
 
       if (!peek) {
@@ -454,7 +400,7 @@ export default class Xmp {
       return value;
     }
 
-    function read16(peek = false) {
+    function _read16(peek = false) {
       let value = data.getUint16(offset);
 
       if (!peek) {

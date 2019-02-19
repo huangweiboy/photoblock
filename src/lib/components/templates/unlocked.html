@@ -1,22 +1,16 @@
-<div id="photoblock-grid photoblock-inner-content">
-    <div id="photoblock-photo-wrapper">
-        <img id="photoblock-photo" class="photoblock-unlocked" alt="Photo" />
-
-        <div id="photoblock-controls">
-            <div id="photoblock-controls-left" class="photoblock-controls-column">
-                <button class="photoblock-secondary-action">
-                    <img src="../../img/download.svg" />
-                </button>
-            </div>
-            <div id="photoblock-controls-center" class="photoblock-controls-column">
-                <button id="photoblock-primary-action">
-                    <img src="../../img/unlocked.svg" />
-                </button>
-            </div>
-            <div id="photoblock-controls-right" class="photoblock-controls-column">
-                <button class="photoblock-secondary-action">
-                    <img src="../../img/add.svg" />
-                </button>
-            </div>
+<div id="photoblock-unlocked-wrapper" class="noselect" unselectable="on" onselectstart="return false;">
+    <img id="photoblock-photo" class="photoblock-emojikey" style="filter:none;" alt="Photo" />
+</div>
+<div id="photoblock-controls">
+    <div>
+        <button id="photoblock-action-back" class="photoblock-secondary-action"></button>
+    </div>
+    <div>
+        <div id="photoblock-action-next" class="photoblock-primary-action">
+            <div></div>
         </div>
+    </div>
+    <div>
+        <button id="photoblock-action-download" class="photoblock-secondary-action"></button>
+    </div>
 </div>

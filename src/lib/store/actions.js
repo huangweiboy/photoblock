@@ -12,20 +12,52 @@ export default {
         context.commit('hideModal', payload);
     },
 
-    loadPhoto(context, payload) {
-        context.commit('loadPhoto', payload)
+    loadPhoto(context, payload) { 
+        context.commit('loadPhoto', payload);
     },
 
-    unlock(context, payload) {
+    newEmojiKey(context, payload) {
+        context.commit('newEmojiKey', payload);
+    },
+
+    defineEmojiKey(context, payload) {
+        context.commit('defineEmojiKey', payload);
+    },
+
+    confirmEmojiKey(context, payload) {  
+        context.commit('confirmEmojiKey', payload);
+    },
+
+    downloadPhoto(context, payload) {  
+        context.commit('downloadPhoto', payload); 
+    },
+
+    cancelPhoto(context, payload) {  
+        context.commit('cancelPhoto', payload);
+    },
+
+    addContextAccountAndDownload(context, payload) {
+        context.commit('addContextAccountAndDownload', payload);
+    },
+
+    unlock(context, payload) {  
         context.commit('unlock', payload);
     },
 
-    setWallpaper(context, payload) {
+    __setWallpaper(context, payload) {
         context.commit('setWallpaper', payload);
     },
 
-    setCollectionName(context, payload) {
+    __setCollectionName(context, payload) {
         context.commit('setCollectionName', payload);
+    },
+
+    __createCollection(context, payload) {  
+        context.commit('createCollection', payload);
+    },
+
+    __saveCollection(context, payload) {  
+        context.commit('saveCollection', payload);
     }
 
 };

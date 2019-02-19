@@ -3,8 +3,8 @@ import DOM from '../core/dom.js';
 import Component from '../core/component';
 import store from '../store/index';
 import ModalTemplate from './templates/modal.html';
-import Wallpaper from './wallpaper/wallpaper';
-
+//import Wallpaper from './wallpaper/__wallpaper';
+import PB from '../core/constants';
 
 export default class Modal extends Component {
   constructor() {
@@ -19,7 +19,7 @@ export default class Modal extends Component {
   
   render() {
     let self = this;
-    self.log('modal..render');
+    self.log('modal...render');
 
     if (self.element === null) {
 
@@ -54,15 +54,16 @@ export default class Modal extends Component {
       });
   
       // Close button in modal window
-      let closeButton = DOM.elid('photoblock-close-button');
+      let closeButton = DOM.elid('photoblock-modal-close');
       closeButton.addEventListener('click', () => {
         store.dispatch('hideModal', {});
       });
 
+      DOM.elid('photoblock-context').setAttribute('style', `background-image:url("img/contexts/${store.state.xmp.currentContext.name}.png")`);
+
     }
 
     if (store.state.isModalVisible === true) {
-      DOM.elid('photoblock-context').setAttribute('style', `background-image:url("img/contexts/${store.state.currentContext.name}.svg")`);
 
       self.lastFocusedElement = document.activeElement;
       // Find all focusable children
@@ -74,17 +75,17 @@ export default class Modal extends Component {
       self.firstTabStop.focus(); // Focus the window
     } 
     
-    self.displayWallpaper();
+    self.display();
   }
 
-  displayWallpaper() {
+  display() {
     let self = this;
-    if (store.state.wallpaper !== null) {
-      let wallpaperIndex = Wallpaper.map((w) => { return w.id; }).indexOf(store.state.wallpaper);
-      self.element.setAttribute('style', `display: ${store.state.isModalVisible ? 'flex' : 'none'}; background-image: url("${Wallpaper[wallpaperIndex].wallpaper}")`);  
-    } else {
-      self.element.setAttribute('style', `display: ${store.state.isModalVisible ? 'flex' : 'none'}")`);  
-    }
+    // if (store.state.wallpaperId !== null) {
+    //   let wallpaperIndex = Wallpaper.map((w) => { return w.id; }).indexOf(store.state.wallpaperId);
+    //   self.element.setAttribute('style', `display: ${store.state.isModalVisible ? 'flex' : 'none'}; background-image: url("${store.state.gateway}${PB.IPFS_PATHS.WALLPAPER_DIRECTORY}${Wallpaper[wallpaperIndex].id}.jpg")`);  
+    // } else {
+      self.element.setAttribute('style', `display: ${store.state.isModalVisible ? 'flex' : 'none'}`);  
+    //}
   }
 }
 

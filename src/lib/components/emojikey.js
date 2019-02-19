@@ -4,10 +4,10 @@ import DOM from '../core/dom';
 import Component from '../core/component';
 import store from '../store/index';
 import Emoji from './emoji/11/photoblock-emoji';
-import LockedTemplate from "./templates/locked.html";
+import EmojiKeyTemplate from "./templates/emojikey.html";
 import "./emoji/11/photoblock-emoji.css";
 
-export default class Locked extends Component {
+export default class EmojiKey extends Component {
     constructor(modal) {
         super({
             store
@@ -15,9 +15,10 @@ export default class Locked extends Component {
 
         this.element = null;
         this.modal = modal;
-        this.focus = -1;
+        this.focus = 4;
         this.emojiPicker = false;
         this.emojiKey = [];
+        this.error = false;
     } 
 
     // Random Hex: https://www.browserling.com/tools/random-hex
@@ -25,52 +26,138 @@ export default class Locked extends Component {
     render() {
 
         let self = this;
-        self.log('locked..render');
+        self.log('emojikey...render');
 
-        if (store.state.currentState === PB.STATE_LOCKED) {
+        if ((store.state.currentState === PB.STATE_NEW) || (store.state.currentState === PB.STATE_DEFINE) || (store.state.currentState === PB.STATE_CONFIRM)){
             self.modal.content.innerHTML = '';
-            self.modal.content.insertAdjacentHTML('beforeend', self.localizer.localize(LockedTemplate));
+            self.emojiKey = store.state.emojiKey;
+
+            let template = EmojiKeyTemplate;
+            switch(store.state.currentState) {
+                case PB.STATE_DEFINE:
+                    template = EmojiKeyTemplate
+                                    .replace('{currentTitle}', '{emojiKey.createTitle}')
+                                    .replace('{currentText}', '{emojiKey.create}');
+                    break;
+                case PB.STATE_CONFIRM:
+                    template = EmojiKeyTemplate
+                                    .replace('{currentTitle}', '{emojiKey.confirmTitle}')
+                                    .replace('{currentText}', '{emojiKey.confirm}');
+                    break;
+            }
+
+            self.modal.content.insertAdjacentHTML('beforeend', self.localizer.localize(template));
             self.element = DOM.elid('photoblock-photo');  
-            self.element.src = store.state.photo.imgData;
-            self.element.addEventListener('click', () => {
-                self.toggleEmojiPicker();
-            });
+            if (store.state.photoEngine != null) {
+                self.element.src = store.state.photoEngine.getUrl();
+                store.state.photoEngine.revokeUrl(self.element.src);    
+            }
 
-            // Unlock button
+            let introSection = DOM.elid('photoblock-emoji-intro');  
+            let cellsSection = DOM.elid('photoblock-emoji-cells');  
+            let helpSection = DOM.elid('photoblock-emoji-helptext');  
+
+            let backButton = DOM.elid('photoblock-action-back');
+            let nextButton = DOM.elid('photoblock-action-next');
             let unlockButton = DOM.elid('photoblock-action-unlock');
-            unlockButton.addEventListener('click', () => {
-                if (self.emojiKey.length >= PB.REQUIRED_EMOJIS) {
-                    store.dispatch('unlock', {});
-                }
-            }); 
-
-            // Reset button
             let resetButton = DOM.elid('photoblock-action-reset');
-            resetButton.addEventListener('click', () => {
-                self.focus = -1;
-                self.emojiKey = [];
-                self.render();
-            }); 
 
-            
-            self.renderCells();
+            switch(store.state.currentState) {
 
-            self.renderPicker();
+                case PB.STATE_NEW:
+                    cellsSection.setAttribute('style', 'display:none;');
+                    helpSection.setAttribute('style', 'display:none;');
+    
+                    backButton.addEventListener('click', () => {
+                        store.dispatch('cancelPhoto', {});
+                    }); 
+    
+                    nextButton.addEventListener('click', () => {
+                        store.dispatch('defineEmojiKey', {});
+                    });
+    
+                    resetButton.id = '';
+                    break;
 
-        }
+                case PB.STATE_DEFINE:                    
+                    backButton.addEventListener('click', () => {
+                        store.dispatch('newEmojiKey', {});
+                    }); 
+
+                    nextButton.addEventListener('click', () => {
+                        if (self.emojiKey.length >= PB.REQUIRED_EMOJIS) {
+                            store.dispatch('confirmEmojiKey', { emojiKey: self.emojiKey });
+                        }
+                    });
+                    break;
+
+                case PB.STATE_CONFIRM:
+                    self.emojiKey = [];
+
+                    backButton.addEventListener('click', () => {
+                        store.dispatch('defineEmojiKey', {});
+                    }); 
+                    
+                    nextButton.addEventListener('click', () => {
+                        if (self.emojiKey.length >= PB.REQUIRED_EMOJIS) {
+                            if (self.compareEmojiKey()) {
+                                store.dispatch('downloadPhoto', {});
+                            } else {
+                                self.error = true;
+                                self.renderCells();                            
+                            }
+                        }
+                    });
+                    break;
+            }
+
+            if (store.state.currentState !== PB.STATE_NEW) {
+                introSection.setAttribute('style', 'display:none;');
+
+                self.element.addEventListener('click', () => {
+                    self.toggleEmojiPicker();
+                });
+
+                unlockButton.addEventListener('click', () => {
+                    if (self.emojiKey.length >= PB.REQUIRED_EMOJIS) {
+                        store.dispatch('unlock', {});
+                    }
+                }); 
+
+                resetButton.addEventListener('click', () => {
+                    self.focus = -1;
+                    self.emojiKey = [];
+                    self.error = false;
+                    self.render();
+                }); 
+                
+                self.renderCells();
+                self.renderPicker();
+            }
+           
+        }        
+
     } 
+
+    compareEmojiKey() {
+        let self = this;
+        let current  = self.emojiKey.map((item) => { return String(item.cell) + item.emoji}).join('');
+        let previous  = store.state.emojiKey.map((item) => { return String(item.cell) + item.emoji}).join('');
+        return (store.state.emojiKey.length === 0) || (current === previous); 
+    }
 
     renderCells() {
         let self = this;
 
         // Remove existing cells
         for(let r=0; r<=2; r++) {
-            let tr = DOM.elid(`photoblock-cells-r${String(r)}`);
+            let tr = DOM.elid(`photoblock-emoji-cells-r${String(r)}`);
             tr.innerHTML = '';
         }
 
         for(let cell=0; cell<9; cell++) {
-            let row = DOM.elid('photoblock-cells-r' + String(Math.floor(cell / 3)));
+            let row = DOM.elid('photoblock-emoji-cells-r' + String(Math.floor(cell / 3)));
+            let suffix = self.compareEmojiKey() ? 'ready' : 'error';
             let td = DOM.td({ className: `photoblock-cell${ self.focus === cell ? ' photoblock-cell-animated' : ''}`});
 
             // Find if the current cell has an emoji
@@ -81,7 +168,7 @@ export default class Locked extends Component {
 
             let div = null;
             if (emojiInfo !== null) {
-                let badge =  DOM.div({className: `photoblock-cell-badge${self.emojiKey.length >= PB.REQUIRED_EMOJIS ? ' photoblock-cell-badge-ready' : ''}`}, String(emojiKeyIndex+1));
+                let badge =  DOM.div({className: `photoblock-cell-badge${self.emojiKey.length >= PB.REQUIRED_EMOJIS ? ' photoblock-cell-badge-' + suffix : ''}`}, String(emojiKeyIndex+1));
                 td.appendChild(badge);
                 div = DOM.div({id: `cell-${cell}-${emojiKeyIndex}`, className: `pbemoji-sprite pbemoji-${emojiInfo.categoryKey} pbemoji-${emojiInfo.spriteIndex}`});
                 td.appendChild(div);    
@@ -95,10 +182,13 @@ export default class Locked extends Component {
         }
 
         let unlockButton = DOM.elid('photoblock-action-unlock');        
-        if (self.emojiKey.length >= PB.REQUIRED_EMOJIS) {
+        let nextButton = DOM.elid('photoblock-action-next');        
+        if ((self.emojiKey.length >= PB.REQUIRED_EMOJIS) && self.compareEmojiKey()) {
             unlockButton.className = 'photoblock-primary-action';
+            nextButton.className = 'photoblock-primary-action';
         } else {
             unlockButton.className = 'photoblock-primary-action photoblock-primary-action-disabled';
+            nextButton.className = 'photoblock-primary-action photoblock-primary-action-disabled';
         }
 
     }
@@ -128,9 +218,9 @@ export default class Locked extends Component {
             // Deleting an existing emoji voids all that follow it
             let emojiKeyIndex = self.getEmojiKeyIndexForCell(cellIndex);
             if (emojiKeyIndex > -1) {
-                for(let i=emojiKeyIndex; i<self.emojiKey.length; i++) {
-                    self.enableEmojiIcon(self.emojiKey[i].emoji);
-                }
+                // for(let i=emojiKeyIndex; i<self.emojiKey.length; i++) {
+                //     self.enableEmojiIcon(self.emojiKey[i].emoji);
+                // }
                 self.emojiKey.splice(emojiKeyIndex);
             }            
         }
@@ -172,11 +262,11 @@ export default class Locked extends Component {
             sprites[s].addEventListener('click', self.handleEmojiSelect.bind(self));
         }
 
-        if (self.emojiKey.length > 0) {
-            for(let i=0; i<self.emojiKey.length; i++) {
-                self.disableEmojiIcon(self.emojiKey[i].emoji);
-            }    
-        }
+        // if (self.emojiKey.length > 0) {
+        //     for(let i=0; i<self.emojiKey.length; i++) {
+        //         self.disableEmojiIcon(self.emojiKey[i].emoji);
+        //     }    
+        // }
 
     }
 
@@ -209,6 +299,7 @@ export default class Locked extends Component {
             emoji: emojiCode
         };
 
+
         // Add or replace the emoji for a cell
         if (emojiKeyIndex < 0) {
             self.emojiKey.push(emojiInfo);    
@@ -220,7 +311,7 @@ export default class Locked extends Component {
         self.renderCells();
 
         // Disable the emoji so it can't be re-used
-        self.disableEmojiIcon(e.target.id.substring(1)); // id begins with 'U'
+        //self.disableEmojiIcon(e.target.id.substring(1)); // id begins with 'U'
 
     }
 

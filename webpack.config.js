@@ -29,7 +29,19 @@ module.exports = {
         test: /\.html$/,
         use: "html-loader",
         exclude: /node_modules/
+      },
+      {
+        test: /[\\\/]tweetnacl[\\\/]/,
+        use: 'exports-loader?window.nacl!imports-loader?this=>window,module=>{},require=>false'
+      },
+      {
+          test: /[\\\/]tweetnacl-auth[\\\/]/,
+          use: 'exports-loader?window.nacl.auth!imports-loader?this=>window,module=>{},require=>false'
       }
+    ],
+    noParse: [
+      /[\\\/]tweetnacl[\\\/]/,
+      /[\\\/]tweetnacl-auth[\\\/]/
     ]
   },
   plugins: [
@@ -47,6 +59,7 @@ module.exports = {
   },
   devServer: {
     contentBase: path.join(__dirname, "docs"),
+    host: "0.0.0.0",
     port: 8000,
     stats: "minimal"
   }
