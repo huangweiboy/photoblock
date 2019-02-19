@@ -7,12 +7,15 @@ import Loader from './components/loader';
 import EmojiKey from './components/emojikey';
 import Download from './components/download';
 import Unlocked from './components/unlocked';
-//import Save from './components/save';
-//import CollectionForm from './components/collection-form';
+
+import EthereumContext from './contexts/ethereum-context';
+import BitcoinContext from './contexts/bitcoin-context';
+import WebContext from './contexts/web-context';
 
 import photoBlockFrame from './img/photoblock-frame.svg';
 import photoBlockIcon from './img/photoblock-icon.svg';
 import './photoblock.css';
+import Ethereum from './contexts/ethereum-context';
 
 const RESTRICTED_CONTEXTS = 'app;ethereum;bitcoin;';
 
@@ -20,7 +23,6 @@ const RESTRICTED_CONTEXTS = 'app;ethereum;bitcoin;';
 export default class PhotoBlock {
 
   constructor(containerId, callback, options) {
-    console.log(document.currentScript);
     this.containerId = containerId;
     this.options = options || {};
     this.element = null;
@@ -32,35 +34,26 @@ export default class PhotoBlock {
     this.contexts = {};
     this.context = null;
     this.rendered = false;
-    //this.gateway = null;
-    //this.collectionForm = null;
-    //this.save = null;
 
     // Built-in handlers
     this.enableContextRegistration = true;
 
     this.registerContext('Ethereum', ['address', 'publicKey'], { 
-      getAccount: function(entropy, index) {
-
-      },
+      getAccount: (entropy, index) => EthereumContext.getAccount(entropy, index),
       sign: function(entropy, index, data) {
 
       }      
     });
 
     this.registerContext('Bitcoin', ['address', 'publicKey'], { 
-      getAccount: function(entropy, index) {
-
-      },
+      getAccount: (entropy, index) => BitcoinContext.getAccount(entropy, index),
       sign: function(entropy, index, data) {
 
       }      
     });
 
-    this.registerContext('Web', ['name', 'userId'], { 
-      getAccount: function(entropy, index) {
-
-      },
+    this.registerContext('Web', ['userId', 'publicKey'], { 
+      getAccount: (entropy, index) => WebContext.getAccount(entropy, index),
       sign: function(entropy, index, data) {
 
       }      

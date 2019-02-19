@@ -36,28 +36,12 @@ export default {
         context.commit('cancelPhoto', payload);
     },
 
-    addContextAccountAndDownload(context, payload) {
-        context.commit('addContextAccountAndDownload', payload);
+    savePhotoBlock(context, payload) {
+        context.commit('savePhotoBlock', payload);
     },
 
     unlock(context, payload) {  
         context.commit('unlock', payload);
-    },
-
-    __setWallpaper(context, payload) {
-        context.commit('setWallpaper', payload);
-    },
-
-    __setCollectionName(context, payload) {
-        context.commit('setCollectionName', payload);
-    },
-
-    __createCollection(context, payload) {  
-        context.commit('createCollection', payload);
-    },
-
-    __saveCollection(context, payload) {  
-        context.commit('saveCollection', payload);
     }
 
 };

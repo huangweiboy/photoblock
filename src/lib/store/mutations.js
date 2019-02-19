@@ -80,14 +80,18 @@ export default {
         callback(state);
     },
 
-    addContextAccountAndDownload(state, payload, callback) {
+    savePhotoBlock(state, payload, callback) {
 
-        state.photoEngine.createPhotoBlockImage(state.xmp.contexts, () => {
-            state.fresh = true;
-            state.photoEngine = null;
-            state.emojiKey = [];
-            state.currentState = PB.STATE_LOAD;
-            callback(state);
+        state.photoEngine.createPhotoBlockImage((error) => {
+            if (error) {
+                callback(state);    
+            } else {
+                state.fresh = true;
+                state.photoEngine = null;
+                state.emojiKey = [];
+                state.currentState = PB.STATE_LOAD;
+                callback(state);    
+            }
         });
     },
 

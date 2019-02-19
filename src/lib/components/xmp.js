@@ -47,13 +47,9 @@ export default class Xmp {
     return hasAccounts ? accounts : null;
   }
 
-  addAccount(buffer, contextName, account) {
+  addAccounts(buffer, contextAccounts) {
 
-    // Validate
-    if (!this.contexts.hasOwnProperty(contextName)) {
-      return false;
-    }
-
+  
     // Read the image
     this._parseBuffer(buffer, false);
     if (!this.xmpPacket.hasOwnProperty("doc")) {
@@ -62,24 +58,42 @@ export default class Xmp {
 
     let isValid = true;
 
-    // Validate that all attributes are present
-    this.contexts[contextName].attributes.map((attribute) => {
-      if (!account.hasOwnProperty(attribute) || (account[attribute] === null)) {
-        isValid = false;
-      }
-    });
+    let contextNames = Object.keys(contextAccounts);
+    contextNames.map((contextName) => {
 
-    if (isValid) {
-      // Validate that the account does not allready exist
-      let attribute = this.contexts[contextName].attributes[0];
-      this.contexts[contextName].accounts.map((acct) => {
-        if (acct[attribute] === account[attribute]) {
+      let account = contextAccounts[contextName];
+
+      // Validate
+      if (!this.contexts.hasOwnProperty(contextName)) {
+        return false;
+      }
+
+      // Validate that all attributes are present
+      this.contexts[contextName].attributes.map((attribute) => {
+        if (!account.hasOwnProperty(attribute) || (account[attribute] === null)) {
           isValid = false;
         }
-      });  
-    }
+      });
+
+      if (isValid) {
+        // Validate that the account does not allready exist
+        let attribute = this.contexts[contextName].attributes[0];
+        this.contexts[contextName].accounts.map((acct) => {
+          if (acct[attribute] === account[attribute]) {
+            isValid = false;
+          }
+        });  
+      }
+
+      if (isValid) {
+        this.contexts[contextName].accounts.push(account);
+      }
+
+    });
+  
+
     if (isValid) {
-      this.contexts[contextName].accounts.push(account);
+
       this.xmpPacket.doc = _updateXmpPacketDoc(this.xmpPacket.doc, this.contexts);
 
       if (this.xmpPacket.xmpMarker === null) {
@@ -105,11 +119,8 @@ export default class Xmp {
 //      let payloadLength = this.xmpPacket.dataLength - this.xmpPacket.xmpLength + newXmpDV.byteLength;
       let payloadLength = preBytes.length + xmpBytes.length + postBytes.length;
       let payload = new Uint8Array(payloadLength); 
-      console.log('Prebytes', payload, preBytes);
       payload.set(preBytes, 0);
-      console.log('Xmpbytes', payload, xmpBytes);
       payload.set(xmpBytes, this.xmpPacket.xmpMarker);
-      console.log('Postbytes', payload, postBytes);
       payload.set(postBytes, this.xmpPacket.xmpMarker + newXmpDV.byteLength);
 
       delete this.xmpPacket; // Cleanup

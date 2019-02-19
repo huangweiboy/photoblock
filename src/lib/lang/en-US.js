@@ -2,7 +2,7 @@ export default {
     loader: {
         intro: "PhotoBlock is a visual account and password manager that uses photos and emojis for blockchain and website authentication."  ,
         new: "Upload or drag/drop a photo. You can use one that has already been PhotoBlocked, or a new one that you wish to use with PhotoBlock.",
-        fresh: "<span>Hello PhotoBlock rockstar!</span>You just created a PhotoBlock. Now, upload or drag/drop it here to get started.",
+        fresh: "<span>Hey, PhotoBlock rockstar!</span>Upload or drag/drop your newly created PhotoBlock to get started.",
         collectionIntro: "<span>Existing user?</span> To access a collection, enter the collection name and select its wallpaper.",
         select: "Select Photo",
         collection: "Collection Name", 
@@ -22,6 +22,6 @@ export default {
     },
     download: {
         currentTitle: "Step 3: Download PhotoBlock",
-        currentText: "Congrats! You just created a PhotoBlock with an embedded account for each supported platform. Download and save your PhotoBlock to continue.",
+        currentText: "OK, we are ready. Select the download button to create and download a PhotoBlock with an embedded account for each supported platform.",
     }
 }

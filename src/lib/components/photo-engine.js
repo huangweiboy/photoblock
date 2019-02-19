@@ -11,9 +11,125 @@ export default class PhotoEngine {
 
         this.buffer = buffer;
         this.xmp = xmp;
-        this.sliceHashes = hasAccounts ? this._sliceBuffer() : [];
+        this.sliceHashes = hasAccounts ? this._generateSliceHashes() : [];
     }
 
+
+    createPhotoBlockImage(callback) {
+
+        let self = this;
+        let canvas = document.createElement('canvas');
+        canvas.width = PB.PHOTO_INFO.FRAME_WIDTH;
+        canvas.height = PB.PHOTO_INFO.FRAME_HEIGHT;
+        let ctx = canvas.getContext('2d');
+        let photo = document.createElement('img');
+        let frame = document.createElement('img');
+        console.log('Here');
+        let contextNames = Object.keys(self.xmp.contexts);
+        let contextImages = {};
+
+        // This is the last step of the PhotoBlock photo creation. Each of the context logos
+        // is drawn on the bottom white bar. The canvas image is extracted to a dataUri and
+        // then converted to an arraybuffer that the XMP class can process. The photo pixels
+        // are sliced into nine equal sections and hashed. They will be re-hashed with the 
+        // EmojiKey for creating the entropy used to generate the mnemonic for account 
+        // creation. The XMP class calls the handler for each context and adds an account
+        // and then the completed PhotoBlock is downloaded.
+
+        const finalizeImage = () => {
+            const yPos = canvas.height - 230;
+            const logoSize = 120;
+            let xPos = 400;
+            Object.keys(self.xmp.contexts).map((name) => {
+                ctx.drawImage(contextImages[name], xPos, yPos, logoSize, logoSize);
+                xPos += 150;
+            });
+
+            let pb = canvas.toDataURL('image/jpeg');
+            self.buffer = self._dataUriToArrayBuffer(pb);
+
+            // It's very important that all binary image data usage related to account generation
+            // happens after the image is extracted from the canvas. This is because we don't trust
+            // the canvas implementation is consistent across browsers. Once the JPEG is extracted
+            // from the canvas, we can safely use the binary (pixel) data because that will be
+            // persisted on disk and will remain unchanged regardless of browser.
+
+            self._generateSliceHashes();
+
+            let contextAccounts = {};
+            contextNames.map((name) => {
+                let account = self.xmp.contexts[name].handlers.getAccount('xxxxxx', 999);
+                if (account !== null) {
+                    contextAccounts[name] = account;
+                }
+            });
+
+            self.buffer = self.xmp.addAccounts(self.buffer, contextAccounts);
+
+            if (self.buffer !== null) {
+                self._saveBlob(self._arrayBufferToBlob(self.buffer), `Photoblock (Default).jpg`);
+                callback();
+            } else {
+                callback('An error occurred');
+            }
+        }
+
+        // https://codereview.stackexchange.com/questions/128587/check-if-images-are-loaded-es6-promises
+        const loadImage = name => {
+            return new Promise(resolve => {
+                const img = new Image();
+                contextImages[name] = img;
+                img.onload = () => {
+                    resolve(name);
+                }
+                img.onerror = () => resolve(() => {
+                    throw `Error loading ${name}`
+                });
+                
+                switch(name) {
+                    case 'Bitcoin': img.src = Bitcoin; break;
+                    case 'Ethereum': img.src = Ethereum; break;
+                    case 'Web': img.src = Web; break;
+                }
+            });
+        }
+
+        const loadAll = (names) => Promise
+            .all(names.map(loadImage))
+            .then(() => {
+                console.log('Finalizing!');
+                finalizeImage();
+            });
+
+
+
+        // First: Draw the photo
+        photo.onload = () => {
+            console.log('Photo loaded');
+            let imgInfo = this._cover(canvas.width, canvas.height, photo.width, photo.height);
+            ctx.drawImage(photo, imgInfo.offsetX, imgInfo.offsetY, imgInfo.width, imgInfo.height);
+            frame.src = photoblockTemplate;
+        }
+
+        // Second: Draw the frame
+        frame.onload = () => {
+            console.log('Frame loaded', contextNames);
+            ctx.drawImage(frame, 0, 0);
+            loadAll(contextNames);
+        }
+
+        // Start the process here
+        this._getDataUri((dataUri) => {
+            photo.src = dataUri;
+        })
+
+    }
+
+    /**
+     * Base64 encodes buffer and returns as JPEG mime type
+     * 
+     * @param callback 
+     */
     _getDataUri(callback) {
         let fr = new FileReader();
         fr.onload = (e) => {
@@ -25,6 +141,9 @@ export default class PhotoEngine {
         fr.readAsDataURL(blob);
     }
 
+    /**
+     * Returns URL for downloading buffer as JPEG image
+     */
     getUrl() {
         let blob = new Blob([this.buffer], {
             type: 'image/jpeg'
@@ -32,6 +151,11 @@ export default class PhotoEngine {
         return (URL || webkitURL).createObjectURL(blob);
     }
 
+    /**
+     * Frees up memory associated with an object URL
+     * 
+     * @param url 
+     */
     revokeUrl(url) {
         (URL || webkitURL).revokeObjectURL(url);
     }
@@ -76,87 +200,6 @@ export default class PhotoEngine {
         (URL || webkitURL).revokeObjectURL(url);
     }
 
-    createPhotoBlockImage(contexts, callback) {
-
-        let self = this;
-        let canvas = document.createElement('canvas');
-        canvas.width = PB.PHOTO_INFO.FRAME_WIDTH;
-        canvas.height = PB.PHOTO_INFO.FRAME_HEIGHT;
-        let ctx = canvas.getContext('2d');
-        let photo = document.createElement('img');
-        let frame = document.createElement('img');
-        let contextNames = Object.keys(contexts);
-        let contextImages = {};
-
-        const finalizeImage = () => {
-            const yPos = canvas.height - 230;
-            const logoSize = 120;
-            let xPos = 400;
-            Object.keys(contexts).map((name) => {
-                console.log('Drawing', name);
-                ctx.drawImage(contextImages[name], xPos, yPos, logoSize, logoSize);
-                xPos += 150;
-            });
-
-            let pb = canvas.toDataURL('image/jpeg');
-            self.buffer = self._dataUriToArrayBuffer(pb);
-
-            self.buffer = self.xmp.addAccount(self.buffer, self.xmp.currentContext.name, { address: '0x12333333333333', publicKey: '12345678901234567890' });
-            self._sliceBuffer();
-
-            console.log(self.sliceHashes);
-            self._saveBlob(self._arrayBufferToBlob(self.buffer), `Photoblock (Default).jpg`);
-            callback();
-        }
-
-        // https://codereview.stackexchange.com/questions/128587/check-if-images-are-loaded-es6-promises
-        const loadImage = name => {
-            return new Promise(resolve => {
-                const img = new Image();
-                contextImages[name] = img;
-                img.onload = () => {
-                    resolve(name);
-                }
-                img.onerror = () => resolve(() => {
-                    throw `Error loading ${name}`
-                });
-                
-                switch(name) {
-                    case 'Bitcoin': img.src = Bitcoin; break;
-                    case 'Ethereum': img.src = Ethereum; break;
-                    case 'Web': img.src = Web; break;
-                }
-            });
-        }
-
-        const loadAll = (names) => Promise
-            .all(names.map(loadImage))
-            .then(() => {
-                console.log('Finalizing!');
-                finalizeImage();
-            });
-
-
-
-        // First: Draw the photo
-        photo.onload = () => {
-            let imgInfo = this._cover(canvas.width, canvas.height, photo.width, photo.height);
-            ctx.drawImage(photo, imgInfo.offsetX, imgInfo.offsetY, imgInfo.width, imgInfo.height);
-            frame.src = photoblockTemplate;
-        }
-
-        // Second: Draw the frame
-        frame.onload = () => {
-            ctx.drawImage(frame, 0, 0);
-            loadAll(contextNames);
-        }
-
-        // Start the process here
-        this._getDataUri((dataUri) => {
-            photo.src = dataUri;
-        })
-
-    }
 
     _cover(parentWidth, parentHeight, childWidth, childHeight, scale = 1, offsetX = 0.5, offsetY = 0.5) {
         const childRatio = childWidth / childHeight
@@ -180,7 +223,7 @@ export default class PhotoEngine {
     }
 
 
-    _sliceBuffer() {
+    _generateSliceHashes() {
 
         let self = this;
         let decoded = self.decode(self.buffer);
