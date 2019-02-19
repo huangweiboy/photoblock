@@ -18,10 +18,3 @@ export default new Store({
     }
 
 });
-
-/*
-        __gateway: PB.IPFS_GATEWAY,
-        __wallpaperId: null,
-        __wallpaperHash: null,
-        __collectionName: ''
-*/

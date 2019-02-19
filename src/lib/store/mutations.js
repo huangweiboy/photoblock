@@ -1,8 +1,6 @@
 import PB from '../core/constants';
 import Xmp from '../components/xmp';
 import PhotoEngine from '../components/photo-engine';
-import IpfsEngine from '../components/ipfs-engine';
-import FileSaver from "file-saver";
 
 export default {
  
@@ -10,9 +8,6 @@ export default {
         state.currentContext = payload.context;
         state.xmp = new Xmp(payload.context, payload.contexts);
         state.currentState = PB.STATE_INIT;
-        // if (payload.gateway !== null) {
-        //     state.gateway = payload.gateway;
-        // }
         callback(state);
     },
 
@@ -58,15 +53,8 @@ export default {
                 state.currentState = PB.STATE_NEW;
                 callback(state);               
             }
-
-            // Wipe existing container info
-            // state.wallpaperId = null;
-            // state.wallpaperHash = null;
-            // state.collectionName = '';
         }
     },
-
-
 
     newEmojiKey(state, payload, callback) {
         state.currentState = PB.STATE_NEW;
@@ -92,7 +80,6 @@ export default {
         callback(state);
     },
 
-
     addContextAccountAndDownload(state, payload, callback) {
 
         state.photoEngine.createPhotoBlockImage(state.xmp.contexts, () => {
@@ -101,12 +88,7 @@ export default {
             state.emojiKey = [];
             state.currentState = PB.STATE_LOAD;
             callback(state);
-        })
-
-        // let buffer = this._uri2array(state.photo, true);
-        // let contextHandler = state.currentContext.handler;
-        // let blob = state.xmp.addAccount(buffer, state.currentContext.name, { address: '0x12333333333333', publicKey: '12345678901234567890' });
-        // callback(state);
+        });
     },
 
     cancelPhoto(state, payload, callback) {
@@ -121,55 +103,6 @@ export default {
         
         state.currentState = PB.STATE_UNLOCKED;
         callback(state);
-    },
-
-    __createCollection(state, payload, callback) {
-        state.currentState = PB.STATE_CREATE;
-        callback(state);
-    },
-
-    __saveCollection(state, payload, callback) {
-        state.currentState = PB.STATE_SAVE;
-        state.collectionName = payload.collectionName;
-        let ipfsEngine = new IpfsEngine(state.gateway);
-        ipfsEngine.addCollection(state.collectionName, state.wallpaperHash, state.emojiKey[0].emoji, (error, json) => {
-            console.log('Save Collection result', {error}, {json});
-            callback(state);
-        });
-    },
-
-    __setWallpaper(state, payload, callback) {   
-        state.wallpaperId = payload.wallpaperId;
-        state.wallpaperHash = payload.wallpaperHash;
-        callback(state);
-    },
-
-    __uploadToIPFS(buffer) {
-        const xhr = new XMLHttpRequest();
-        let gateway = 'https://ipfs.photoblock.org/ipfs';
-        let emptyPathHash = 'QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn';
-        emptyPathHash = 'QmcqWCi4ytGFZ4wkrThnPmChVz5p92rmWPpAYwxG4QVV3d';
-        emptyPathHash = 'QmZnWUL5V451Yh3pGaF7U19h4GqUdUyLesYcB9bgMmPcdf';
-        xhr.open('PUT', `${gateway}/${emptyPathHash}/test2.json?pin=true`, true);
-        xhr.responseType = 'arraybuffer';
-        xhr.timeout = 3600000;
-        xhr.onreadystatechange = function onreadystatechange() {
-            if (this.readyState === this.HEADERS_RECEIVED) {
-                let fileId = xhr.getResponseHeader('Ipfs-Hash');
-                console.log('fileId', fileId);
-            }
-        };
-        xhr.addEventListener('error', (e) => {
-            console.log('error', e);
-        });
-        xhr.upload.onprogress = function onprogress(e) {
-            if (e.lengthComputable) {
-                const per = Math.round((e.loaded * 100) / e.total);
-                console.log('progress', per);
-            }
-        };
-        xhr.send(Buffer(JSON.stringify({ x: 'abcd', y: 2 })));
-        //xhr.send(new Blob([buffer]));
     }
 
 };

@@ -179,18 +179,4 @@ export default class PhotoBlock {
     }  
   }
 
-
-  __setIpfsGateway(gateway) {
-    let self = this;
-    if (self.rendered) {
-      throw 'Gateway can only be set prior to rendering';
-    }
-
-    if ((gateway.indexOf('https://') === 0) && (gateway.length > 12)) {
-      gateway = gateway.replace('https://', '');
-      self.gateway = 'https://' + gateway.split('/')[0];
-    }
-  }
-
-
 }

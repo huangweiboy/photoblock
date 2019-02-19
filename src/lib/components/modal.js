@@ -3,8 +3,6 @@ import DOM from '../core/dom.js';
 import Component from '../core/component';
 import store from '../store/index';
 import ModalTemplate from './templates/modal.html';
-//import Wallpaper from './wallpaper/__wallpaper';
-import PB from '../core/constants';
 
 export default class Modal extends Component {
   constructor() {
@@ -80,12 +78,7 @@ export default class Modal extends Component {
 
   display() {
     let self = this;
-    // if (store.state.wallpaperId !== null) {
-    //   let wallpaperIndex = Wallpaper.map((w) => { return w.id; }).indexOf(store.state.wallpaperId);
-    //   self.element.setAttribute('style', `display: ${store.state.isModalVisible ? 'flex' : 'none'}; background-image: url("${store.state.gateway}${PB.IPFS_PATHS.WALLPAPER_DIRECTORY}${Wallpaper[wallpaperIndex].id}.jpg")`);  
-    // } else {
-      self.element.setAttribute('style', `display: ${store.state.isModalVisible ? 'flex' : 'none'}`);  
-    //}
+    self.element.setAttribute('style', `display: ${store.state.isModalVisible ? 'flex' : 'none'}`);  
   }
 }
 
