@@ -1,6 +1,7 @@
 import PB from '../core/constants';
 import Xmp from '../components/xmp';
 import PhotoEngine from '../components/photo-engine';
+import CryptoHelper from '../components/crypto-helper';
 
 export default {
  
@@ -82,7 +83,8 @@ export default {
 
     savePhotoBlock(state, payload, callback) {
 
-        state.photoEngine.createPhotoBlockImage((error) => {
+        let emojiEntropyInfo = CryptoHelper.getEmojiEntropy(state.emojiKey);
+        state.photoEngine.createPhotoBlockImage(emojiEntropyInfo, (error) => {
             if (error) {
                 callback(state);    
             } else {

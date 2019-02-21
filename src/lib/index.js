@@ -8,21 +8,21 @@ import EmojiKey from './components/emojikey';
 import Download from './components/download';
 import Unlocked from './components/unlocked';
 
-import EthereumContext from './contexts/ethereum-context';
-import BitcoinContext from './contexts/bitcoin-context';
-import WebContext from './contexts/web-context';
-
 import photoBlockFrame from './img/photoblock-frame.svg';
 import photoBlockIcon from './img/photoblock-icon.svg';
 import './photoblock.css';
-import Ethereum from './contexts/ethereum-context';
+
+import EthereumContext from './contexts/ethereum/ethereum-context';
+import BitcoinContext from './contexts/bitcoin/bitcoin-context';
+import WebContext from './contexts/web/web-context';
+
 
 const RESTRICTED_CONTEXTS = 'app;ethereum;bitcoin;';
 
 
 export default class PhotoBlock {
 
-  constructor(containerId, callback, options) {
+  constructor(containerId, options) {
     this.containerId = containerId;
     this.options = options || {};
     this.element = null;
@@ -61,7 +61,6 @@ export default class PhotoBlock {
 
     this.enableContextRegistration = false;
 
-    callback(this);
   }
 
   registerContext(contextName, attributes, handlers) {
@@ -127,12 +126,8 @@ export default class PhotoBlock {
     return true;
   }
 
-  getContext(contextName) {
-    return this.contexts.hasOwnProperty(contextName) ? this.contexts[contextName] : null;
-  }
-
-  getContexts() {
-    return this.contexts;
+  getContextNames() {
+    return Object.keys(this.contexts);
   }
 
   render(context) {
@@ -148,8 +143,6 @@ export default class PhotoBlock {
         self.unlocked = new Unlocked(self.modal);
         self.emojiKey = new EmojiKey(self.modal);
         self.download = new Download(self.modal);
-        //self.save = new Save(self.modal);
-        //self.collectionForm = new CollectionForm();
       }
 
       self.element = document.querySelector(`#${self.containerId}`);

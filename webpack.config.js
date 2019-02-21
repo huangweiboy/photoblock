@@ -51,7 +51,7 @@ module.exports = {
     new CopyWebpackPlugin([
       { from: 'src/lib/components/emoji/11/img', to: 'img' },
       { from: 'src/lib/img', to: 'img' },
-      { from: 'src/lib/img/contexts', to: 'img/contexts' }
+      { from: 'src/lib/contexts/**/*.png', to: 'img/contexts', flatten: true }
     ])
   ],
   resolve: {

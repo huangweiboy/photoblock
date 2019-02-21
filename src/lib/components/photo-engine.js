@@ -1,21 +1,20 @@
 "use strict";
 import PB from '../core/constants';
-import nacl from 'tweetnacl-blake2b';
 import photoblockTemplate from '../img/photoblock-template.png';
-import Bitcoin from '../img/contexts/Bitcoin.png';
-import Ethereum from '../img/contexts/Ethereum.png';
-import Web from '../img/contexts/Web.png';
+import CryptoHelper from './crypto-helper';
 
 export default class PhotoEngine {
     constructor(buffer, xmp, hasAccounts) {
 
         this.buffer = buffer;
         this.xmp = xmp;
+
+        // If unlocking generate slice hashes, otherwise wait until PhotoBlock is generated
         this.sliceHashes = hasAccounts ? this._generateSliceHashes() : [];
     }
 
 
-    createPhotoBlockImage(callback) {
+    createPhotoBlockImage(emojiEntropyInfo, callback) {
 
         let self = this;
         let canvas = document.createElement('canvas');
@@ -24,7 +23,6 @@ export default class PhotoEngine {
         let ctx = canvas.getContext('2d');
         let photo = document.createElement('img');
         let frame = document.createElement('img');
-        console.log('Here');
         let contextNames = Object.keys(self.xmp.contexts);
         let contextImages = {};
 
@@ -53,12 +51,17 @@ export default class PhotoEngine {
             // the canvas implementation is consistent across browsers. Once the JPEG is extracted
             // from the canvas, we can safely use the binary (pixel) data because that will be
             // persisted on disk and will remain unchanged regardless of browser.
-
+            console.time('Slice hashes');
             self._generateSliceHashes();
+            console.timeEnd('Slice hashes');
+
+            let entropyInfo = CryptoHelper.getEntropy(emojiEntropyInfo, self.sliceHashes);
+
+            console.log('EntropyInfo', entropyInfo);
 
             let contextAccounts = {};
             contextNames.map((name) => {
-                let account = self.xmp.contexts[name].handlers.getAccount('xxxxxx', 999);
+                let account = self._getContextAccount(name, entropyInfo.entropy, entropyInfo.index);
                 if (account !== null) {
                     contextAccounts[name] = account;
                 }
@@ -85,19 +88,13 @@ export default class PhotoEngine {
                 img.onerror = () => resolve(() => {
                     throw `Error loading ${name}`
                 });
-                
-                switch(name) {
-                    case 'Bitcoin': img.src = Bitcoin; break;
-                    case 'Ethereum': img.src = Ethereum; break;
-                    case 'Web': img.src = Web; break;
-                }
+                img.src = `img/contexts/${name.toLowerCase()}.png`;
             });
         }
 
         const loadAll = (names) => Promise
             .all(names.map(loadImage))
             .then(() => {
-                console.log('Finalizing!');
                 finalizeImage();
             });
 
@@ -105,7 +102,6 @@ export default class PhotoEngine {
 
         // First: Draw the photo
         photo.onload = () => {
-            console.log('Photo loaded');
             let imgInfo = this._cover(canvas.width, canvas.height, photo.width, photo.height);
             ctx.drawImage(photo, imgInfo.offsetX, imgInfo.offsetY, imgInfo.width, imgInfo.height);
             frame.src = photoblockTemplate;
@@ -113,7 +109,6 @@ export default class PhotoEngine {
 
         // Second: Draw the frame
         frame.onload = () => {
-            console.log('Frame loaded', contextNames);
             ctx.drawImage(frame, 0, 0);
             loadAll(contextNames);
         }
@@ -123,6 +118,33 @@ export default class PhotoEngine {
             photo.src = dataUri;
         })
 
+    }
+
+    _getContextAccount(contextName, entropy, index) {
+
+        let self = this;
+        let account = null;
+        account = self.xmp.contexts[contextName].handlers.getAccount(entropy, index);
+
+        return account;
+    }
+
+
+
+    _generateSliceHashes() {
+
+        let self = this;
+        let decoded = self.decode(self.buffer);
+        const bytesPerSlice = PB.PHOTO_INFO.FRAME_WIDTH * PB.PHOTO_INFO.SLICE_ROWS * PB.PHOTO_INFO.BYTES_PER_PIXEL;
+        self.sliceHashes = [];
+        let last = -1;
+        for(let s=0; s<9; s++) {
+            last++;
+            let slice = decoded.data.slice(last,  last + PB.PHOTO_INFO.SLICE_HASH_BYTES);
+            last = last + bytesPerSlice;
+            let hash = CryptoHelper.hash(slice);
+            self.sliceHashes.push(hash);
+        }
     }
 
     /**
@@ -223,30 +245,8 @@ export default class PhotoEngine {
     }
 
 
-    _generateSliceHashes() {
-
-        let self = this;
-        let decoded = self.decode(self.buffer);
-        const bytesPerSlice = PB.PHOTO_INFO.FRAME_WIDTH * PB.PHOTO_INFO.SLICE_ROWS * PB.PHOTO_INFO.BYTES_PER_PIXEL;
-        self.sliceHashes = [];
-        let last = -1;
-        for(let s=0; s<9; s++) {
-            last++;
-            let slice = decoded.data.slice(last,  last + bytesPerSlice);
-            last = last + bytesPerSlice;
-            let hash = nacl.hash(slice);
-            self.sliceHashes.push(self._ui8ArrayToHex(hash));
-        }
-    }
 
 
-
-    _ui8ArrayToHex(ui8Array) {
-        let s = '';
-        let h = '0123456789abcdef';
-        ui8Array.forEach((v) => { s += h[v >> 4] + h[v & 15]; });
-        return s;
-      }
     
 
 

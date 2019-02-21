@@ -6,6 +6,7 @@ export default {
         WIDTH: 1320, 
         HEIGHT: 1520,
         SLICE_ROWS: 170,
+        SLICE_HASH_BYTES: 4096,
         BYTES_PER_PIXEL: 4
     },
     STATE_INIT: 'init',
