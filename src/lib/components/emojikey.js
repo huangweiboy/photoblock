@@ -28,9 +28,9 @@ export default class EmojiKey extends Component {
         let self = this;
         self.log('emojikey...render');
 
-        if ((store.state.currentState === PB.STATE_NEW) || (store.state.currentState === PB.STATE_DEFINE) || (store.state.currentState === PB.STATE_CONFIRM)){
+        if ((store.state.currentState === PB.STATE_NEW) || (store.state.currentState === PB.STATE_DEFINE) || (store.state.currentState === PB.STATE_CONFIRM) || (store.state.currentState === PB.STATE_UNLOCK)){
             self.modal.content.innerHTML = '';
-            self.emojiKey = store.state.emojiKey;
+            self.emojiKey = []; //store.state.emojiKey;
 
             let template = EmojiKeyTemplate;
             switch(store.state.currentState) {
@@ -49,8 +49,9 @@ export default class EmojiKey extends Component {
             self.modal.content.insertAdjacentHTML('beforeend', self.localizer.localize(template));
             self.element = DOM.elid('photoblock-photo');  
             if (store.state.photoEngine != null) {
-                self.element.src = store.state.photoEngine.getUrl();
-                store.state.photoEngine.revokeUrl(self.element.src);    
+                store.state.photoEngine.getDataUri((img) => {
+                    self.element.src = img;                    
+                });
             }
 
             let introSection = DOM.elid('photoblock-emoji-intro');  
@@ -141,8 +142,8 @@ export default class EmojiKey extends Component {
 
     compareEmojiKey() {
         let self = this;
-        let current  = self.emojiKey.map((item) => { return String(item.cell) + item.emoji}).join('');
-        let previous  = store.state.emojiKey.map((item) => { return String(item.cell) + item.emoji}).join('');
+        let current  = self.emojiKey.map((item) => { return String(item.cell) + item.emoji}).join(''); 
+        let previous  = store.state.emojiKey.map((item) => { return String(item.cell) + item.emoji}).join(''); 
         return (store.state.emojiKey.length === 0) || (current === previous); 
     }
 
@@ -164,7 +165,7 @@ export default class EmojiKey extends Component {
             let emojiKeyIndex = self.getEmojiKeyIndexForCell(cell);
 
             // Get the data required for CSS to display the emoji
-            let emojiInfo = emojiKeyIndex > -1 ? self.getEmojiInfo(self.emojiKey[emojiKeyIndex].emoji) : null;
+            let emojiInfo = emojiKeyIndex > -1 ? self.getEmojiInfo(window.atob(self.emojiKey[emojiKeyIndex].emoji)) : null;
 
             let div = null;
             if (emojiInfo !== null) {
@@ -290,14 +291,15 @@ export default class EmojiKey extends Component {
     }
 
     handleEmojiSelect(e) {
-        let self = this;
-        let emojiCode = e.target.id.substring(1); // Uxxxxxxxxxxxxx
-        let emojiKeyIndex = self.getEmojiKeyIndexForCell(self.focus);
+        let self = this; 
 
+        // Use btoa as a simplistic way to prevent emoji code from being stored directly in memory
+        let emojiCode = window.btoa(e.target.id.substring(1)); // Uxxxxxxxxxxxxx
+        let emojiKeyIndex = self.getEmojiKeyIndexForCell(self.focus);
         let emojiInfo = {
             cell: self.focus,
             emoji: emojiCode
-        };
+        }; 
 
 
         // Add or replace the emoji for a cell

@@ -38,22 +38,22 @@ export default class PhotoBlock {
     // Built-in handlers
     this.enableContextRegistration = true;
 
-    this.registerContext('Ethereum', ['address', 'publicKey'], { 
-      getAccount: (entropy, index) => EthereumContext.getAccount(entropy, index),
+    this.registerContext('Ethereum', 'ETH', 'm/44\'/60\'/0\'/0', ['address', 'publicKey'], { 
+      getAccount: (hdInfo) => EthereumContext.getAccount(hdInfo),
+      sign: function(entropy, index, data, message) {
+
+      }      
+    });
+
+    this.registerContext('Bitcoin', 'BTC', 'm/44\'/0\'/0\'/0', ['address', 'publicKey'], { 
+      getAccount: (hdInfo) => BitcoinContext.getAccount(hdInfo),
       sign: function(entropy, index, data) {
 
       }      
     });
 
-    this.registerContext('Bitcoin', ['address', 'publicKey'], { 
-      getAccount: (entropy, index) => BitcoinContext.getAccount(entropy, index),
-      sign: function(entropy, index, data) {
-
-      }      
-    });
-
-    this.registerContext('Web', ['userId', 'publicKey'], { 
-      getAccount: (entropy, index) => WebContext.getAccount(entropy, index),
+    this.registerContext('Web', null, 'm/44\'/60\'/255\'/255', ['username', 'userId', 'publicKey'], { 
+      getAccount: (hdInfo) => WebContext.getAccount(hdInfo),
       sign: function(entropy, index, data) {
 
       }      
@@ -63,7 +63,7 @@ export default class PhotoBlock {
 
   }
 
-  registerContext(contextName, attributes, handlers) {
+  registerContext(contextName, symbol, hdPath, attributes, handlers) {
 
     let self = this;
 
@@ -102,6 +102,8 @@ export default class PhotoBlock {
       if (isValid) {
         this.contexts[contextName] = {
           name: contextName,
+          symbol: symbol,
+          hdPath: hdPath,
           attributes: attributes,
           accounts: [],
           handlers: handlers
@@ -138,6 +140,7 @@ export default class PhotoBlock {
       if (self.contexts.hasOwnProperty(context)) {
         self.context = self.contexts[context];
         store.dispatch('setContext', { context: self.context, contexts: self.contexts });
+
         self.modal = new PhotoBlockModal();
         self.loader = new Loader(self.modal);
         self.unlocked = new Unlocked(self.modal);

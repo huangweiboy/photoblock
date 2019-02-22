@@ -17,11 +17,11 @@ export default {
         intro: "Let's create a PhotoBlock:",
         step1: "Create EmojiKey",
         step2: "Confirm EmojiKey",
-        step3: "Download PhotoBlock",
+        step3: "Save PhotoBlock",
         collectionIntro: "To create a collection, enter a collection name and select a wallpaper.",
     },
     download: {
-        currentTitle: "Step 3: Download PhotoBlock",
-        currentText: "OK, we are ready. Select the download button to create and download a PhotoBlock with an embedded account for each supported platform.",
+        currentTitle: "Step 3: Save PhotoBlock",
+        currentText: "OK, we are ready. Select the download button to create and save a PhotoBlock with an embedded account for each supported platform.",
     }
 }

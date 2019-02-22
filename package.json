@@ -49,8 +49,7 @@
     "url": "git@github.com:trycrypto/photoblock.git"
   },
   "dependencies": {
-    "bip39": "2.5.0",
     "blakejs": "1.1.0",
-    "ethers": "4.0.20"
+    "ethers": "4.0.26"
   }
 }

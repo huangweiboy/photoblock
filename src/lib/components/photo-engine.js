@@ -4,14 +4,20 @@ import photoblockTemplate from '../img/photoblock-template.png';
 import CryptoHelper from './crypto-helper';
 
 export default class PhotoEngine {
-    constructor(buffer, xmp, hasAccounts) {
+    constructor(buffer, xmp, account) {
 
         this.buffer = buffer;
         this.xmp = xmp;
-
+        this.account = account;
+        this.sliceHashes = [];
         // If unlocking generate slice hashes, otherwise wait until PhotoBlock is generated
-        this.sliceHashes = hasAccounts ? this._generateSliceHashes() : [];
+//        this.sliceHashes = accounts !== null ? this._generateSliceHashes() : [];
+
+        if (account !== null) {
+
+        }
     }
+
 
 
     createPhotoBlockImage(emojiEntropyInfo, callback) {
@@ -45,32 +51,33 @@ export default class PhotoEngine {
 
             let pb = canvas.toDataURL('image/jpeg');
             self.buffer = self._dataUriToArrayBuffer(pb);
+            
+            // Clean-up
+            // photo.parentElement.removeChild(photo);
+            // frame.parentElement.removeChild(frame);
+            // canvas.parentElement.removeChild(canvas);
 
             // It's very important that all binary image data usage related to account generation
             // happens after the image is extracted from the canvas. This is because we don't trust
-            // the canvas implementation is consistent across browsers. Once the JPEG is extracted
+            // the canvas implementation to be consistent across browsers. Once the JPEG is extracted
             // from the canvas, we can safely use the binary (pixel) data because that will be
             // persisted on disk and will remain unchanged regardless of browser.
-            console.time('Slice hashes');
             self._generateSliceHashes();
-            console.timeEnd('Slice hashes');
 
-            let entropyInfo = CryptoHelper.getEntropy(emojiEntropyInfo, self.sliceHashes);
+            let hdInfo = CryptoHelper.getEntropy(emojiEntropyInfo, self.sliceHashes);
 
-            console.log('EntropyInfo', entropyInfo);
 
             let contextAccounts = {};
             contextNames.map((name) => {
-                let account = self._getContextAccount(name, entropyInfo.entropy, entropyInfo.index);
+                let account = self._getContextAccount(name, hdInfo);
                 if (account !== null) {
                     contextAccounts[name] = account;
                 }
             });
-
             self.buffer = self.xmp.addAccounts(self.buffer, contextAccounts);
 
             if (self.buffer !== null) {
-                self._saveBlob(self._arrayBufferToBlob(self.buffer), `Photoblock (Default).jpg`);
+                self._savePhotoBlock();
                 callback();
             } else {
                 callback('An error occurred');
@@ -114,19 +121,17 @@ export default class PhotoEngine {
         }
 
         // Start the process here
-        this._getDataUri((dataUri) => {
-            photo.src = dataUri;
-        })
+        this.getDataUri(img => photo.src = img);
 
     }
 
-    _getContextAccount(contextName, entropy, index) {
+    _getContextAccount(contextName, hdInfo) {
 
         let self = this;
-        let account = null;
-        account = self.xmp.contexts[contextName].handlers.getAccount(entropy, index);
+        let context = self.xmp.contexts[contextName];
+        hdInfo.path = context.hdPath;
+        return context.handlers.getAccount(hdInfo);
 
-        return account;
     }
 
 
@@ -152,7 +157,7 @@ export default class PhotoEngine {
      * 
      * @param callback 
      */
-    _getDataUri(callback) {
+    getDataUri(callback) {
         let fr = new FileReader();
         fr.onload = (e) => {
             callback(e.target.result);
@@ -161,25 +166,6 @@ export default class PhotoEngine {
             type: 'image/jpeg'
         });
         fr.readAsDataURL(blob);
-    }
-
-    /**
-     * Returns URL for downloading buffer as JPEG image
-     */
-    getUrl() {
-        let blob = new Blob([this.buffer], {
-            type: 'image/jpeg'
-        });
-        return (URL || webkitURL).createObjectURL(blob);
-    }
-
-    /**
-     * Frees up memory associated with an object URL
-     * 
-     * @param url 
-     */
-    revokeUrl(url) {
-        (URL || webkitURL).revokeObjectURL(url);
     }
 
 
@@ -203,23 +189,19 @@ export default class PhotoEngine {
        return arrayBuffer;
     }
 
-    _arrayBufferToBlob(arrayBuffer) {
-        let dataView = new DataView(arrayBuffer);
-        let blob = new Blob([dataView], {
-            type: 'image/jpeg'
-        });
-        return blob;
-    }
 
-    _saveBlob(blob, fileName) {
+    _savePhotoBlock() {
+        let self = this;
         let a = document.createElement('a');
         document.body.appendChild(a);
         a.style = 'display: none';
-        let url = (URL || webkitURL).createObjectURL(blob);
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        (URL || webkitURL).revokeObjectURL(url);
+        a.download = 'Photoblock (Default).jpg';
+        // a.target = '_blank';
+        // a.setAttribute('rel','noopener noreferrer');
+        self.getDataUri((img) => {
+            a.href = img;
+            a.click();
+        });
     }
 
 

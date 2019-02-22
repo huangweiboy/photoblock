@@ -35,7 +35,7 @@ export default {
         if (payload.imgBuffer !== null) {
 
             let accounts = state.xmp.getAccounts(payload.imgBuffer, state.currentContext.name);
-            if (accounts != null) {
+            if (accounts != null) { 
                 
                 if (accounts[state.currentContext.name].length === 0) {
                     callback(state);
@@ -43,14 +43,14 @@ export default {
                 else {
                     state.emojiKey = [];
                     state.fresh = false;
-                    state.photoEngine = new PhotoEngine(payload.imgBuffer, state.xmp, true);
+                    state.photoEngine = new PhotoEngine(payload.imgBuffer, state.xmp, accounts[state.currentContext.name][0]);
                     state.currentState = PB.STATE_UNLOCK;
                     callback(state);    
                 }
             } else {    
                 state.emojiKey = [];
                 state.fresh = false;
-                state.photoEngine = new PhotoEngine(payload.imgBuffer, state.xmp, false);
+                state.photoEngine = new PhotoEngine(payload.imgBuffer, state.xmp, null);
                 state.currentState = PB.STATE_NEW;
                 callback(state);               
             }

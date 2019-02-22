@@ -26,8 +26,7 @@ export default class Download extends Component {
             self.element = DOM.elid('photoblock-download-wrapper'); 
             if (store.state.photoEngine != null) {
                 let photo = DOM.elid('photoblock-photo');  
-                photo.src = store.state.photoEngine.getUrl();
-                store.state.photoEngine.revokeUrl(photo.src);    
+                store.state.photoEngine.getDataUri(img => photo.src = img);
             }
 
 

@@ -1,7 +1,8 @@
+import CryptoHelper from '../../components/crypto-helper';
+
 export default class BitcoinContext {
 
-    static getAccount(entropy, index) {
-        console.log('Bitcoin', index, entropy);
-        return { address: '0x111111', publicKey: '12345678901234567890' };
+    static getAccount(hdInfo) {
+        return { address: 'Coming Soon', publicKey: 'Work in progress' };
     }
 }
