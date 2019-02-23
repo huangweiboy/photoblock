@@ -125,6 +125,13 @@ export default {
             }
     
         }
+    },
+
+    lock(state, payload, callback) {
+        
+        this.init(state);
+        state.currentState = PB.STATE_LOAD;
+        callback(state);
     }
 
 };

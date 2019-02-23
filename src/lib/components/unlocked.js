@@ -20,6 +20,8 @@ export default class Unlocked extends Component {
         let self = this;
         self.log('unlocked...render');
 
+        let widget = DOM.elid('photoblock-widget-photo');
+
         if (store.state.currentState === PB.STATE_READY) {
             self.modal.content.innerHTML = '';
             self.modal.content.insertAdjacentHTML('beforeend', self.localizer.localize(UnlockedTemplate));
@@ -31,21 +33,26 @@ export default class Unlocked extends Component {
                 });
             }
 
-            let widget = DOM.elid('photoblock-widget-icon');
-            if (widget != null) {
-                store.state.photoEngine.getDataUri((img) => {
-                    widget.src = img;                    
-                });
+            if ((widget !== null) && (store.state.photoEngine !== null)) {
+                    store.state.photoEngine.getDataUri((img) => {
+                        widget.src = img;                    
+                    });    
+                    widget.setAttribute('style', 'display:block;');
             }
-
-            let nextButton = DOM.elid('photoblock-action-next');
+    
+            let nextButton = DOM.elid('photoblock-action-lock');
             nextButton.addEventListener('click', () => {
                 self.element = null;
-                store.dispatch('saveCollection', { });
-            });
-
-    
+                store.dispatch('lock', { });
+            });    
+        } else {
+            if (widget !== null) {
+                widget.src = '';
+                widget.removeAttribute('style');
+            }
         }
+
+
     }
 
 }

@@ -12,6 +12,11 @@
   box-sizing: border-box;
   z-index: 930;
 }
+
+#photoblock-modal *:focus {
+  outline: none;
+}
+
 /* HTML5 display-role reset for older browsers */
 #photoblock-modal article, 
 #photoblock-modal aside, 
@@ -107,6 +112,7 @@
 /************************ WIDGET *************************/
 
 #photoblock-widget-wrapper,
+#photoblock-widget-photo,
 #photoblock-widget-frame {
   width: 140px;
   height: 170px;
@@ -118,12 +124,20 @@
   z-index: 0;
 }
 
+#photoblock-widget-photo,
 #photoblock-widget-frame {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 10;
   cursor: pointer;
+}
+
+#photoblock-widget-photo {
+  z-index: 20;
+  border: 1px solid #00c6f6;
+  border-radius: 5px;
+  display:none;
 }
 
 #photoblock-widget-icon {
@@ -622,7 +636,7 @@
   background: linear-gradient(135deg, #00c6f6 40%, #ffd200 60%);
   /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   background-size: 400% 400%;
-  animation: photoblock-gradient 20s ease infinite;
+  animation: photoblock-gradient 10s ease infinite;
   cursor: pointer;
 }
 
@@ -643,6 +657,7 @@
 }
 
 #photoblock-action-unlock > div,
+#photoblock-action-lock > div,
 #photoblock-action-next > div,
 #photoblock-action-download > div {
   width: 100%;
@@ -650,11 +665,19 @@
   background-size: contain;
 }
 
-#photoblock-action-unlock > div {
-  background-image: url("img/locked.svg");
+#photoblock-action-unlock > div,
+#photoblock-action-lock > div {
   background-repeat: no-repeat;
   background-size: 50px;
   background-position: center center;
+}
+
+#photoblock-action-unlock > div {
+  background-image: url("img/unlocked.svg");
+}
+
+#photoblock-action-lock > div {
+  background-image: url("img/locked.svg");
 }
 
 #photoblock-action-next > div {

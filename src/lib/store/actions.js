@@ -42,6 +42,10 @@ export default {
 
     unlock(context, payload) {  
         context.commit('unlock', payload);
+    },
+
+    lock(context, payload) {  
+        context.commit('lock', payload);
     }
 
 };

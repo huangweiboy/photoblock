@@ -154,6 +154,7 @@ export default class PhotoBlock {
       self.element.innerHTML = '';
       let wrapper = DOM.div({ id: 'photoblock-widget-wrapper'}); 
       self.element.appendChild(wrapper); 
+      wrapper.appendChild(DOM.img({ id: 'photoblock-widget-photo', className: 'photoblock-button' }));  
       wrapper.appendChild(DOM.img({ id: 'photoblock-widget-icon', className: 'photoblock-button', src: photoBlockIcon, alt: 'PhotoBlock Icon' }));  
       wrapper.appendChild(DOM.img({ id: 'photoblock-widget-frame', className: 'photoblock-button', src: photoBlockFrame, alt: 'PhotoBlock Frame' }));  
 
