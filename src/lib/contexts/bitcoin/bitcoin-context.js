@@ -2,8 +2,8 @@ import CryptoHelper from '../../components/crypto-helper';
 
 export default class BitcoinContext {
 
-    static createAccount(hdInfo) {
+    static generateAccount(hdInfo) {
         return { address: 'Coming Soon', publicKey: 'Work in progress' };
     }
-    
+
 }

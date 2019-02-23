@@ -44,19 +44,19 @@ export default class PhotoBlock {
     this.enableContextRegistration = true;
 
     this.registerContext('Ethereum', 'ETH', 'm/44\'/60\'/0\'/0', ['address', 'publicKey'], { 
-        createAccount: (hdInfo) => EthereumContext.createAccount(hdInfo),
+        generateAccount: (hdInfo) => EthereumContext.generateAccount(hdInfo),
         sign: function(entropy, index, data, message) {
       }      
     });
 
     this.registerContext('Bitcoin', 'BTC', 'm/44\'/0\'/0\'/0', ['address', 'publicKey'], { 
-        createAccount: (hdInfo) => BitcoinContext.createAccount(hdInfo),
+        generateAccount: (hdInfo) => BitcoinContext.generateAccount(hdInfo),
         sign: function(entropy, index, data) {
       }      
     });
 
     this.registerContext('Web', null, 'm/44\'/60\'/255\'/255', ['username', 'userId', 'publicKey'], { 
-        createAccount: (hdInfo) => WebContext.createAccount(hdInfo),
+        generateAccount: (hdInfo) => WebContext.generateAccount(hdInfo),
         sign: function(entropy, index, data) {
       }      
     });
@@ -90,8 +90,8 @@ export default class PhotoBlock {
       && attributes.length 
       && (attributes.length > 0) 
       && (typeof handlers == 'object')
-      && (handlers.hasOwnProperty('createAccount'))
-      && (typeof handlers.createAccount == 'function')
+      && (handlers.hasOwnProperty('generateAccount'))
+      && (typeof handlers.generateAccount == 'function')
       && (handlers.hasOwnProperty('sign'))
       && (typeof handlers.sign == 'function')      
       ) {

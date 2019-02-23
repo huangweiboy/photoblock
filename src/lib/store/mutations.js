@@ -113,14 +113,17 @@ export default {
         
         state.unlockCount++;
 
-        // Code to check goes here
-        //state.currentState = PB.STATE_READY;
-
-        if (state.unlockCount > PB.MAX_UNLOCK_ATTEMPTS) {
-            this.hideModal(state, null, callback);
-        } else {
-            state.emojiKey = [];
+        if (state.photoEngine.unlockPhotoBlock(state.currentContext, payload.emojiKey)) {
+            state.currentState = PB.STATE_READY;
             callback(state);
+        } else {
+            if (state.unlockCount > PB.MAX_UNLOCK_ATTEMPTS) {
+                this.hideModal(state, null, callback);
+            } else {
+                state.emojiKey = [];
+                callback(state);
+            }
+    
         }
     }
 

@@ -20,18 +20,23 @@ export default class Unlocked extends Component {
         let self = this;
         self.log('unlocked...render');
 
-        if (store.state.currentState === PB.STATE_UNLOCKED) {
+        if (store.state.currentState === PB.STATE_READY) {
             self.modal.content.innerHTML = '';
             self.modal.content.insertAdjacentHTML('beforeend', self.localizer.localize(UnlockedTemplate));
             self.element = DOM.elid('photoblock-unlocked-wrapper'); 
-            let photo = DOM.elid('photoblock-photo');  
-            photo.src = store.state.photo;
+            self.element = DOM.elid('photoblock-photo');  
+            if (store.state.photoEngine != null) {
+                store.state.photoEngine.getDataUri((img) => {
+                    self.element.src = img;                    
+                });
+            }
 
-
-            let backButton = DOM.elid('photoblock-action-back');
-            backButton.addEventListener('click', () => {
-                store.dispatch('cancelPhoto', {});
-            }); 
+            let widget = DOM.elid('photoblock-widget-icon');
+            if (widget != null) {
+                store.state.photoEngine.getDataUri((img) => {
+                    widget.src = img;                    
+                });
+            }
 
             let nextButton = DOM.elid('photoblock-action-next');
             nextButton.addEventListener('click', () => {
@@ -39,11 +44,6 @@ export default class Unlocked extends Component {
                 store.dispatch('saveCollection', { });
             });
 
-            let downloadButton = DOM.elid('photoblock-action-download');
-            downloadButton.addEventListener('click', () => {
-                self.element = null;
-                store.dispatch('downloadPhotoBlock', { });
-            });
     
         }
     }

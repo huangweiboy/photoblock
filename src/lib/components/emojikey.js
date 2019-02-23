@@ -127,7 +127,7 @@ export default class EmojiKey extends Component {
                     let unlockButton = DOM.elid('photoblock-action-unlock');
                     unlockButton.removeAttribute('style');
                     unlockButton.addEventListener('click', () => {
-                        store.dispatch('unlock', {});
+                        store.dispatch('unlock', { emojiKey: self.emojiKey });
                     }); 
     
                     DOM.elid('photoblock-emoji-unlock').removeAttribute('style');

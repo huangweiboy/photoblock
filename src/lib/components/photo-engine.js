@@ -26,7 +26,24 @@ export default class PhotoEngine {
         fr.readAsDataURL(blob);
     }
 
-
+    unlockPhotoBlock(context, emojiKey) {
+        let self = this;
+        try {
+            if (self.account !== null) {
+                let hdInfo = self._getPhotoBlockEntropy(emojiKey);
+                let pbAccount = self._generateContextAccount(context, hdInfo);
+                context.attributes.map((attribute) => {
+                    if (self.account[attribute] !== pbAccount[attribute]) {
+                        console.log('UNLOCKING', self.account, pbAccount, false);
+                        return false;
+                    }
+                });
+                return true;
+            }
+        } catch (e) {
+        }
+        return false;
+    }
 
     createPhotoBlockImage(emojiKey, callback) {
 
@@ -70,7 +87,7 @@ export default class PhotoEngine {
             const yPos = canvas.height - 230;
             const logoSize = 120;
             let xPos = 400;
-            Object.keys(self.xmp.contexts).map((name) => {
+            contextNames.map((name) => {
                 ctx.drawImage(contextImages[name], xPos, yPos, logoSize, logoSize);
                 xPos += 150;
             });
@@ -88,13 +105,14 @@ export default class PhotoEngine {
             // the canvas implementation to be consistent across browsers. Once the JPEG is extracted
             // from the canvas, we can safely use the binary (pixel) data because that will be
             // persisted on disk and will remain unchanged regardless of browser.
-            let hdInfo = _getPhotoBlockEntropy(emojiKey);
+
+            let hdInfo = self._getPhotoBlockEntropy(emojiKey);
 
             let contextAccounts = {};
-            contextNames.map((name) => {
-                let account = _createContextAccount(name, hdInfo);
+            contextNames.map((contextName) => {
+                let account = self._generateContextAccount(self.xmp.contexts[contextName], hdInfo);
                 if (account !== null) {
-                    contextAccounts[name] = account;
+                    contextAccounts[contextName] = account;
                 }
             });
             self.buffer = self.xmp.addAccounts(self.buffer, contextAccounts);
@@ -165,73 +183,6 @@ export default class PhotoEngine {
         }
 
 
-
-        const _getPhotoBlockEntropy = (emojiKey) => {
-
-            if (emojiKey.length < PB.REQUIRED_EMOJIS) {
-                return null;
-            }
-
-            let hashes = [];
-            let idx = 0;
-            let combinedHash = '';
-
-            let cells = [];
-            emojiKey.map((item, index) => {
-                let hash = CryptoHelper.hash(window.atob(item.emoji));
-                hashes.push({
-                    cell: item.cell,
-                    hash: hash
-                });
-                cells.push(item.cell);
-
-                if (index === (emojiKey.length - 1)) {
-                    // The index is the last byte of the last emoji item
-                    idx = window.atob(item.emoji)[window.atob(item.emoji).length - 1];
-                }
-            });
-
-            const _generateSliceHashes = (cells) => {
-
-                let self = this;
-                let decoded = self.decode(self.buffer);
-                const bytesPerSlice = PB.PHOTO_INFO.FRAME_WIDTH * PB.PHOTO_INFO.SLICE_ROWS * PB.PHOTO_INFO.BYTES_PER_PIXEL;
-                let sliceHashes = [];
-                let last = -1;
-                for (let s = 0; s < 9; s++) {
-                    last++;
-                    let hash = null;
-                    if (cells.indexOf(s) > -1) {
-                        let slice = decoded.data.slice(last, last + PB.PHOTO_INFO.SLICE_HASH_BYTES);
-                        hash = CryptoHelper.hash(slice);
-                    }
-                    last = last + bytesPerSlice;
-                    sliceHashes.push(hash);
-                }
-
-                return sliceHashes;
-            }
-
-            let imageSliceHashes = _generateSliceHashes(cells);
-
-            hashes.map((item) => {
-                let cell = item.cell;
-                let emojiHash = item.hash;
-                let imageHash = imageSliceHashes[cell]; // Hash of image for slice referenced by emoji cell (0..8)
-
-                let cellHash = emojiHash + imageHash;
-                combinedHash += CryptoHelper.hash(cellHash);
-
-            });
-            return {
-                hash: CryptoHelper.hash(combinedHash),
-                index: idx
-            }
-
-
-
-        }
-
         const _savePhotoBlock = () => {
             let self = this;
             console.log('Save Photo Block');
@@ -291,16 +242,6 @@ export default class PhotoEngine {
 
         }
 
-        // For reference:  https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-        const _createContextAccount = (contextName, hdInfo) => {
-
-            let self = this;
-            let context = self.xmp.contexts[contextName];
-            hdInfo.path = context.hdPath;
-            return context.handlers.createAccount(hdInfo);
-
-        }
-
 
         const _getBlobUri = (callback) => {
             let blob = new Blob([this.buffer], {
@@ -316,6 +257,79 @@ export default class PhotoEngine {
     }
 
 
+
+    // For reference:  https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+    _generateContextAccount(context, hdInfo) {
+
+        let self = this;
+        hdInfo.path = context.hdPath;
+        return context.handlers.generateAccount(hdInfo);
+    }
+
+
+    _getPhotoBlockEntropy(emojiKey) {
+
+        if (emojiKey.length < PB.REQUIRED_EMOJIS) {
+            return null;
+        }
+
+        let hashes = [];
+        let idx = 0;
+        let combinedHash = '';
+
+        let cells = [];
+        emojiKey.map((item, index) => {
+            let hash = CryptoHelper.hash(window.atob(item.emoji));
+            hashes.push({
+                cell: item.cell,
+                hash: hash
+            });
+            cells.push(item.cell);
+
+            if (index === (emojiKey.length - 1)) {
+                // The index is the last byte of the last emoji item
+                idx = window.atob(item.emoji)[window.atob(item.emoji).length - 1];
+            }
+        });
+
+        const _generateSliceHashes = (cells) => {
+
+            let self = this;
+            let decoded = self.decode(self.buffer);
+            const bytesPerSlice = PB.PHOTO_INFO.FRAME_WIDTH * PB.PHOTO_INFO.SLICE_ROWS * PB.PHOTO_INFO.BYTES_PER_PIXEL;
+            let sliceHashes = [];
+            let last = -1;
+            for (let s = 0; s < 9; s++) {
+                last++;
+                let hash = null;
+                if (cells.indexOf(s) > -1) {
+                    let slice = decoded.data.slice(last, last + PB.PHOTO_INFO.SLICE_HASH_BYTES);
+                    hash = CryptoHelper.hash(slice);
+                }
+                last = last + bytesPerSlice;
+                sliceHashes.push(hash);
+            }
+
+            return sliceHashes;
+        }
+
+        let imageSliceHashes = _generateSliceHashes(cells);
+
+        hashes.map((item) => {
+            let cell = item.cell;
+            let emojiHash = item.hash;
+            let imageHash = imageSliceHashes[cell]; // Hash of image for slice referenced by emoji cell (0..8)
+
+            let cellHash = emojiHash + imageHash;
+            combinedHash += CryptoHelper.hash(cellHash);
+
+        });
+        return {
+            hash: CryptoHelper.hash(combinedHash),
+            index: idx
+        }
+
+    }
 
 
 
