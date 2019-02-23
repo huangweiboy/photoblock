@@ -18,10 +18,13 @@ export default {
         step1: "Create EmojiKey",
         step2: "Confirm EmojiKey",
         step3: "Save PhotoBlock",
+        unlockTitle: "Unlock PhotoBlock",
+        unlockText: "Enter emoji sequence to unlock PhotoBlock",
         collectionIntro: "To create a collection, enter a collection name and select a wallpaper.",
     },
     download: {
         currentTitle: "Step 3: Save PhotoBlock",
         currentText: "OK, we are ready. Select the download button to create and save a PhotoBlock with an embedded account for each supported platform.",
+        error: "An error occurred while creating the PhotoBlock. If the problem persists, try using a different photo."
     }
 }

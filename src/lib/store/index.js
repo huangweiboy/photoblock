@@ -10,6 +10,7 @@ export default new Store({
         currentState: PB.STATE_INIT,
         currentContext: null,
         isModalVisible: false,
+        unlockCount: 0,
         emojiKey: [],
         xmp: null,
         photoEngine: null,

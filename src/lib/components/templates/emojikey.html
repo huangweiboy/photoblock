@@ -15,11 +15,17 @@
         <tr id="photoblock-emoji-cells-r2"></tr>
     </table>
     <div id="photoblock-emoji-helptext">
-        <div>
+        <div id="photoblock-emoji-create" style="display:none;">
             <img src="../../img/smile-emoji.svg" alt="Smile emoji" />
             <h3>${currentTitle}</h3>            
             <p>
                 ${currentText}
+            </p>
+        </div>
+        <div id="photoblock-emoji-unlock" style="display:none;">
+            <h3>${emojiKey.unlockTitle}</h3>            
+            <p>
+                ${emojiKey.unlockText}
             </p>
         </div>
     </div> 
@@ -34,9 +40,9 @@
     </div>
     <div>
         <button id="photoblock-action-unlock" class="photoblock-primary-action" style="display:none;">
-            <div></div>>
+            <div></div>
         </button>
-        <div id="photoblock-action-next" class="photoblock-primary-action">
+        <div id="photoblock-action-next" class="photoblock-primary-action" style="display:none;">
             <div></div>
         </div>
     </div>

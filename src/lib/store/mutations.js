@@ -21,10 +21,17 @@ export default {
         callback(state);
     },
 
+    init(state) {
+        state.photoEngine = null;
+        state.emojiKey = [];
+        state.unlockCount = 0;
+        state.fresh = false;
+    },
+
     hideModal(state, payload, callback) {
         state.isModalVisible = false;
-        if (state.currentState !== PB.STATE_UNLOCKED) {
-            state.photoEngine = null;
+        if (state.currentState !== PB.STATE_READY) {
+            this.init(state);
             state.currentState = PB.STATE_INIT;
         }
         
@@ -43,6 +50,7 @@ export default {
                 else {
                     state.emojiKey = [];
                     state.fresh = false;
+                    state.unlockCount = 0;
                     state.photoEngine = new PhotoEngine(payload.imgBuffer, state.xmp, accounts[state.currentContext.name][0]);
                     state.currentState = PB.STATE_UNLOCK;
                     callback(state);    
@@ -83,14 +91,11 @@ export default {
 
     savePhotoBlock(state, payload, callback) {
 
-        let emojiEntropyInfo = CryptoHelper.getEmojiEntropy(state.emojiKey);
-        state.photoEngine.createPhotoBlockImage(emojiEntropyInfo, (error) => {
+        state.photoEngine.createPhotoBlockImage(state.emojiKey, (error) => {
             if (error) {
                 callback(state);    
             } else {
-                state.fresh = true;
-                state.photoEngine = null;
-                state.emojiKey = [];
+                this.init(state);
                 state.currentState = PB.STATE_LOAD;
                 callback(state);    
             }
@@ -99,16 +104,24 @@ export default {
 
     cancelPhoto(state, payload, callback) {
 
-        state.photoEngine = null;
-        state.emojiKey = [];
+        init(state);
         state.currentState = PB.STATE_LOAD;
         callback(state);
     },
 
     unlock(state, payload, callback) {
         
-        state.currentState = PB.STATE_UNLOCKED;
-        callback(state);
+        state.unlockCount++;
+
+        // Code to check goes here
+        //state.currentState = PB.STATE_READY;
+
+        if (state.unlockCount > PB.MAX_UNLOCK_ATTEMPTS) {
+            this.hideModal(state, null, callback);
+        } else {
+            state.emojiKey = [];
+            callback(state);
+        }
     }
 
 };

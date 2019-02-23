@@ -37,7 +37,6 @@ export default class Download extends Component {
 
             let downloadButton = DOM.elid('photoblock-action-download');
             downloadButton.addEventListener('click', () => {
-//                self.element = null;
                 DOM.elid('photoblock-loader').removeAttribute('style');
                 store.dispatch('savePhotoBlock', { });
             });

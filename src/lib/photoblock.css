@@ -361,12 +361,8 @@
 }
 
 .photoblock-emojikey {
-  opacity: 0.25;
+  opacity: 0.4;
   filter: grayscale(100%);
-}
-
-.photoblock-unlocked {
-  opacity: 0.6;
 }
 
 #photoblock-emoji-cells {
@@ -429,6 +425,10 @@
   background-color: #00cc00;
 }
 
+#photoblock-emoji-cells div.photoblock-cell-badge-pass {
+  background-color: #cc6600;
+}
+
 #photoblock-emoji-cells div.photoblock-cell-badge-error {
   background-color: #cc0000;
 }
@@ -488,6 +488,11 @@
   color: #00c6f6;
 }
 
+#photoblock-emoji-unlock h3,
+#photoblock-emoji-unlock p {
+  margin-left: 0;
+}
+
 #photoblock-emoji-helptext img {
   float: left;
   width: 2rem;
@@ -529,14 +534,14 @@
 #photoblock-emoji-tabs {
   background: #00c6f6; 
   padding: 0;
-  height: 28px;
+  height: 32px;
   text-align: center;
 }
 
 #photoblock-emoji-tabs div {
   background-color: transparent;
   background-repeat: no-repeat;
-  margin: 3px 0 3px 18px;
+  margin: 5px 0 5px 18px;
   padding:0; 
   width: 22px;
   height: 22px;
@@ -647,6 +652,9 @@
 
 #photoblock-action-unlock > div {
   background-image: url("img/locked.svg");
+  background-repeat: no-repeat;
+  background-size: 50px;
+  background-position: center center;
 }
 
 #photoblock-action-next > div {

@@ -17,12 +17,12 @@ import BitcoinContext from './contexts/bitcoin/bitcoin-context';
 import WebContext from './contexts/web/web-context';
 
 
-const RESTRICTED_CONTEXTS = 'app;ethereum;bitcoin;';
+const RESTRICTED_CONTEXTS = 'bitcoin;ethereum;web;';
 
 
 export default class PhotoBlock {
 
-  constructor(containerId, options) {
+  constructor(containerId, options, callback) {
     this.containerId = containerId;
     this.options = options || {};
     this.element = null;
@@ -34,28 +34,30 @@ export default class PhotoBlock {
     this.contexts = {};
     this.context = null;
     this.rendered = false;
+    this.callback = function() {};
+
+    if (callback  && (typeof callback == 'function')) {
+      this.callback = callback;
+    }
 
     // Built-in handlers
     this.enableContextRegistration = true;
 
     this.registerContext('Ethereum', 'ETH', 'm/44\'/60\'/0\'/0', ['address', 'publicKey'], { 
-      getAccount: (hdInfo) => EthereumContext.getAccount(hdInfo),
-      sign: function(entropy, index, data, message) {
-
+        createAccount: (hdInfo) => EthereumContext.createAccount(hdInfo),
+        sign: function(entropy, index, data, message) {
       }      
     });
 
     this.registerContext('Bitcoin', 'BTC', 'm/44\'/0\'/0\'/0', ['address', 'publicKey'], { 
-      getAccount: (hdInfo) => BitcoinContext.getAccount(hdInfo),
-      sign: function(entropy, index, data) {
-
+        createAccount: (hdInfo) => BitcoinContext.createAccount(hdInfo),
+        sign: function(entropy, index, data) {
       }      
     });
 
     this.registerContext('Web', null, 'm/44\'/60\'/255\'/255', ['username', 'userId', 'publicKey'], { 
-      getAccount: (hdInfo) => WebContext.getAccount(hdInfo),
-      sign: function(entropy, index, data) {
-
+        createAccount: (hdInfo) => WebContext.createAccount(hdInfo),
+        sign: function(entropy, index, data) {
       }      
     });
 
@@ -88,8 +90,8 @@ export default class PhotoBlock {
       && attributes.length 
       && (attributes.length > 0) 
       && (typeof handlers == 'object')
-      && (handlers.hasOwnProperty('getAccount'))
-      && (typeof handlers.getAccount == 'function')
+      && (handlers.hasOwnProperty('createAccount'))
+      && (typeof handlers.createAccount == 'function')
       && (handlers.hasOwnProperty('sign'))
       && (typeof handlers.sign == 'function')      
       ) {
@@ -139,7 +141,7 @@ export default class PhotoBlock {
     if ((self.element == null) || ((self.context !== null) && (context !== self.context.name))) {      
       if (self.contexts.hasOwnProperty(context)) {
         self.context = self.contexts[context];
-        store.dispatch('setContext', { context: self.context, contexts: self.contexts });
+        store.dispatch('setContext', { context: self.context, contexts: self.contexts, callback: self.callback });
 
         self.modal = new PhotoBlockModal();
         self.loader = new Loader(self.modal);

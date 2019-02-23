@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 
 export default class EthereumContext {
 
-    static getAccount(hdInfo) {
+    static createAccount(hdInfo) {
 
         let wallet = ethers.Wallet.fromMnemonic(ethers.utils.HDNode.entropyToMnemonic(hdInfo.hash),`${hdInfo.path}/${hdInfo.index}`);
         let accountInfo = { address: wallet.address, publicKey: wallet.signingKey.publicKey };
@@ -10,6 +10,5 @@ export default class EthereumContext {
         wallet = null;
 
         return accountInfo;
-
     }
 }

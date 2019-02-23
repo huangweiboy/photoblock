@@ -10,17 +10,25 @@ export default class PhotoEngine {
         this.xmp = xmp;
         this.account = account;
         this.sliceHashes = [];
-        // If unlocking generate slice hashes, otherwise wait until PhotoBlock is generated
-//        this.sliceHashes = accounts !== null ? this._generateSliceHashes() : [];
-
-        if (account !== null) {
-
-        }
     }
 
 
 
-    createPhotoBlockImage(emojiEntropyInfo, callback) {
+
+    getDataUri(callback) {
+        let fr = new FileReader();
+        fr.onload = (e) => {
+            callback(e.target.result);
+        }
+        let blob = new Blob([this.buffer], {
+            type: 'image/jpeg'
+        });
+        fr.readAsDataURL(blob);
+    }
+
+
+
+    createPhotoBlockImage(emojiKey, callback) {
 
         let self = this;
         let canvas = document.createElement('canvas');
@@ -32,6 +40,24 @@ export default class PhotoEngine {
         let contextNames = Object.keys(self.xmp.contexts);
         let contextImages = {};
 
+
+        // First: Draw the photo
+        photo.onload = () => {
+            let imgInfo = _cover(canvas.width, canvas.height, photo.width, photo.height);
+            ctx.drawImage(photo, imgInfo.offsetX, imgInfo.offsetY, imgInfo.width, imgInfo.height);
+            frame.src = photoblockTemplate;
+        }
+
+        // Second: Draw the frame
+        frame.onload = () => {
+            ctx.drawImage(frame, 0, 0);
+            _loadAll(contextNames); // Loads all the context icons
+        }
+
+        // Start the process here
+        self.getDataUri(img => photo.src = img);
+
+
         // This is the last step of the PhotoBlock photo creation. Each of the context logos
         // is drawn on the bottom white bar. The canvas image is extracted to a dataUri and
         // then converted to an arraybuffer that the XMP class can process. The photo pixels
@@ -40,7 +66,7 @@ export default class PhotoEngine {
         // creation. The XMP class calls the handler for each context and adds an account
         // and then the completed PhotoBlock is downloaded.
 
-        const finalizeImage = () => {
+        const _finalizeImage = () => {
             const yPos = canvas.height - 230;
             const logoSize = 120;
             let xPos = 400;
@@ -50,26 +76,23 @@ export default class PhotoEngine {
             });
 
             let pb = canvas.toDataURL('image/jpeg');
-            self.buffer = self._dataUriToArrayBuffer(pb);
-            
+            self.buffer = _dataUriToArrayBuffer(pb);
+
             // Clean-up
-            // photo.parentElement.removeChild(photo);
-            // frame.parentElement.removeChild(frame);
-            // canvas.parentElement.removeChild(canvas);
+            photo = null;
+            frame = null;
+            canvas = null;
 
             // It's very important that all binary image data usage related to account generation
             // happens after the image is extracted from the canvas. This is because we don't trust
             // the canvas implementation to be consistent across browsers. Once the JPEG is extracted
             // from the canvas, we can safely use the binary (pixel) data because that will be
             // persisted on disk and will remain unchanged regardless of browser.
-            self._generateSliceHashes();
-
-            let hdInfo = CryptoHelper.getEntropy(emojiEntropyInfo, self.sliceHashes);
-
+            let hdInfo = _getPhotoBlockEntropy(emojiKey);
 
             let contextAccounts = {};
             contextNames.map((name) => {
-                let account = self._getContextAccount(name, hdInfo);
+                let account = _createContextAccount(name, hdInfo);
                 if (account !== null) {
                     contextAccounts[name] = account;
                 }
@@ -77,7 +100,11 @@ export default class PhotoEngine {
             self.buffer = self.xmp.addAccounts(self.buffer, contextAccounts);
 
             if (self.buffer !== null) {
-                self._savePhotoBlock();
+                if (_isMobile()) {
+                    _savePhotoBlockMobile();
+                } else {
+                    _savePhotoBlock();
+                }
                 callback();
             } else {
                 callback('An error occurred');
@@ -85,7 +112,7 @@ export default class PhotoEngine {
         }
 
         // https://codereview.stackexchange.com/questions/128587/check-if-images-are-loaded-es6-promises
-        const loadImage = name => {
+        const _loadImage = name => {
             return new Promise(resolve => {
                 const img = new Image();
                 contextImages[name] = img;
@@ -99,137 +126,199 @@ export default class PhotoEngine {
             });
         }
 
-        const loadAll = (names) => Promise
-            .all(names.map(loadImage))
+        const _loadAll = (names) => Promise
+            .all(names.map(_loadImage))
             .then(() => {
-                finalizeImage();
+                _finalizeImage();
             });
 
 
-
-        // First: Draw the photo
-        photo.onload = () => {
-            let imgInfo = this._cover(canvas.width, canvas.height, photo.width, photo.height);
-            ctx.drawImage(photo, imgInfo.offsetX, imgInfo.offsetY, imgInfo.width, imgInfo.height);
-            frame.src = photoblockTemplate;
+        const _isMobile = () => {
+            return (navigator.userAgent.match(/Android/i) ||
+                navigator.userAgent.match(/webOS/i) ||
+                navigator.userAgent.match(/iPhone/i) ||
+                navigator.userAgent.match(/iPad/i) ||
+                navigator.userAgent.match(/iPod/i) ||
+                navigator.userAgent.match(/BlackBerry/i) ||
+                navigator.userAgent.match(/Windows Phone/i));
         }
 
-        // Second: Draw the frame
-        frame.onload = () => {
-            ctx.drawImage(frame, 0, 0);
-            loadAll(contextNames);
+
+        const _dataUriToArrayBuffer = (dataUri) => {
+            let byteString = null;
+            if (dataUri.split(',')[0].indexOf('base64') >= 0)
+                byteString = atob(dataUri.split(',')[1]);
+            else
+                byteString = unescape(dataUri.split(',')[1]);
+
+            // separate out the mime component
+            //let mimeString = dataUri.split(',')[0].split(':')[1].split(';')[0];
+
+            // write the bytes of the string to an ArrayBuffer
+            let arrayBuffer = new ArrayBuffer(byteString.length);
+            let ia = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+
+            return arrayBuffer;
         }
 
-        // Start the process here
-        this.getDataUri(img => photo.src = img);
+
+
+        const _getPhotoBlockEntropy = (emojiKey) => {
+
+            if (emojiKey.length < PB.REQUIRED_EMOJIS) {
+                return null;
+            }
+
+            let hashes = [];
+            let idx = 0;
+            let combinedHash = '';
+
+            let cells = [];
+            emojiKey.map((item, index) => {
+                let hash = CryptoHelper.hash(window.atob(item.emoji));
+                hashes.push({
+                    cell: item.cell,
+                    hash: hash
+                });
+                cells.push(item.cell);
+
+                if (index === (emojiKey.length - 1)) {
+                    // The index is the last byte of the last emoji item
+                    idx = window.atob(item.emoji)[window.atob(item.emoji).length - 1];
+                }
+            });
+
+            const _generateSliceHashes = (cells) => {
+
+                let self = this;
+                let decoded = self.decode(self.buffer);
+                const bytesPerSlice = PB.PHOTO_INFO.FRAME_WIDTH * PB.PHOTO_INFO.SLICE_ROWS * PB.PHOTO_INFO.BYTES_PER_PIXEL;
+                let sliceHashes = [];
+                let last = -1;
+                for (let s = 0; s < 9; s++) {
+                    last++;
+                    let hash = null;
+                    if (cells.indexOf(s) > -1) {
+                        let slice = decoded.data.slice(last, last + PB.PHOTO_INFO.SLICE_HASH_BYTES);
+                        hash = CryptoHelper.hash(slice);
+                    }
+                    last = last + bytesPerSlice;
+                    sliceHashes.push(hash);
+                }
+
+                return sliceHashes;
+            }
+
+            let imageSliceHashes = _generateSliceHashes(cells);
+
+            hashes.map((item) => {
+                let cell = item.cell;
+                let emojiHash = item.hash;
+                let imageHash = imageSliceHashes[cell]; // Hash of image for slice referenced by emoji cell (0..8)
+
+                let cellHash = emojiHash + imageHash;
+                combinedHash += CryptoHelper.hash(cellHash);
+
+            });
+            return {
+                hash: CryptoHelper.hash(combinedHash),
+                index: idx
+            }
+
+
+
+        }
+
+        const _savePhotoBlock = () => {
+            let self = this;
+            console.log('Save Photo Block');
+            if (window.navigator && window.navigator.msSaveOrOpenBlob) { //IE11 support
+
+                let blob = new Blob([self.buffer], {
+                    type: 'image/jpeg'
+                });
+                window.navigator.msSaveOrOpenBlob(blob, fileName);
+            } else {
+                let a = document.createElement('a');
+                document.body.appendChild(a);
+                a.style = 'display: none';
+                a.download = PB.DEFAULT_FILE_NAME;
+                a.setAttribute('rel', 'noopener noreferrer');
+                _getBlobUri((img) => {
+                    console.log('In save', img);
+                    a.href = img;
+                    a.click();
+                });
+            }
+        }
+
+        const _savePhotoBlockMobile = () => {
+            let self = this;
+            let fileName = PB.DEFAULT_FILE_NAME;
+            // other browsers
+            let file = new File([self.buffer], fileName, {
+                type: 'image/jpeg'
+            });
+            let exportUrl = (window.webkitURL || window.URL).createObjectURL(file);
+            window.location.assign(exportUrl);
+            window.setTimeout(() => {
+                (window.webkitURL || window.URL).revokeObjectURL(exportUrl);
+            }, 5000);
+
+        }
+
+        const _cover = (parentWidth, parentHeight, childWidth, childHeight, scale = 1, offsetX = 0.5, offsetY = 0.5) => {
+            const childRatio = childWidth / childHeight
+            const parentRatio = parentWidth / parentHeight
+            let width = parentWidth * scale
+            let height = parentHeight * scale
+
+            if (childRatio < parentRatio) {
+                height = width / childRatio
+            } else {
+                width = height * childRatio
+            }
+
+            return {
+                width,
+                height,
+                offsetX: (parentWidth - width) * offsetX,
+                offsetY: (parentHeight - height) * offsetY
+            }
+
+        }
+
+        // For reference:  https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+        const _createContextAccount = (contextName, hdInfo) => {
+
+            let self = this;
+            let context = self.xmp.contexts[contextName];
+            hdInfo.path = context.hdPath;
+            return context.handlers.createAccount(hdInfo);
+
+        }
+
+
+        const _getBlobUri = (callback) => {
+            let blob = new Blob([this.buffer], {
+                type: 'image/jpeg'
+            });
+            callback((window.webkitURL || window.URL).createObjectURL(blob));
+            window.setTimeout(() => {
+                (window.webkitURL || window.URL).revokeObjectURL(blob);
+            }, 5000);
+        }
+
 
     }
 
-    _getContextAccount(contextName, hdInfo) {
-
-        let self = this;
-        let context = self.xmp.contexts[contextName];
-        hdInfo.path = context.hdPath;
-        return context.handlers.getAccount(hdInfo);
-
-    }
-
-
-
-    _generateSliceHashes() {
-
-        let self = this;
-        let decoded = self.decode(self.buffer);
-        const bytesPerSlice = PB.PHOTO_INFO.FRAME_WIDTH * PB.PHOTO_INFO.SLICE_ROWS * PB.PHOTO_INFO.BYTES_PER_PIXEL;
-        self.sliceHashes = [];
-        let last = -1;
-        for(let s=0; s<9; s++) {
-            last++;
-            let slice = decoded.data.slice(last,  last + PB.PHOTO_INFO.SLICE_HASH_BYTES);
-            last = last + bytesPerSlice;
-            let hash = CryptoHelper.hash(slice);
-            self.sliceHashes.push(hash);
-        }
-    }
-
-    /**
-     * Base64 encodes buffer and returns as JPEG mime type
-     * 
-     * @param callback 
-     */
-    getDataUri(callback) {
-        let fr = new FileReader();
-        fr.onload = (e) => {
-            callback(e.target.result);
-        }
-        let blob = new Blob([this.buffer], {
-            type: 'image/jpeg'
-        });
-        fr.readAsDataURL(blob);
-    }
-
-
-    _dataUriToArrayBuffer(dataUri) {
-        let byteString = null;
-        if (dataUri.split(',')[0].indexOf('base64') >= 0)
-            byteString = atob(dataUri.split(',')[1]);
-        else
-            byteString = unescape(dataUri.split(',')[1]);
-
-        // separate out the mime component
-        //let mimeString = dataUri.split(',')[0].split(':')[1].split(';')[0];
-
-        // write the bytes of the string to an ArrayBuffer
-        let arrayBuffer = new ArrayBuffer(byteString.length);
-        let ia = new Uint8Array(arrayBuffer);
-        for (let i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
-
-       return arrayBuffer;
-    }
-
-
-    _savePhotoBlock() {
-        let self = this;
-        let a = document.createElement('a');
-        document.body.appendChild(a);
-        a.style = 'display: none';
-        a.download = 'Photoblock (Default).jpg';
-        // a.target = '_blank';
-        // a.setAttribute('rel','noopener noreferrer');
-        self.getDataUri((img) => {
-            a.href = img;
-            a.click();
-        });
-    }
-
-
-    _cover(parentWidth, parentHeight, childWidth, childHeight, scale = 1, offsetX = 0.5, offsetY = 0.5) {
-        const childRatio = childWidth / childHeight
-        const parentRatio = parentWidth / parentHeight
-        let width = parentWidth * scale
-        let height = parentHeight * scale
-
-        if (childRatio < parentRatio) {
-            height = width / childRatio
-        } else {
-            width = height * childRatio
-        }
-
-        return {
-            width,
-            height,
-            offsetX: (parentWidth - width) * offsetX,
-            offsetY: (parentHeight - height) * offsetY
-        }
-
-    }
 
 
 
 
-    
 
 
     /* -*- tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- /
@@ -1303,6 +1392,7 @@ export default class PhotoEngine {
 
         return image;
     }
+
 
 
 }
