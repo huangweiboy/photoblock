@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 import UTF8 from "../vendor/utf8";
 

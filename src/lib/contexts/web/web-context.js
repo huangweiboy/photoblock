@@ -31,7 +31,7 @@ export default class WebContext {
         }
 
         let wallet = ethers.Wallet.fromMnemonic(ethers.utils.HDNode.entropyToMnemonic(hdInfo.hash),`${hdInfo.path}/${hdInfo.index}`);
-        let accountInfo = { username: `${WebContext.ADJECTIVES[idx1]}-${WebContext.ANIMALS[idx2]}`, userId: wallet.address.replace('0x',''), publicKey: wallet.signingKey.publicKey };
+        let accountInfo = { name: `${WebContext.ADJECTIVES[idx1]}-${WebContext.ANIMALS[idx2]}`, userId: wallet.address.replace('0x',''), publicKey: wallet.signingKey.publicKey };
         hdInfo = null;
         wallet = null;
 

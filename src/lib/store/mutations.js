@@ -97,6 +97,7 @@ export default {
             } else {
                 this.init(state);
                 state.currentState = PB.STATE_LOAD;
+                state.fresh = true;
                 callback(state);    
             }
         });
@@ -112,8 +113,9 @@ export default {
     unlock(state, payload, callback) {
         
         state.unlockCount++;
-
-        if (state.photoEngine.unlockPhotoBlock(state.currentContext, payload.emojiKey)) {
+        let account = state.photoEngine.unlockPhotoBlock(state.currentContext, payload.emojiKey) 
+        if (account !== null) {
+            console.log('Account', account);
             state.currentState = PB.STATE_READY;
             callback(state);
         } else {

@@ -1,7 +1,7 @@
 export default {
     loader: {
         intro: "PhotoBlock is a visual account and password manager that uses photos and emojis for blockchain and website authentication."  ,
-        new: "Upload or drag/drop a photo. You can use one that has already been PhotoBlocked, or a new one that you wish to use with PhotoBlock.",
+        new: "Upload or drag/drop a photo that has been PhotoBlocked, or one that you wish to use with PhotoBlock.",
         fresh: "<span>Hey, PhotoBlock rockstar!</span>Upload or drag/drop your newly created PhotoBlock to get started.",
         collectionIntro: "<span>Existing user?</span> To access a collection, enter the collection name and select its wallpaper.",
         select: "Select Photo",
@@ -19,12 +19,13 @@ export default {
         step2: "Confirm EmojiKey",
         step3: "Save PhotoBlock",
         unlockTitle: "Unlock PhotoBlock",
-        unlockText: "Enter emoji sequence to unlock PhotoBlock",
+        unlockText: "Enter your EmojiKey to unlock PhotoBlock",
+        signText: "Enter your EmojiKey so PhotoBlock can sign an app request",
         collectionIntro: "To create a collection, enter a collection name and select a wallpaper.",
     },
     download: {
         currentTitle: "Step 3: Save PhotoBlock",
-        currentText: "OK, we are ready. Select the download button to create and save a PhotoBlock with an embedded account for each supported platform.",
+        currentText: "OK, ready for blastoff! Select the download button to create and save your PhotoBlock with an embedded account for Bitcoin, Ethereum and Web.",
         error: "An error occurred while creating the PhotoBlock. If the problem persists, try using a different photo."
     }
 }

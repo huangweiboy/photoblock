@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 import DOM from '../core/dom.js';
 import Component from '../core/component';
 import store from '../store/index';

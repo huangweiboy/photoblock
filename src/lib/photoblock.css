@@ -112,7 +112,6 @@
 /************************ WIDGET *************************/
 
 #photoblock-widget-wrapper,
-#photoblock-widget-photo,
 #photoblock-widget-frame {
   width: 140px;
   height: 170px;
@@ -127,17 +126,19 @@
 #photoblock-widget-photo,
 #photoblock-widget-frame {
   position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 10;
+  top: 1px;
+  left: 1px;
+  z-index: 20;
   cursor: pointer;
 }
 
 #photoblock-widget-photo {
-  z-index: 20;
+  z-index: 10;
   border: 1px solid #00c6f6;
-  border-radius: 5px;
+  border-radius: 10px;
   display:none;
+  width: 138px;
+  height: 168px;
 }
 
 #photoblock-widget-icon {
@@ -147,7 +148,7 @@
   top: 0;
   left: 0;
   margin: 9px;
-  z-index: 9;
+  z-index: 5;
   cursor: pointer;
 }
 
@@ -325,8 +326,8 @@
   padding: 10px;
   background: #fdd106;
   cursor: pointer;
+  border: 2px solid #000000;
   border-radius: 5px;
-  border: 0;
   margin: 60px auto 60px auto;
 }
 
@@ -801,6 +802,11 @@
   top: 50px;
   left: 120px;
   position: absolute;
+}
+
+#photoblock-new-message,
+#photoblock-fresh-message {
+  text-align: center;
 }
 
 #photoblock-fresh-message span {

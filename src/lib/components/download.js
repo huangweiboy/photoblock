@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 import PB from '../core/constants';
 import DOM from '../core/dom';
 import Component from '../core/component';

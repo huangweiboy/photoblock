@@ -1,5 +1,10 @@
 export default {
     EMOJI_VERSION: '11',
+    BUILTIN_CONTEXTS: {
+        bitcoin: 'Bitcoin',
+        ethereum: 'Ethereum',
+        web: 'Web'
+    },
     PHOTO_INFO: {
         FRAME_WIDTH: 1400,
         FRAME_HEIGHT: 1900,
@@ -23,5 +28,6 @@ export default {
     STATE_BROWSE: 'browse',
     REQUIRED_EMOJIS: 2,
     MAX_UNLOCK_ATTEMPTS: 3,
-    DEFAULT_FILE_NAME: 'Photoblock (Default).jpg'
+    FILE_NAME_SUFFIX_PLACEHOLDER: 'DEFAULT',
+    DEFAULT_FILE_NAME: 'Photoblock (DEFAULT).jpg'
 };

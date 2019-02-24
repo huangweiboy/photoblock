@@ -1,6 +1,7 @@
 'use strict';
 
-import DOM from './core/dom.js';
+import DOM from './core/dom';
+import PB from './core/constants';
 import store from './store/index';
 import PhotoBlockModal from './components/modal';
 import Loader from './components/loader';
@@ -17,7 +18,7 @@ import BitcoinContext from './contexts/bitcoin/bitcoin-context';
 import WebContext from './contexts/web/web-context';
 
 
-const RESTRICTED_CONTEXTS = 'bitcoin;ethereum;web;';
+const RESTRICTED_CONTEXTS = PB.BUILTIN_CONTEXTS.bitcoin.toLowerCase() + ';' + PB.BUILTIN_CONTEXTS.ethereum.toLowerCase() + ';' + PB.BUILTIN_CONTEXTS.web.toLowerCase() + ';';
 
 
 export default class PhotoBlock {
@@ -43,19 +44,19 @@ export default class PhotoBlock {
     // Built-in handlers
     this.enableContextRegistration = true;
 
-    this.registerContext('Ethereum', 'ETH', 'm/44\'/60\'/0\'/0', ['address', 'publicKey'], { 
+    this.registerContext(PB.BUILTIN_CONTEXTS.ethereum, 'ETH', 'm/44\'/60\'/0\'/0', ['address', 'publicKey'], { 
         generateAccount: (hdInfo) => EthereumContext.generateAccount(hdInfo),
         sign: function(entropy, index, data, message) {
       }      
     });
 
-    this.registerContext('Bitcoin', 'BTC', 'm/44\'/0\'/0\'/0', ['address', 'publicKey'], { 
+    this.registerContext(PB.BUILTIN_CONTEXTS.bitcoin, 'BTC', 'm/44\'/0\'/0\'/0', ['address', 'publicKey'], { 
         generateAccount: (hdInfo) => BitcoinContext.generateAccount(hdInfo),
         sign: function(entropy, index, data) {
       }      
     });
 
-    this.registerContext('Web', null, 'm/44\'/60\'/255\'/255', ['username', 'userId', 'publicKey'], { 
+    this.registerContext(PB.BUILTIN_CONTEXTS.web, null, 'm/44\'/60\'/255\'/255', ['name', 'userId', 'publicKey'], { 
         generateAccount: (hdInfo) => WebContext.generateAccount(hdInfo),
         sign: function(entropy, index, data) {
       }      
@@ -141,6 +142,7 @@ export default class PhotoBlock {
     if ((self.element == null) || ((self.context !== null) && (context !== self.context.name))) {      
       if (self.contexts.hasOwnProperty(context)) {
         self.context = self.contexts[context];
+
         store.dispatch('setContext', { context: self.context, contexts: self.contexts, callback: self.callback });
 
         self.modal = new PhotoBlockModal();
@@ -165,6 +167,8 @@ export default class PhotoBlock {
             store.dispatch('showModal', {});
           });
         }   
+
+
       } else {
         wrapper.appendChild(DOM.div({ className: 'photoblock-error-message' }, 'Error: No context specified'));
       }

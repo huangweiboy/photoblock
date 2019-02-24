@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 import PB from '../core/constants';
 import photoblockTemplate from '../img/photoblock-template.png';
 import CryptoHelper from './crypto-helper';
@@ -33,16 +33,15 @@ export default class PhotoEngine {
                 let hdInfo = self._getPhotoBlockEntropy(emojiKey);
                 let pbAccount = self._generateContextAccount(context, hdInfo);
                 context.attributes.map((attribute) => {
-                    if (self.account[attribute] !== pbAccount[attribute]) {
-                        console.log('UNLOCKING', self.account, pbAccount, false);
-                        return false;
+                    if (self.account[attribute] !== CryptoHelper.hashHex(pbAccount[attribute])) {
+                        return null;
                     }
                 });
-                return true;
+                return pbAccount;
             }
         } catch (e) {
         }
-        return false;
+        return null;
     }
 
     createPhotoBlockImage(emojiKey, callback) {
@@ -108,20 +107,28 @@ export default class PhotoEngine {
 
             let hdInfo = self._getPhotoBlockEntropy(emojiKey);
 
+            let fileNameSuffix = '';
             let contextAccounts = {};
             contextNames.map((contextName) => {
                 let account = self._generateContextAccount(self.xmp.contexts[contextName], hdInfo);
                 if (account !== null) {
                     contextAccounts[contextName] = account;
+                    if (contextName === PB.BUILTIN_CONTEXTS.web) {
+                        fileNameSuffix = account.name;
+                    }
+
+                    Object.keys(account).map((key) => {
+                        account[key] = CryptoHelper.hashHex(account[key]);
+                    })
                 }
             });
             self.buffer = self.xmp.addAccounts(self.buffer, contextAccounts);
 
             if (self.buffer !== null) {
                 if (_isMobile()) {
-                    _savePhotoBlockMobile();
+                    _savePhotoBlockMobile(fileNameSuffix);
                 } else {
-                    _savePhotoBlock();
+                    _savePhotoBlock(fileNameSuffix);
                 }
                 callback();
             } else {
@@ -183,9 +190,8 @@ export default class PhotoEngine {
         }
 
 
-        const _savePhotoBlock = () => {
+        const _savePhotoBlock = (suffix) => {
             let self = this;
-            console.log('Save Photo Block');
             if (window.navigator && window.navigator.msSaveOrOpenBlob) { //IE11 support
 
                 let blob = new Blob([self.buffer], {
@@ -196,19 +202,18 @@ export default class PhotoEngine {
                 let a = document.createElement('a');
                 document.body.appendChild(a);
                 a.style = 'display: none';
-                a.download = PB.DEFAULT_FILE_NAME;
+                a.download = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, suffix);
                 a.setAttribute('rel', 'noopener noreferrer');
                 _getBlobUri((img) => {
-                    console.log('In save', img);
                     a.href = img;
                     a.click();
                 });
             }
         }
 
-        const _savePhotoBlockMobile = () => {
+        const _savePhotoBlockMobile = (suffix) => {
             let self = this;
-            let fileName = PB.DEFAULT_FILE_NAME;
+            let fileName = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, suffix);
             // other browsers
             let file = new File([self.buffer], fileName, {
                 type: 'image/jpeg'
@@ -260,12 +265,9 @@ export default class PhotoEngine {
 
     // For reference:  https://github.com/satoshilabs/slips/blob/master/slip-0044.md
     _generateContextAccount(context, hdInfo) {
-
-        let self = this;
         hdInfo.path = context.hdPath;
         return context.handlers.generateAccount(hdInfo);
     }
-
 
     _getPhotoBlockEntropy(emojiKey) {
 
@@ -279,7 +281,7 @@ export default class PhotoEngine {
 
         let cells = [];
         emojiKey.map((item, index) => {
-            let hash = CryptoHelper.hash(window.atob(item.emoji));
+            let hash = item.emoji;
             hashes.push({
                 cell: item.cell,
                 hash: hash
@@ -287,8 +289,8 @@ export default class PhotoEngine {
             cells.push(item.cell);
 
             if (index === (emojiKey.length - 1)) {
-                // The index is the last byte of the last emoji item
-                idx = window.atob(item.emoji)[window.atob(item.emoji).length - 1];
+                // The index is the char code of the last character of the last emoji item
+                idx = item.emoji[item.emoji.length - 1].charCodeAt();
             }
         });
 
@@ -304,7 +306,7 @@ export default class PhotoEngine {
                 let hash = null;
                 if (cells.indexOf(s) > -1) {
                     let slice = decoded.data.slice(last, last + PB.PHOTO_INFO.SLICE_HASH_BYTES);
-                    hash = CryptoHelper.hash(slice);
+                    hash = CryptoHelper.hashHex(slice);
                 }
                 last = last + bytesPerSlice;
                 sliceHashes.push(hash);
@@ -321,8 +323,7 @@ export default class PhotoEngine {
             let imageHash = imageSliceHashes[cell]; // Hash of image for slice referenced by emoji cell (0..8)
 
             let cellHash = emojiHash + imageHash;
-            combinedHash += CryptoHelper.hash(cellHash);
-
+            combinedHash += CryptoHelper.hashHex(cellHash);
         });
         return {
             hash: CryptoHelper.hash(combinedHash),

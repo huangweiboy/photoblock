@@ -1,5 +1,6 @@
-"use strict";
+'use strict';
 import PB from '../core/constants';
+import CryptoHelper from './crypto-helper';
 import DOM from '../core/dom';
 import Component from '../core/component';
 import store from '../store/index';
@@ -19,6 +20,14 @@ export default class EmojiKey extends Component {
         this.focus = 4;
         this.emojiPicker = false;
         this.emojiKey = [];
+
+        this.preloadTabs = document.createElement('div');
+        this.preloadEmojis = document.createElement('div');
+
+        // Emoji pre-loader
+        window.setTimeout(() => {
+            this.preloadEmojiElements();
+          },100);
     } 
 
     // Random Hex: https://www.browserling.com/tools/random-hex
@@ -186,7 +195,7 @@ export default class EmojiKey extends Component {
             let emojiKeyIndex = self.getEmojiKeyIndexForCell(cell);
 
             // Get the data required for CSS to display the emoji
-            let emojiInfo = emojiKeyIndex > -1 ? self.getEmojiInfo(window.atob(self.emojiKey[emojiKeyIndex].emoji)) : null;
+            let emojiInfo = emojiKeyIndex > -1 ? self.getEmojiInfo(self.emojiKey[emojiKeyIndex].emoji) : null;
 
             let div = null;
             if (emojiInfo !== null) {
@@ -252,27 +261,36 @@ export default class EmojiKey extends Component {
         self.renderCells();
     }
 
-    renderPicker() {
+    preloadEmojiElements() {
+        // console.time('Preload Emojis');
         let self = this;
-        let emojiTabsContainer = DOM.elid('photoblock-emoji-tabs');
-        let emojiContainer = DOM.elid('photoblock-emoji-scroll');
-        emojiContainer.innerHTML = '';
+        let memCrypto = store.state.memCrypto;
         Emoji.map((category) => {
 
-            emojiTabsContainer.appendChild(DOM.div({ id: `photoblock-emojitab-${category.key}`, className: 'pbemoji-tab', title: `${category.label}` }));
+            self.preloadTabs.appendChild(DOM.div({ id: `photoblock-emojitab-${category.key}`, className: 'pbemoji-tab', title: `${category.label}` }));
 
-            emojiContainer.appendChild(DOM.div({ id: `photoblock-${category.key}` }));            
-            emojiContainer.appendChild(DOM.h3({}, category.label));
+            self.preloadEmojis.appendChild(DOM.div({ id: `photoblock-${category.key}` }));            
+            self.preloadEmojis.appendChild(DOM.h3({}, category.label));
 
             let emojiHtml = '';
             category.items.map((emoji, index) => {
-                emojiHtml += `<button id="U${emoji.code}" class="pbemoji-sprite pbemoji-${category.key} pbemoji-${index}" title="${emoji.name}"></button>`;
+                emojiHtml += `<button id="U${CryptoHelper.hashHex(emoji.code)}" class="pbemoji-sprite pbemoji-${category.key} pbemoji-${index}" title="${emoji.name}"></button>`;
             });
 
             let div = DOM.div();
-            emojiContainer.appendChild(div);
+            self.preloadEmojis.appendChild(div);
             div.innerHTML = emojiHtml;
-        })
+        });
+       // console.timeEnd('Preload Emojis');
+    }
+
+    renderPicker() {
+        let self = this;
+        let emojiTabsContainer = DOM.elid('photoblock-emoji-tabs');
+        emojiTabsContainer.innerHTML = self.preloadTabs.innerHTML;
+
+        let emojiContainer = DOM.elid('photoblock-emoji-scroll');
+        emojiContainer.innerHTML = self.preloadEmojis.innerHTML;
 
         let categories = document.getElementsByClassName('pbemoji-tab');
         for(let c = 0; c < categories.length; c++ ) {
@@ -283,12 +301,6 @@ export default class EmojiKey extends Component {
         for (let s = 0; s < sprites.length; s++) {
             sprites[s].addEventListener('click', self.handleEmojiSelect.bind(self));
         }
-
-        // if (self.emojiKey.length > 0) {
-        //     for(let i=0; i<self.emojiKey.length; i++) {
-        //         self.disableEmojiIcon(self.emojiKey[i].emoji);
-        //     }    
-        // }
 
     }
 
@@ -314,14 +326,12 @@ export default class EmojiKey extends Component {
     handleEmojiSelect(e) {
         let self = this; 
 
-        // Use btoa as a simplistic way to prevent emoji code from being stored directly in memory
-        let emojiCode = window.btoa(e.target.id.substring(1)); // Uxxxxxxxxxxxxx
+        let emojiCode = e.target.id.substring(1); // Uxxxxxxxxxxxxx
         let emojiKeyIndex = self.getEmojiKeyIndexForCell(self.focus);
         let emojiInfo = {
             cell: self.focus,
             emoji: emojiCode
         }; 
-
 
         // Add or replace the emoji for a cell
         if (emojiKeyIndex < 0) {
@@ -333,15 +343,14 @@ export default class EmojiKey extends Component {
         // Redraw the cells
         self.renderCells();
 
-        // Disable the emoji so it can't be re-used
-        //self.disableEmojiIcon(e.target.id.substring(1)); // id begins with 'U'
+    
 
     }
 
     getEmojiInfo(code) {
         for(let e=0; e<Emoji.length; e++) {
             let category = Emoji[e];
-            let index = category.items.map(function(e) { return e.code; }).indexOf(code.toLowerCase());
+            let index = category.items.map(function(e) { return CryptoHelper.hashHex(e.code); }).indexOf(code);
             if (index > -1) {
                 return { categoryKey: category.key, spriteIndex: index };
             }
