@@ -26,6 +26,7 @@ export default {
         state.emojiKey = [];
         state.unlockCount = 0;
         state.fresh = false;
+        state.currentAccount = null;
     },
 
     hideModal(state, payload, callback) {
@@ -113,12 +114,11 @@ export default {
     unlock(state, payload, callback) {
         
         state.unlockCount++;
-        let account = state.photoEngine.unlockPhotoBlock(state.currentContext, payload.emojiKey) 
-        if (account !== null) {
-            console.log('Account', account);
+        state.currentAccount = state.photoEngine.unlockPhotoBlock(state.currentContext, payload.emojiKey) 
+        if (state.currentAccount !== null) {
             state.currentState = PB.STATE_READY;
             callback(state);
-        } else {
+        } else {            
             if (state.unlockCount > PB.MAX_UNLOCK_ATTEMPTS) {
                 this.hideModal(state, null, callback);
             } else {

@@ -31,7 +31,7 @@ export default class PhotoEngine {
         try {
             if (self.account !== null) {
                 let hdInfo = self._getPhotoBlockEntropy(emojiKey);
-                let pbAccount = self._generateContextAccount(context, hdInfo);
+                let pbAccount = context.handlers.generateAccount(Object.assign(hdInfo, { path: context.hdPath}));
                 context.attributes.map((attribute) => {
                     if (self.account[attribute] !== CryptoHelper.hashHex(pbAccount[attribute])) {
                         return null;
@@ -110,7 +110,8 @@ export default class PhotoEngine {
             let fileNameSuffix = '';
             let contextAccounts = {};
             contextNames.map((contextName) => {
-                let account = self._generateContextAccount(self.xmp.contexts[contextName], hdInfo);
+                let context = self.xmp.contexts[contextName];
+                let account = context.handlers.generateAccount(Object.assign(hdInfo, { path: context.hdPath}));
                 if (account !== null) {
                     contextAccounts[contextName] = account;
                     if (contextName === PB.BUILTIN_CONTEXTS.web) {
@@ -261,14 +262,8 @@ export default class PhotoEngine {
 
     }
 
-
-
-    // For reference:  https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-    _generateContextAccount(context, hdInfo) {
-        hdInfo.path = context.hdPath;
-        return context.handlers.generateAccount(hdInfo);
-    }
-
+    // Paths reference:  https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+ 
     _getPhotoBlockEntropy(emojiKey) {
 
         if (emojiKey.length < PB.REQUIRED_EMOJIS) {

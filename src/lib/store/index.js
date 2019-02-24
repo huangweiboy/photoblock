@@ -9,6 +9,7 @@ export default new Store({
     state: {
         currentState: PB.STATE_INIT,
         currentContext: null,
+        currentAccount: null,
         isModalVisible: false,
         unlockCount: 0,
         emojiKey: [],
