@@ -74,7 +74,9 @@ export default class Dashboard extends Component {
         dashboardWrapper.className = self.dashboard ? 'photoblock-dashboard-slide' : '';
 
         if (self.dashboard) {
-            store.state.currentContext.handlers.updateDashboard(store.state.currentAccount);
+            store.state.currentContext.handlers.updateDashboard(store.state.currentAccount, (html) => {
+                DOM.elid('photoblock-dashboard-scroll').innerHTML = html;
+            });
         }
     }
 

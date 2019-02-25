@@ -16,7 +16,8 @@ export default new Store({
         emojiKey: [],
         photoEngine: null,
         fresh: false,
-        error: null
+        error: null,
+        handlers: {}
     }
 
 });

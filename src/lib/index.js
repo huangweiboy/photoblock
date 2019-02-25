@@ -23,6 +23,7 @@ const RESTRICTED_CONTEXTS = PB.BUILTIN_CONTEXTS.bitcoin.toLowerCase() + ';' + PB
 
 export default class PhotoBlock {
 
+  
   constructor(containerId, options, callback) {
     this.containerId = containerId;
     this.options = options || {};
@@ -35,50 +36,41 @@ export default class PhotoBlock {
     this.contexts = {};
     this.context = null;
     this.rendered = false;
-    this.callback = function() {};
-
-    if (callback  && (typeof callback == 'function')) {
-      this.callback = callback;
-    }
-
+    this.handlers = {};
+    this.handlers[PB.EVENT_TYPES.CREATE] = () => {};
+    this.handlers[PB.EVENT_TYPES.HIDE] = () => {};
+    this.handlers[PB.EVENT_TYPES.LOAD] = () => {};
+    this.handlers[PB.EVENT_TYPES.LOCK] = () => {};
+    this.handlers[PB.EVENT_TYPES.NEW] = () => {};
+    this.handlers[PB.EVENT_TYPES.SHOW] = () => {};
+    this.handlers[PB.EVENT_TYPES.UNLOCK] = () => {};
+  
     // Built-in handlers
-    this.enableContextRegistration = true;
 
-    this.registerContext(PB.BUILTIN_CONTEXTS.ethereum, 'ETH', `img/contexts/${PB.BUILTIN_CONTEXTS.ethereum.toLowerCase()}.png`, 'm/44\'/60\'/0\'/0', ['address', 'publicKey'], { 
-        generateAccount: (hdInfo) => EthereumContext.generateAccount(hdInfo),
-        updateDashboard: (account) => EthereumContext.updateDashboard(account),
-        sign: function(entropy, index, data, message) {
-      }      
+    this.registerContext(PB.BUILTIN_CONTEXTS.ethereum, 'ETH', `img/contexts/${PB.BUILTIN_CONTEXTS.ethereum.toLowerCase()}.png`, 'm/44\'/60\'/0\'/0', ['address'], { 
+        generateAccounts: (hdInfo, count) => EthereumContext.generateAccounts(hdInfo, count),
+        updateDashboard: (account, callback) => EthereumContext.updateDashboard(account, callback),
+        sign: (data, reason, callback) => EthereumContext.sign(data, reason, callback)
     });
 
-    this.registerContext(PB.BUILTIN_CONTEXTS.bitcoin, 'BTC', `img/contexts/${PB.BUILTIN_CONTEXTS.bitcoin.toLowerCase()}.png`, 'm/44\'/0\'/0\'/0', ['address', 'publicKey'], { 
-        generateAccount: (hdInfo) => BitcoinContext.generateAccount(hdInfo),
-        updateDashboard: (account) => BitcoinContext.updateDashboard(account),
-        sign: function(entropy, index, data) {
-      }      
+    this.registerContext(PB.BUILTIN_CONTEXTS.bitcoin, 'BTC', `img/contexts/${PB.BUILTIN_CONTEXTS.bitcoin.toLowerCase()}.png`, 'm/44\'/0\'/0\'/0', ['address'], { 
+        generateAccounts: (hdInfo, count) => BitcoinContext.generateAccounts(hdInfo, count),
+        updateDashboard: (account, callback) => BitcoinContext.updateDashboard(account, callback),
+        sign: (data, reason, callback) => BitcoinContext.sign(data, reason, callback)
     });
 
     this.registerContext(PB.BUILTIN_CONTEXTS.web, null, `img/contexts/${PB.BUILTIN_CONTEXTS.web.toLowerCase()}.png`, 'm/44\'/60\'/255\'/255', ['userId', 'name', 'publicKey'], { 
-        generateAccount: (hdInfo) => WebContext.generateAccount(hdInfo),
-        updateDashboard: (account) => WebContext.updateDashboard(account),
-        sign: function(entropy, index, data) {
-      }      
+        generateAccounts: (hdInfo, count) => WebContext.generateAccounts(hdInfo, count),
+        updateDashboard: (account, callback) => WebContext.updateDashboard(account, callback),
+        sign: (data, reason, callback) => WebContext.sign(data, reason, callback)
     });
 
-    this.enableContextRegistration = false;
-
   }
+
 
   registerContext(contextName, symbol, imageUrl, hdPath, attributes, handlers) {
 
     let self = this;
-
-    if (!self.enableContextRegistration) {
-      // No technical reason for this...will be enabled in the future when
-      // there is proper documentation and a process to ensure dependencies
-      // such as icons and handlers can be validated.
-      throw 'Context registration by external callers is not currently supported';
-    }
 
     if (self.rendered) {
       throw 'Contexts can only be registered prior to rendering';
@@ -94,11 +86,14 @@ export default class PhotoBlock {
       && attributes.length 
       && (attributes.length > 0) 
       && (typeof handlers == 'object')
-      && (handlers.hasOwnProperty('generateAccount'))
-      && (typeof handlers.generateAccount == 'function')
+      && (handlers.hasOwnProperty('generateAccounts'))
+      && (handlers.generateAccounts !== null)
+      && (typeof handlers.generateAccounts == 'function')
       && (handlers.hasOwnProperty('updateDashboard'))
+      && (handlers.updateDashboard !== null)
       && (typeof handlers.updateDashboard == 'function')
       && (handlers.hasOwnProperty('sign'))
+      && (handlers.sign !== null)
       && (typeof handlers.sign == 'function')      
       ) {
       isValid = true;
@@ -114,7 +109,6 @@ export default class PhotoBlock {
           imageUrl: imageUrl,
           hdPath: hdPath,
           attributes: attributes,
-          accounts: [],
           handlers: handlers
         }
       }
@@ -122,6 +116,38 @@ export default class PhotoBlock {
     }
     return isValid;
   }
+
+  sign(data, reason, callback) {
+    let self = this;
+    self.context.handlers.sign(data, reason, callback);
+  }
+
+  on(eventType, callback) {
+    let self = this;
+
+    if (self.rendered) {
+      throw 'Handlers can only be registered prior to rendering';
+    }
+
+    if ((callback === null) || (typeof callback !== 'function')) {
+      throw 'Handlers require a valid callback function';
+    }
+
+    switch(eventType) {
+      case PB.EVENT_TYPES.CREATE: self.handlers[PB.EVENT_TYPES.CREATE] = callback; break;
+      case PB.EVENT_TYPES.HIDE: self.handlers[PB.EVENT_TYPES.HIDE] = callback; break;
+      case PB.EVENT_TYPES.LOAD: self.handlers[PB.EVENT_TYPES.LOAD] = callback; break;
+      case PB.EVENT_TYPES.LOCK: self.handlers[PB.EVENT_TYPES.LOCK] = callback; break;
+      case PB.EVENT_TYPES.NEW: self.handlers[PB.EVENT_TYPES.NEW] = callback; break;
+      case PB.EVENT_TYPES.SHOW: self.handlers[PB.EVENT_TYPES.SHOW] = callback; break;
+      case PB.EVENT_TYPES.UNLOCK: self.handlers[PB.EVENT_TYPES.UNLOCK] = callback; break;
+    }
+  }
+
+  static eventTypes() {
+    return PB.EVENT_TYPES;
+  }
+
 
   unregisterContext(contextName) {
     let self = this;
@@ -141,7 +167,7 @@ export default class PhotoBlock {
     return Object.keys(this.contexts);
   }
 
-  render(context) {
+  render(context, callback) {
     let self = this;
     self.rendered = true;
 
@@ -149,7 +175,7 @@ export default class PhotoBlock {
       if (self.contexts.hasOwnProperty(context)) {
         self.context = self.contexts[context];
 
-        store.dispatch('setContext', { context: self.context, contexts: self.contexts, callback: self.callback });
+        store.dispatch('ready', { context: self.context, contexts: self.contexts, handlers: self.handlers });
 
         self.modal = new PhotoBlockModal();
         self.loader = new Loader(self.modal);
@@ -173,12 +199,11 @@ export default class PhotoBlock {
             store.dispatch('showModal', {});
           });
         }   
-
-
       } else {
         wrapper.appendChild(DOM.div({ className: 'photoblock-error-message' }, 'Error: No context specified'));
       }
     }  
+    callback();
   }
 
 }

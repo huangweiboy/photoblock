@@ -1,5 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Lato");
-
+@import url('https://fonts.googleapis.com/css?family=Roboto');
 
 /* http://meyerweb.com/eric/tools/css/reset/   v4.0 | 20180602    License: none (public domain)  */
 #photoblock-modal * {
@@ -90,7 +89,7 @@
 
 #photoblock-modal-content,
 #photoblock-modal-content * {
-  font-family: 'LatoWeb', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1rem;
 }
 
@@ -601,6 +600,7 @@
 #photoblock-dashboard-scroll {
   background-color: #000000;
   opacity: 0.8;
+  padding: 20px 10px;
 }
 
 #photoblock-wallpaper-scroll {

@@ -5,11 +5,12 @@ import photoblockTemplate from '../img/photoblock-template.png';
 import CryptoHelper from './crypto-helper';
 
 export default class PhotoEngine {
-    constructor(buffer, contexts, account) {
+    constructor(buffer, contexts, accounts) {
 
         this.buffer = buffer;
         this.contexts = contexts;
-        this.account = account;
+        this.accounts = accounts;
+        this.account = this.accounts[0];
         this.sliceHashes = [];
     }
 
@@ -32,7 +33,7 @@ export default class PhotoEngine {
         try {
             if (self.account !== null) {
                 let hdInfo = self._getPhotoBlockEntropy(emojiKey);
-                let pbAccount = context.handlers.generateAccount(Object.assign(hdInfo, { path: context.hdPath}));
+                let pbAccount = context.handlers.generateAccounts(Object.assign(hdInfo, { path: context.hdPath}), 1);
                 context.attributes.map((attribute) => {
                     if (self.account[attribute] !== CryptoHelper.hashHex(pbAccount[attribute])) {
                         return null;
@@ -112,7 +113,7 @@ export default class PhotoEngine {
             let contextAccounts = {};
             contextNames.map((contextName) => {
                 let context = self.contexts[contextName];
-                let account = context.handlers.generateAccount(Object.assign(hdInfo, { path: context.hdPath}));
+                let account = context.handlers.generateAccounts(Object.assign(hdInfo, { path: context.hdPath}), 1);
                 if (account !== null) {
                     contextAccounts[contextName] = account;
                     if (contextName === PB.BUILTIN_CONTEXTS.web) {

@@ -1,7 +1,7 @@
 export default {
 
-    setContext(context, payload) {
-        context.commit('setContext', payload);
+    ready(context, payload) {
+        context.commit('ready', payload);
     },
 
     showModal(context, payload) {

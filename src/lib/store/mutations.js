@@ -4,9 +4,10 @@ import Xmp from '../components/xmp';
 
 export default {
  
-    setContext(state, payload, callback) {
+    ready(state, payload, callback) {
         state.contexts = payload.contexts;
         state.currentContext = payload.context;
+        state.handlers = payload.handlers;
         state.currentState = PB.STATE_INIT;
         callback(state);
     },
@@ -18,6 +19,7 @@ export default {
         }
 
         callback(state);
+        state.handlers[PB.EVENT_TYPES.SHOW]();    
     },
 
     init(state) {
@@ -36,6 +38,7 @@ export default {
         }
         
         callback(state);
+        state.handlers[PB.EVENT_TYPES.HIDE]();    
     },
 
     loadPhoto(state, payload, callback) {
@@ -58,9 +61,10 @@ export default {
                     state.emojiKey = [];
                     state.fresh = false;
                     state.unlockCount = 0;
-                    state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts, accounts[state.currentContext.name][0]);
-                    state.currentState = PB.STATE_UNLOCK;
+                    state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts, accounts[state.currentContext.name]);
+                    state.currentState = PB.STATE_UNLOCK;      
                     callback(state);    
+                    state.handlers[PB.EVENT_TYPES.LOAD]();              
                 } else {
                     state.error = PB.ERROR.NO_CONTEXT;
                     callback(state);
@@ -72,6 +76,7 @@ export default {
                 state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts, null);
                 state.currentState = PB.STATE_NEW;
                 callback(state);               
+                state.handlers[PB.EVENT_TYPES.NEW]();              
             }
         }
     },
@@ -110,6 +115,7 @@ export default {
                 state.currentState = PB.STATE_LOAD;
                 state.fresh = true;
                 callback(state);    
+                state.handlers[PB.EVENT_TYPES.CREATE]();              
             }
         });
     },
@@ -128,6 +134,7 @@ export default {
         if (state.currentAccount !== null) {
             state.currentState = PB.STATE_READY;
             callback(state);
+            state.handlers[PB.EVENT_TYPES.UNLOCK]();              
         } else {            
             if (state.unlockCount > PB.MAX_UNLOCK_ATTEMPTS) {
                 this.hideModal(state, null, callback);
@@ -143,6 +150,7 @@ export default {
         
         this.init(state);
         state.currentState = PB.STATE_LOAD;
+        state.handlers[PB.EVENT_TYPES.LOCK]();              
         callback(state);
     }
 

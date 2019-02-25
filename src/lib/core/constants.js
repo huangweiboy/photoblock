@@ -32,5 +32,14 @@ export default {
     DEFAULT_FILE_NAME: 'Photoblock (DEFAULT).jpg',
     ERROR: {
         NO_CONTEXT: 'no-context'
+    },
+    EVENT_TYPES: {
+        CLEAR: 'clear',
+        CREATE: 'create',
+        HIDE: 'hide',
+        LOAD: 'load',
+        NEW: 'new',
+        SHOW: 'show',
+        UNLOCK: 'unlock'
     }
 };

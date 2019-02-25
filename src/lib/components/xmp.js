@@ -26,12 +26,7 @@ const TAG_XPACKET = "xpacket";
 const XMP_GUID = "W5M0MpCehiHzreSzNTczkc9d";
 
 export default class Xmp {
-  constructor(currentContext, contexts) {
-
-    this.contexts = contexts;
-    this.currentContext = currentContext;
-
-  }
+ 
   
   static getAccounts(buffer, contexts) {
 
