@@ -44,7 +44,7 @@ export default class Component {
         }
 
         self.localizer = Localizer;
-        self.localizer.setContext(props.store.state.xmp.currentContext);
+        self.localizer.setContext(props.store.state.currentContext);
 
         // If there's a store passed in, subscribe to the state change
         if(props.store instanceof Store) { 

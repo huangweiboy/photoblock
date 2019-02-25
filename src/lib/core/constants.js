@@ -29,5 +29,8 @@ export default {
     REQUIRED_EMOJIS: 2,
     MAX_UNLOCK_ATTEMPTS: 3,
     FILE_NAME_SUFFIX_PLACEHOLDER: 'DEFAULT',
-    DEFAULT_FILE_NAME: 'Photoblock (DEFAULT).jpg'
+    DEFAULT_FILE_NAME: 'Photoblock (DEFAULT).jpg',
+    ERROR: {
+        NO_CONTEXT: 'no-context'
+    }
 };

@@ -348,12 +348,17 @@
 #photoblock-loader-wrapper,
 #photoblock-photo-wrapper,
 #photoblock-download-wrapper, 
+#photoblock-dash-wrapper,
 #photoblock-save-wrapper {
   position: fixed;
   width: 330px;
   height: 380px;
   background-color: #000000;
   overflow: hidden;
+}
+
+#photoblock-dash-wrapper > img {
+  cursor: pointer;
 }
 
 #photoblock-loader-wrapper {
@@ -519,6 +524,7 @@
   text-align: center;
 }
 
+#photoblock-dashboard-wrapper,
 #photoblock-wallpaper-wrapper,
 #photoblock-emoji-wrapper {
   overflow: hidden;
@@ -533,6 +539,11 @@
   transition-property: top, height;
   transition-duration: 0.5s, 0.5s;
   z-index: 970;
+}
+
+#photoblock-dashboard-wrapper.photoblock-dashboard-slide {
+  top: 211px;
+  height: 198px;
 }
 
 #photoblock-emoji-wrapper.photoblock-emoji-slide {
@@ -578,6 +589,7 @@
   cursor: pointer;
 }
 
+#photoblock-dashboard-scroll,
 #photoblock-wallpaper-scroll,
 #photoblock-emoji-scroll {
   background-color: #ffffff;
@@ -586,10 +598,16 @@
   overscroll-behavior: contain;
 }
 
+#photoblock-dashboard-scroll {
+  background-color: #000000;
+  opacity: 0.8;
+}
+
 #photoblock-wallpaper-scroll {
   height: 350px;
 }
 
+#photoblock-dashboard-scroll,
 #photoblock-emoji-scroll {
   height: 170px;
 }
@@ -805,7 +823,8 @@
 }
 
 #photoblock-new-message,
-#photoblock-fresh-message {
+#photoblock-fresh-message,
+#photoblock-error-message {
   text-align: center;
 }
 
@@ -816,9 +835,14 @@
   margin-bottom: 20px;
 }
 
+#photoblock-error-message {
+  color: #cc0000;
+}
+
 .photoblock-new {
   background-image: linear-gradient(to top, #fddb92 0%, #d1fdff 100%);
 }
+
 
 .photoblock-fresh {
   background-image: url("img/fresh-bg.jpg");

@@ -8,14 +8,15 @@ export default new Store({
     mutations,
     state: {
         currentState: PB.STATE_INIT,
+        contexts: null,
         currentContext: null,
         currentAccount: null,
         isModalVisible: false,
         unlockCount: 0,
         emojiKey: [],
-        xmp: null,
         photoEngine: null,
-        fresh: false
+        fresh: false,
+        error: null
     }
 
 });

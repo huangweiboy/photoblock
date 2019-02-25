@@ -1,13 +1,12 @@
 import PB from '../core/constants';
-import Xmp from '../components/xmp';
 import PhotoEngine from '../components/photo-engine';
-import CryptoHelper from '../components/crypto-helper';
+import Xmp from '../components/xmp';
 
 export default {
  
     setContext(state, payload, callback) {
+        state.contexts = payload.contexts;
         state.currentContext = payload.context;
-        state.xmp = new Xmp(payload.context, payload.contexts);
         state.currentState = PB.STATE_INIT;
         callback(state);
     },
@@ -41,25 +40,36 @@ export default {
 
     loadPhoto(state, payload, callback) {
         if (payload.imgBuffer !== null) {
+            let accounts = Xmp.getAccounts(payload.imgBuffer, state.contexts);
+            let hasAccounts = false;
+            let hasContextAccount = true;
+            Object.keys(accounts).map((contextName) => {
+                if ((accounts[contextName] !== null) && (accounts[contextName].length) && (accounts[contextName].length > 0)){
+                    hasAccounts = true;
 
-            let accounts = state.xmp.getAccounts(payload.imgBuffer, state.currentContext.name);
-            if (accounts != null) { 
-                
-                if (accounts[state.currentContext.name].length === 0) {
-                    callback(state);
+                    if (contextName === state.currentContext.name) {
+                        hasContextAccount = true;
+                    }
                 }
-                else {
+            });
+            
+            if (hasAccounts) {
+                if (hasContextAccount) {
                     state.emojiKey = [];
                     state.fresh = false;
                     state.unlockCount = 0;
-                    state.photoEngine = new PhotoEngine(payload.imgBuffer, state.xmp, accounts[state.currentContext.name][0]);
+                    state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts, accounts[state.currentContext.name][0]);
                     state.currentState = PB.STATE_UNLOCK;
                     callback(state);    
+                } else {
+                    state.error = PB.ERROR.NO_CONTEXT;
+                    callback(state);
                 }
-            } else {    
+
+            } else {
                 state.emojiKey = [];
                 state.fresh = false;
-                state.photoEngine = new PhotoEngine(payload.imgBuffer, state.xmp, null);
+                state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts, null);
                 state.currentState = PB.STATE_NEW;
                 callback(state);               
             }
@@ -106,7 +116,7 @@ export default {
 
     cancelPhoto(state, payload, callback) {
 
-        init(state);
+        this.init(state);
         state.currentState = PB.STATE_LOAD;
         callback(state);
     },

@@ -57,7 +57,7 @@ export default class Modal extends Component {
         store.dispatch('hideModal', {});
       });
 
-      DOM.elid('photoblock-context').setAttribute('style', `background-image:url("img/contexts/${store.state.xmp.currentContext.name}.png")`);
+      DOM.elid('photoblock-context').setAttribute('style', `background-image:url("img/contexts/${store.state.currentContext.name}.png")`);
 
     }
 

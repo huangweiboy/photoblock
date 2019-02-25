@@ -7,7 +7,7 @@ import PhotoBlockModal from './components/modal';
 import Loader from './components/loader';
 import EmojiKey from './components/emojikey';
 import Download from './components/download';
-import Unlocked from './components/unlocked';
+import Dashboard from './components/dashboard';
 
 import photoBlockFrame from './img/photoblock-frame.svg';
 import photoBlockIcon from './img/photoblock-icon.svg';
@@ -29,7 +29,7 @@ export default class PhotoBlock {
     this.element = null;
     this.modal = null;
     this.loader = null;
-    this.unlocked = null;
+    this.dashboard = null;
     this.emojiKey = null;
     this.download = null;
     this.contexts = {};
@@ -44,20 +44,23 @@ export default class PhotoBlock {
     // Built-in handlers
     this.enableContextRegistration = true;
 
-    this.registerContext(PB.BUILTIN_CONTEXTS.ethereum, 'ETH', 'm/44\'/60\'/0\'/0', ['address', 'publicKey'], { 
+    this.registerContext(PB.BUILTIN_CONTEXTS.ethereum, 'ETH', `img/contexts/${PB.BUILTIN_CONTEXTS.ethereum.toLowerCase()}.png`, 'm/44\'/60\'/0\'/0', ['address', 'publicKey'], { 
         generateAccount: (hdInfo) => EthereumContext.generateAccount(hdInfo),
+        updateDashboard: (account) => EthereumContext.updateDashboard(account),
         sign: function(entropy, index, data, message) {
       }      
     });
 
-    this.registerContext(PB.BUILTIN_CONTEXTS.bitcoin, 'BTC', 'm/44\'/0\'/0\'/0', ['address', 'publicKey'], { 
+    this.registerContext(PB.BUILTIN_CONTEXTS.bitcoin, 'BTC', `img/contexts/${PB.BUILTIN_CONTEXTS.bitcoin.toLowerCase()}.png`, 'm/44\'/0\'/0\'/0', ['address', 'publicKey'], { 
         generateAccount: (hdInfo) => BitcoinContext.generateAccount(hdInfo),
+        updateDashboard: (account) => BitcoinContext.updateDashboard(account),
         sign: function(entropy, index, data) {
       }      
     });
 
-    this.registerContext(PB.BUILTIN_CONTEXTS.web, null, 'm/44\'/60\'/255\'/255', ['name', 'userId', 'publicKey'], { 
+    this.registerContext(PB.BUILTIN_CONTEXTS.web, null, `img/contexts/${PB.BUILTIN_CONTEXTS.web.toLowerCase()}.png`, 'm/44\'/60\'/255\'/255', ['userId', 'name', 'publicKey'], { 
         generateAccount: (hdInfo) => WebContext.generateAccount(hdInfo),
+        updateDashboard: (account) => WebContext.updateDashboard(account),
         sign: function(entropy, index, data) {
       }      
     });
@@ -66,7 +69,7 @@ export default class PhotoBlock {
 
   }
 
-  registerContext(contextName, symbol, hdPath, attributes, handlers) {
+  registerContext(contextName, symbol, imageUrl, hdPath, attributes, handlers) {
 
     let self = this;
 
@@ -93,6 +96,8 @@ export default class PhotoBlock {
       && (typeof handlers == 'object')
       && (handlers.hasOwnProperty('generateAccount'))
       && (typeof handlers.generateAccount == 'function')
+      && (handlers.hasOwnProperty('updateDashboard'))
+      && (typeof handlers.updateDashboard == 'function')
       && (handlers.hasOwnProperty('sign'))
       && (typeof handlers.sign == 'function')      
       ) {
@@ -106,6 +111,7 @@ export default class PhotoBlock {
         this.contexts[contextName] = {
           name: contextName,
           symbol: symbol,
+          imageUrl: imageUrl,
           hdPath: hdPath,
           attributes: attributes,
           accounts: [],
@@ -147,7 +153,7 @@ export default class PhotoBlock {
 
         self.modal = new PhotoBlockModal();
         self.loader = new Loader(self.modal);
-        self.unlocked = new Unlocked(self.modal);
+        self.dashboard = new Dashboard(self.modal);
         self.emojiKey = new EmojiKey(self.modal);
         self.download = new Download(self.modal);
       }

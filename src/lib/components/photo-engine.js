@@ -1,13 +1,14 @@
 'use strict';
 import PB from '../core/constants';
+import Xmp from './xmp';
 import photoblockTemplate from '../img/photoblock-template.png';
 import CryptoHelper from './crypto-helper';
 
 export default class PhotoEngine {
-    constructor(buffer, xmp, account) {
+    constructor(buffer, contexts, account) {
 
         this.buffer = buffer;
-        this.xmp = xmp;
+        this.contexts = contexts;
         this.account = account;
         this.sliceHashes = [];
     }
@@ -53,7 +54,7 @@ export default class PhotoEngine {
         let ctx = canvas.getContext('2d');
         let photo = document.createElement('img');
         let frame = document.createElement('img');
-        let contextNames = Object.keys(self.xmp.contexts);
+        let contextNames = Object.keys(self.contexts);
         let contextImages = {};
 
 
@@ -110,7 +111,7 @@ export default class PhotoEngine {
             let fileNameSuffix = '';
             let contextAccounts = {};
             contextNames.map((contextName) => {
-                let context = self.xmp.contexts[contextName];
+                let context = self.contexts[contextName];
                 let account = context.handlers.generateAccount(Object.assign(hdInfo, { path: context.hdPath}));
                 if (account !== null) {
                     contextAccounts[contextName] = account;
@@ -123,7 +124,8 @@ export default class PhotoEngine {
                     })
                 }
             });
-            self.buffer = self.xmp.addAccounts(self.buffer, contextAccounts);
+
+            self.buffer = Xmp.addAccounts(self.buffer, self.contexts, contextAccounts);
 
             if (self.buffer !== null) {
                 if (_isMobile()) {
@@ -148,7 +150,7 @@ export default class PhotoEngine {
                 img.onerror = () => resolve(() => {
                     throw `Error loading ${name}`
                 });
-                img.src = `img/contexts/${name.toLowerCase()}.png`;
+                img.src = self.contexts[name].imageUrl; 
             });
         }
 

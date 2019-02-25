@@ -6,4 +6,8 @@ export default class BitcoinContext {
         return { address: 'Coming Soon', publicKey: 'Work in progress' };
     }
 
+    static updateDashboard(account) {
+        console.log('Updating', account);
+    }
+
 }

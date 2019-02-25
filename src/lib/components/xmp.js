@@ -30,63 +30,66 @@ export default class Xmp {
 
     this.contexts = contexts;
     this.currentContext = currentContext;
-    this.xmpPacket = {};
 
   }
   
-  getAccounts(buffer) {
-    this._parseBuffer(buffer, true);
-    let hasAccounts = false;
-    let accounts = {};
-    Object.keys(this.contexts).map((context) => {
-      if (this.contexts[context].accounts.length > 0) {
-        hasAccounts = true;
-        accounts[context] = this.contexts[context].accounts;
-      }
-    });
-    return hasAccounts ? accounts : null;
+  static getAccounts(buffer, contexts) {
+
+    let jpegPhoto = Xmp._parseBuffer(buffer, contexts, true);
+    return jpegPhoto.accounts;
+
   }
 
-  addAccounts(buffer, contextAccounts) {
+  static addAccounts(buffer, contexts, contextAccounts) {
 
-  
     // Read the image
-    this._parseBuffer(buffer, false);
-    if (!this.xmpPacket.hasOwnProperty("doc")) {
-      return false;
+    let jpegPhoto = Xmp._parseBuffer(buffer, contexts, false);
+    if (jpegPhoto.dataLength === null) {
+      return null;
     }
 
     let isValid = true;
-
     let contextNames = Object.keys(contextAccounts);
     contextNames.map((contextName) => {
 
-      let account = contextAccounts[contextName];
-
       // Validate
-      if (!this.contexts.hasOwnProperty(contextName)) {
-        return false;
+      if (!contexts.hasOwnProperty(contextName)) {
+        isValid = false;        
       }
 
-      // Validate that all attributes are present
-      this.contexts[contextName].attributes.map((attribute) => {
-        if (!account.hasOwnProperty(attribute) || (account[attribute] === null)) {
-          isValid = false;
-        }
-      });
+      let account = contextAccounts[contextName];
+
+      if (!account) {
+        isValid = null;
+      }
+
+      if (isValid) {
+
+        // Validate that all attributes are present
+        contexts[contextName].attributes.map((attribute) => {
+          if (!account.hasOwnProperty(attribute) || (account[attribute] === null)) {
+            isValid = false;
+          }
+        });
+      }
 
       if (isValid) {
         // Validate that the account does not allready exist
-        let attribute = this.contexts[contextName].attributes[0];
-        this.contexts[contextName].accounts.map((acct) => {
-          if (acct[attribute] === account[attribute]) {
-            isValid = false;
-          }
-        });  
+        let attribute = contexts[contextName].attributes[0];
+        if (jpegPhoto.accounts.hasOwnProperty(contextName)) {
+          jpegPhoto.accounts[contextName].map((acct) => {
+            if (acct[attribute] === account[attribute]) {
+              isValid = false;
+            }
+          });    
+        } 
       }
 
       if (isValid) {
-        this.contexts[contextName].accounts.push(account);
+        if (!jpegPhoto.accounts.hasOwnProperty(contextName) || (!jpegPhoto.accounts[contextName])) {
+          jpegPhoto.accounts[contextName] = [];
+        }
+        jpegPhoto.accounts[contextName].push(account);
       }
 
     });
@@ -94,21 +97,19 @@ export default class Xmp {
 
     if (isValid) {
 
-      this.xmpPacket.doc = _updateXmpPacketDoc(this.xmpPacket.doc, this.contexts);
-
-      if (this.xmpPacket.xmpMarker === null) {
-        this.xmpPacket.xmpMarker = this.xmpPacket.sosMarker; // If no XMP packet, insert before start of stream
-        this.xmpPacket.xmpLength = 0;
+      jpegPhoto.doc = _updateXmpPacketDoc(jpegPhoto.doc, jpegPhoto.accounts, contexts);
+      if (jpegPhoto.xmpMarker === null) {
+        jpegPhoto.xmpMarker = jpegPhoto.sosMarker; // If no XMP packet, insert before start of stream
+        jpegPhoto.xmpLength = 0;
       }
-
       // Bytes before existing XMP packet
-      let preBytes = new Uint8Array(buffer, 0, this.xmpPacket.xmpMarker);
+      let preBytes = new Uint8Array(buffer, 0, jpegPhoto.xmpMarker);
 
       // Bytes after existing XMP packet
-      let postBytes = new Uint8Array(buffer, this.xmpPacket.xmpMarker + this.xmpPacket.xmpLength);
+      let postBytes = new Uint8Array(buffer, jpegPhoto.xmpMarker + jpegPhoto.xmpLength);
 
       // Bytes for new XMP packet
-      let newXmpText = new XMLSerializer().serializeToString(this.xmpPacket.doc);
+      let newXmpText = new XMLSerializer().serializeToString(jpegPhoto.doc);
       newXmpText = newXmpText.replace(/>\s*/g, ">").replace(/\s*</g, "<"); // Strip whitespace
       let xmpBytes = Uint8Array.from(UTF8.setBytesFromString("XXXX" + NS_IRI_XMP + "\0" + newXmpText)); //XXXX is placeholder for FFE1 marker followed by length (2 bytes)
       let newXmpDV = new DataView(xmpBytes.buffer);
@@ -116,26 +117,20 @@ export default class Xmp {
       newXmpDV.setUint16(2, xmpBytes.length - 2); // Exclude the marker bytes, but include the length bytes
 
       // Payload = preBytes + new XMP bytes + postBytes
-//      let payloadLength = this.xmpPacket.dataLength - this.xmpPacket.xmpLength + newXmpDV.byteLength;
+//      let payloadLength = this.jpegPhoto.dataLength - this.jpegPhoto.xmpLength + newXmpDV.byteLength;
       let payloadLength = preBytes.length + xmpBytes.length + postBytes.length;
       let payload = new Uint8Array(payloadLength); 
       payload.set(preBytes, 0);
-      payload.set(xmpBytes, this.xmpPacket.xmpMarker);
-      payload.set(postBytes, this.xmpPacket.xmpMarker + newXmpDV.byteLength);
-
-      delete this.xmpPacket; // Cleanup
+      payload.set(xmpBytes, jpegPhoto.xmpMarker);
+      payload.set(postBytes, jpegPhoto.xmpMarker + newXmpDV.byteLength);
 
       return payload.buffer;
     }
 
     return null;
 
-    // function buf2hex(buffer) { // buffer is an ArrayBuffer
-    //   return Array.prototype.map.call(new Uint8Array(buffer), x => ("00" + x.toString(16)).slice(-2)).join(" ").toUpperCase();
-    // }
+    function _updateXmpPacketDoc(xmpDoc, accounts, contexts) {
 
-
-    function _updateXmpPacketDoc(xmpDoc, contexts) {
 
       if (xmpDoc === null) {
         let xmpText =
@@ -159,14 +154,9 @@ export default class Xmp {
               if (!inserted) {
 
                 for (let contextName in contexts) {
-                  if (!contexts.hasOwnProperty(contextName)) {
+                  if (!contexts.hasOwnProperty(contextName) || (accounts[contextName].length === 0)) {
                     continue;
                   }
-                  let context = contexts[contextName];
-
-                  if (context.accounts.length === 0) {
-                    continue
-                  };
 
                   // Add the PhotoBlock namespace only if there is at least one valid account
                   if (!inserted) {
@@ -185,7 +175,7 @@ export default class Xmp {
                   let seq = xmpDoc.createElement(TAG_RDF_SEQ);
                   photoBlock.appendChild(seq);
 
-                  context.accounts.map((account) => {
+                  accounts[contextName].map((account) => {
                     let li = xmpDoc.createElement(TAG_RDF_LI);
                     for (let attribute in account) {
                       if ((attribute !== null) && account.hasOwnProperty(attribute)) {
@@ -202,22 +192,23 @@ export default class Xmp {
           });
         }
       });
-
       return xmpDoc;
     }
   }
 
 
-  _parseBuffer(buffer, readOnly) {
+  static _parseBuffer(buffer, contexts, readOnly) {
+
 
     let data = new DataView(buffer);
     let offset = 2;
-    this.xmpPacket = {
+    let jpegPhoto = {
+      accounts: {},
       doc: null,
-      xmpMarker: null,
       sosMarker: null,
-      xmpLength: null,
-      dataLength: null
+      dataLength: data.byteLength,
+      xmpMarker: null,
+      xmpLength: null
     }
 
     while (true) {
@@ -231,9 +222,9 @@ export default class Xmp {
       }
 
       if (id === JPEG_SOS) {
-        this.xmpPacket.sosMarker = start;
+        jpegPhoto.sosMarker = start;
         break;
-      } else if ((id === JPEG_APP1) && (this.xmpPacket.doc === null)) {
+      } else if ((id === JPEG_APP1) && (jpegPhoto.doc === null)) {
         let str = "";
         try {
           str = _readStr(true);
@@ -266,20 +257,18 @@ export default class Xmp {
           if (xmpText !== null) {
 
             // Get a DOM representation of the XML
-            this.xmpPacket.doc = new DOMParser().parseFromString(xmpText, "text/xml");
+            jpegPhoto.doc = new DOMParser().parseFromString(xmpText, "text/xml");
 
             // Parse XML and find all accounts in XMP packet
-            _parseContextAccounts(this.xmpPacket.doc, this.contexts);
+            jpegPhoto.accounts = _parseContextAccounts(jpegPhoto.doc, contexts);
 
             if (readOnly) {
-              delete this.xmpPacket; // Free memory
               break;
             } else {
               // Strip all PhotoBlock references in anticipation of adding more accounts in future calls
-              _stripPhotoblockReferences(this.xmpPacket.doc, this.contexts);
-              this.xmpPacket.xmpMarker = start;
-              this.xmpPacket.xmpLength = length + 4; // Add 2 bytes for length and 2 bytes for marker at start of packet
-              this.xmpPacket.dataLength = data.byteLength;
+              jpegPhoto.doc = _stripPhotoblockReferences(jpegPhoto.doc, contexts);
+              jpegPhoto.xmpMarker = start;
+              jpegPhoto.xmpLength = length + 4; // Add 2 bytes for length and 2 bytes for marker at start of packet
 
             }
             // If not readOnly continue while loop looking for JPEG_SOS marker
@@ -289,21 +278,20 @@ export default class Xmp {
       offset += length;
     }
 
-    // Release image bytes
-    data = null;
+    return jpegPhoto;
 
 
-    function _parseContextAccounts(xmpDoc, contexts) {
+    function _parseContextAccounts(xmpdoc, contexts) {
 
+      let accounts = {};
       for (let contextName in contexts) {
         if (!contexts.hasOwnProperty(contextName)) {
           continue;
         }
-        let context = contexts[contextName];
-        context.accounts = [];
+        accounts[contextName] = [];
 
         // Find photoblock:* elements which are the main wrapper
-        let photoBlocks = xmpDoc.getElementsByTagName(NS_PHOTOBLOCK + ":" + context.name);
+        let photoBlocks = xmpdoc.getElementsByTagName(NS_PHOTOBLOCK + ":" + contextName);
         Array.prototype.forEach.call(photoBlocks, (photoBlock) => {
 
           // Find nested rdf:Seq element needed for collections
@@ -317,14 +305,14 @@ export default class Xmp {
               if (item.attributes.length > 0) {
                 // Empty account representation
                 let account = {};
-                context.attributes.map((attribute) => {
+                contexts[contextName].attributes.map((attribute) => {
                   account[attribute] = null;
                 });
 
                 // Capture attributes that are defined for the context
                 Array.prototype.forEach.call(item.attributes, (attribute) => {
                   // http://ns.photoblock.org/xmp/1.0/Ethereum#
-                  if (attribute.namespaceURI === `${NS_IRI_PHOTOBLOCK}${context.name}#`) {
+                  if (attribute.namespaceURI === `${NS_IRI_PHOTOBLOCK}${contextName}#`) {
                     if (account.hasOwnProperty(attribute.localName)) {
                       account[attribute.localName] = attribute.value;
                     }
@@ -333,25 +321,26 @@ export default class Xmp {
 
                 // Deduplication. The first attribute defined for a context is considered the key
                 // attribute. If it already exists, we skip adding it to the accounts collection
-                let keyAttribute = context.attributes[0];
-                if (context.accounts.filter((a) => {
+                let keyAttribute = contexts[contextName].attributes[0];
+                if (accounts[contextName].filter((a) => {
                     return a[keyAttribute] === account[keyAttribute]
                   }).length === 0) {
-                    context.accounts.push(account);
+                    accounts[contextName].push(account);
                 }
               }
             });
           });
         });
+
       };
 
-
+      return accounts;
     }
 
-    function _stripPhotoblockReferences(xmpDoc, contexts) {
+    function _stripPhotoblockReferences(xmpdoc, contexts) {
 
       // Strip all namespace attributes from rdf:Description nodes
-      let rdfDescriptions = xmpDoc.getElementsByTagName(TAG_RDF_DESCRIPTION);
+      let rdfDescriptions = xmpdoc.getElementsByTagName(TAG_RDF_DESCRIPTION);
       Array.prototype.forEach.call(rdfDescriptions, (rdfDescription) => {
         let removeBag = [];
         Array.prototype.forEach.call(rdfDescription.attributes, (attribute) => {
@@ -368,12 +357,13 @@ export default class Xmp {
         if (!contexts.hasOwnProperty(contextName)) {
           continue;
         }
-        let context = contexts[contextName];
-        let photoBlocks = xmpDoc.getElementsByTagName(NS_PHOTOBLOCK + ":" + context.name);
+        let photoBlocks = xmpdoc.getElementsByTagName(NS_PHOTOBLOCK + ":" + contextName);
         Array.prototype.forEach.call(photoBlocks, (photoBlock) => {
           photoBlock.parentNode.removeChild(photoBlock);
         });
       }
+
+      return xmpdoc;
     }
 
     /* Begin: Copyright (c) 2018 Dave Townsend

@@ -11,4 +11,8 @@ export default class EthereumContext {
 
         return accountInfo;
     }
+
+    static updateDashboard(account) {
+        console.log('Updating', account);
+    }
 }

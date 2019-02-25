@@ -23,16 +23,24 @@ export default class Loader extends Component {
         self.log('loader...render');
 
         if (store.state.currentState === PB.STATE_LOAD) {
+            let template = LoaderTemplate;
+            if (store.state.error == PB.ERROR.NO_CONTEXT) {
+                template = template.replace('\{error\}', '\{error.noContext\}');
+            }
             self.modal.content.innerHTML = '';
-            self.modal.content.insertAdjacentHTML('beforeend', self.localizer.localize(LoaderTemplate));
+            self.modal.content.insertAdjacentHTML('beforeend', self.localizer.localize(template));
             self.element = DOM.elid('photoblock-loader-wrapper'); 
         
             if (store.state.fresh) {
                 DOM.elid('photoblock-fresh-message').removeAttribute('style');
                 DOM.elid('photoblock-loader-wrapper').className = "photoblock-fresh";
             } else {
-                DOM.elid('photoblock-new-message').removeAttribute('style');
-                DOM.elid('photoblock-loader-wrapper').className = "photoblock-new";
+                if (store.state.error !== null) {
+                    DOM.elid('photoblock-error-message').removeAttribute('style');
+                } else {
+                    DOM.elid('photoblock-new-message').removeAttribute('style');
+                }
+                DOM.elid('photoblock-loader-wrapper').className = "photoblock-new";    
             }
 
             self.dropFiles = DOM.elid("photoblock-files");

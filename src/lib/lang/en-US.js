@@ -27,5 +27,8 @@ export default {
         currentTitle: "Step 3: Save PhotoBlock",
         currentText: "OK, ready for blastoff! Select the download button to create and save your PhotoBlock with an embedded account for Bitcoin, Ethereum and Web.",
         error: "An error occurred while creating the PhotoBlock. If the problem persists, try using a different photo."
+    },
+    error: {
+        noContext: "The PhotoBlock you uploaded does not have an account that can be used in the current environment."
     }
 }
