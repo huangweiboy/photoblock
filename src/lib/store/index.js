@@ -17,7 +17,8 @@ export default new Store({
         photoEngine: null,
         fresh: false,
         error: null,
-        handlers: {}
+        handlers: {},
+        xmpAccounts: null
     }
 
 });

@@ -38,9 +38,4 @@ export default class WebContext {
         return accountInfo;
     }
 
-
-    static updateDashboard(account, callback) {
-        console.log('Updating', account);
-    }
-
 }

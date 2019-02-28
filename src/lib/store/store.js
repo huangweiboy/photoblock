@@ -43,7 +43,7 @@ export default class Store {
                 state[key] = value;
                 
                 // Trace out to the console. This will be grouped by the related action
-                console.log(`state :: ${key}`, oldValue, value );
+            //    console.log(`state :: ${key}`, oldValue, value );
                 
 
                 return true;

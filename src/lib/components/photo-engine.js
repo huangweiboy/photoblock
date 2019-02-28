@@ -5,12 +5,10 @@ import photoblockTemplate from '../img/photoblock-template.png';
 import CryptoHelper from './crypto-helper';
 
 export default class PhotoEngine {
-    constructor(buffer, contexts, accounts) {
+    constructor(buffer, contexts) {
 
         this.buffer = buffer;
         this.contexts = contexts;
-        this.accounts = accounts;
-        this.account = this.accounts[0];
         this.sliceHashes = [];
     }
 
@@ -28,18 +26,28 @@ export default class PhotoEngine {
         fr.readAsDataURL(blob);
     }
 
-    unlockPhotoBlock(context, emojiKey) {
+    unlockPhotoBlock(context, emojiKey, xmpAccounts) {
         let self = this;
         try {
-            if (self.account !== null) {
+            if (xmpAccounts !== null) {
                 let hdInfo = self._getPhotoBlockEntropy(emojiKey);
                 let pbAccount = context.handlers.generateAccounts(Object.assign(hdInfo, { path: context.hdPath}), 1);
-                context.attributes.map((attribute) => {
-                    if (self.account[attribute] !== CryptoHelper.hashHex(pbAccount[attribute])) {
-                        return null;
+                let attributes = Object.keys(context.attributes);
+                let isMatch = true;
+                for(let a=0; a<attributes.length; a++) {
+                    let attribute = context.attributes[a];
+                    if (!xmpAccounts[0].hasOwnProperty(attribute)) {
+                        isMatch = false;
+                        break;
                     }
-                });
-                return pbAccount;
+                    if (xmpAccounts[0][attribute] !== CryptoHelper.hashHex(pbAccount[attribute])) {
+                        isMatch = false;
+                        break;
+                    }
+                }
+                if (isMatch) {
+                    return pbAccount;
+                }    
             }
         } catch (e) {
         }

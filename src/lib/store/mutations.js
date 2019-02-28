@@ -17,9 +17,8 @@ export default {
         if (state.currentState === PB.STATE_INIT) {
             state.currentState = PB.STATE_LOAD;
         }
-
-        callback(state);
         state.handlers[PB.EVENT_TYPES.SHOW]();    
+        callback(state);
     },
 
     init(state) {
@@ -28,6 +27,7 @@ export default {
         state.unlockCount = 0;
         state.fresh = false;
         state.currentAccount = null;
+        state.xmpAccounts = null;
     },
 
     hideModal(state, payload, callback) {
@@ -37,15 +37,15 @@ export default {
             state.currentState = PB.STATE_INIT;
         }
         
-        callback(state);
         state.handlers[PB.EVENT_TYPES.HIDE]();    
+        callback(state);
     },
 
     loadPhoto(state, payload, callback) {
         if (payload.imgBuffer !== null) {
             let accounts = Xmp.getAccounts(payload.imgBuffer, state.contexts);
             let hasAccounts = false;
-            let hasContextAccount = true;
+            let hasContextAccount = false;
             Object.keys(accounts).map((contextName) => {
                 if ((accounts[contextName] !== null) && (accounts[contextName].length) && (accounts[contextName].length > 0)){
                     hasAccounts = true;
@@ -61,22 +61,22 @@ export default {
                     state.emojiKey = [];
                     state.fresh = false;
                     state.unlockCount = 0;
-                    state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts, accounts[state.currentContext.name]);
+                    state.xmpAccounts = accounts[state.currentContext.name];
+                    state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts);
                     state.currentState = PB.STATE_UNLOCK;      
-                    callback(state);    
                     state.handlers[PB.EVENT_TYPES.LOAD]();              
+                    callback(state);    
                 } else {
                     state.error = PB.ERROR.NO_CONTEXT;
                     callback(state);
                 }
-
             } else {
                 state.emojiKey = [];
                 state.fresh = false;
-                state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts, null);
+                state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts);
                 state.currentState = PB.STATE_NEW;
-                callback(state);               
                 state.handlers[PB.EVENT_TYPES.NEW]();              
+                callback(state);               
             }
         }
     },
@@ -114,8 +114,8 @@ export default {
                 this.init(state);
                 state.currentState = PB.STATE_LOAD;
                 state.fresh = true;
-                callback(state);    
                 state.handlers[PB.EVENT_TYPES.CREATE]();              
+                callback(state);    
             }
         });
     },
@@ -130,11 +130,11 @@ export default {
     unlock(state, payload, callback) {
         
         state.unlockCount++;
-        state.currentAccount = state.photoEngine.unlockPhotoBlock(state.currentContext, payload.emojiKey) 
+        state.currentAccount = state.photoEngine.unlockPhotoBlock(state.currentContext, payload.emojiKey, state.xmpAccounts);
         if (state.currentAccount !== null) {
             state.currentState = PB.STATE_READY;
+            state.handlers[PB.EVENT_TYPES.UNLOCK](state.currentAccount);              
             callback(state);
-            state.handlers[PB.EVENT_TYPES.UNLOCK]();              
         } else {            
             if (state.unlockCount > PB.MAX_UNLOCK_ATTEMPTS) {
                 this.hideModal(state, null, callback);

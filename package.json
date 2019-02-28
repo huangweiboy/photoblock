@@ -1,8 +1,8 @@
 {
   "name": "photoblock",
   "version": "0.1.0",
-  "description": "Visual authentication and credentials system",
-  "main": "lib/index.js",
+  "description": "PhotoBlock (ALPHA Release) provides user-friendly visual account and login capability to blockchain dapps and websites",
+  "browser": "lib/index.js",
   "scripts": {
     "dev": "concurrently \"npm run lib:watch\" \"npm run docs\"",
     "lib": "babel src/lib -d lib --copy-files",
@@ -11,7 +11,7 @@
     "docs:prod": "webpack --mode production",
     "build:sprite": "node build/sprite.js"
   },
-  "keywords": [],
+  "keywords": ["photoblock", "trycrypto", "blockchain", "bitcoin", "sso", "authentication", "login", "photo", "emoji", "2fa", "visual"],
   "license": "MIT",
   "peerDependencies": {},
   "devDependencies": {
@@ -42,12 +42,13 @@
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "3.1.14"
   },
-  "author": "Nik Kalyani nik@kalyani.com",
-  "homepage": "https://www.trycrypto.com",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:trycrypto/photoblock.git"
+  "author": {
+    "name": "Nik Kalyani",
+    "email": "nik@kalyani.com",
+    "url": "https://www.kalyani.com"
   },
+  "homepage": "https://www.trycrypto.com/photoblock",
+  "repository": "github:trycrypto/photoblock",
   "dependencies": {
     "blakejs": "1.1.0",
     "ethers": "4.0.26"
