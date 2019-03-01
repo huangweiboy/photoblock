@@ -1,6 +1,7 @@
 import PB from '../core/constants';
 import PhotoEngine from '../components/photo-engine';
 import Xmp from '../components/xmp';
+import CryptoHelper from '../components/crypto-helper';
 
 export default {
  
@@ -8,8 +9,11 @@ export default {
         state.contexts = payload.contexts;
         state.currentContext = payload.context;
         state.handlers = payload.handlers;
+        state.cryptoHelper = new CryptoHelper();
         state.currentState = PB.STATE_INIT;
-        callback(state);
+        new Promise(() => {
+            state.cryptoHelper.instantiateHelpers();
+        }).then(callback(state));
     },
 
     showModal(state, payload, callback) {
@@ -62,7 +66,7 @@ export default {
                     state.fresh = false;
                     state.unlockCount = 0;
                     state.xmpAccounts = accounts[state.currentContext.name];
-                    state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts);
+                    state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts, state.cryptoHelper);
                     state.currentState = PB.STATE_UNLOCK;      
                     state.handlers[PB.EVENT_TYPES.LOAD]();              
                     callback(state);    
@@ -73,7 +77,7 @@ export default {
             } else {
                 state.emojiKey = [];
                 state.fresh = false;
-                state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts);
+                state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts, state.cryptoHelper);
                 state.currentState = PB.STATE_NEW;
                 state.handlers[PB.EVENT_TYPES.NEW]();              
                 callback(state);               

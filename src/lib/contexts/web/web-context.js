@@ -31,11 +31,10 @@ export default class WebContext {
         }
 
         let wallet = ethers.Wallet.fromMnemonic(ethers.utils.HDNode.entropyToMnemonic(hdInfo.hash),`${hdInfo.path}/${hdInfo.index}`);
-        let accountInfo = { name: `${WebContext.ADJECTIVES[idx1]}-${WebContext.ANIMALS[idx2]}`, userId: wallet.address.replace('0x',''), publicKey: wallet.signingKey.publicKey };
-        hdInfo = null;
-        wallet = null;
-
-        return accountInfo;
+        let accounts = [];
+        accounts.push({ name: `${WebContext.ADJECTIVES[idx1]}-${WebContext.ANIMALS[idx2]}`, userId: wallet.address.replace('0x',''), publicKey: wallet.signingKey.publicKey })
+        
+        return accounts;
     }
 
 }

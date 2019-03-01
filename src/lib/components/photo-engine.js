@@ -5,10 +5,11 @@ import photoblockTemplate from '../img/photoblock-template.png';
 import CryptoHelper from './crypto-helper';
 
 export default class PhotoEngine {
-    constructor(buffer, contexts) {
+    constructor(buffer, contexts, cryptoHelper) {
 
         this.buffer = buffer;
         this.contexts = contexts;
+        this.cryptoHelper = cryptoHelper;
         this.sliceHashes = [];
     }
 
@@ -31,7 +32,11 @@ export default class PhotoEngine {
         try {
             if (xmpAccounts !== null) {
                 let hdInfo = self._getPhotoBlockEntropy(emojiKey);
-                let pbAccount = context.handlers.generateAccounts(Object.assign(hdInfo, { path: context.hdPath}), 1);
+                hdInfo.cryptoHelper = this.cryptoHelper;
+                let pbAccounts = context.handlers.generateAccounts(Object.assign(hdInfo, { path: context.hdPath}), 1);
+                if (pbAccounts === null) { return null; }
+
+                let pbAccount = pbAccounts[0];
                 let attributes = Object.keys(context.attributes);
                 let isMatch = true;
                 for(let a=0; a<attributes.length; a++) {
@@ -116,13 +121,15 @@ export default class PhotoEngine {
             // persisted on disk and will remain unchanged regardless of browser.
 
             let hdInfo = self._getPhotoBlockEntropy(emojiKey);
+            hdInfo.cryptoHelper = this.cryptoHelper;
 
             let fileNameSuffix = '';
             let contextAccounts = {};
             contextNames.map((contextName) => {
                 let context = self.contexts[contextName];
-                let account = context.handlers.generateAccounts(Object.assign(hdInfo, { path: context.hdPath}), 1);
-                if (account !== null) {
+                let accounts = context.handlers.generateAccounts(Object.assign(hdInfo, { path: context.hdPath}), 1);
+                if (accounts !== null) {
+                    let account = accounts[0];
                     contextAccounts[contextName] = account;
                     if (contextName === PB.BUILTIN_CONTEXTS.web) {
                         fileNameSuffix = account.name;

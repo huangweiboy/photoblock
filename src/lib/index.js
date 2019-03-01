@@ -257,7 +257,7 @@ export default class PhotoBlock {
       case PB.BUILTIN_CONTEXTS.bitcoin:
       self.handlers[PB.EVENT_TYPES.UPDATE] = (account, callback) => {
 
-              callback(`
+          callback(`
               <div style="color:#ffffff;">
                   <!--div>Account Balance (BTC):</div-->
                   <!--div style="font-weight:100;font-size:60px;line-height:60px;margin:20px 0;text-align:center;">(TODO: Balance)</div -->

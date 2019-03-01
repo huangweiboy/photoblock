@@ -15,6 +15,7 @@ export default new Store({
         unlockCount: 0,
         emojiKey: [],
         photoEngine: null,
+        cryptoHelper: null,
         fresh: false,
         error: null,
         handlers: {},

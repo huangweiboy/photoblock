@@ -11,7 +11,19 @@
     "docs:prod": "webpack --mode production",
     "build:sprite": "node build/sprite.js"
   },
-  "keywords": ["photoblock", "trycrypto", "blockchain", "bitcoin", "sso", "authentication", "login", "photo", "emoji", "2fa", "visual"],
+  "keywords": [
+    "photoblock",
+    "trycrypto",
+    "blockchain",
+    "bitcoin",
+    "sso",
+    "authentication",
+    "login",
+    "photo",
+    "emoji",
+    "2fa",
+    "visual"
+  ],
   "license": "MIT",
   "peerDependencies": {},
   "devDependencies": {
@@ -50,6 +62,7 @@
   "homepage": "https://www.trycrypto.com/photoblock",
   "repository": "github:trycrypto/photoblock",
   "dependencies": {
+    "bitcoin-ts": "1.4.0",
     "blakejs": "1.1.0",
     "ethers": "4.0.26"
   }
