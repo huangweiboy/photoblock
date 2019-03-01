@@ -9,11 +9,12 @@ export default {
         state.contexts = payload.contexts;
         state.currentContext = payload.context;
         state.handlers = payload.handlers;
-        state.cryptoHelper = new CryptoHelper();
         state.currentState = PB.STATE_INIT;
         new Promise(() => {
+            state.cryptoHelper = new CryptoHelper();
             state.cryptoHelper.instantiateHelpers();
-        }).then(callback(state));
+        }).then(callback(state));    
+            
     },
 
     showModal(state, payload, callback) {
@@ -25,7 +26,7 @@ export default {
         callback(state);
     },
 
-    init(state) {
+    init(state) { 
         state.photoEngine = null;
         state.emojiKey = [];
         state.unlockCount = 0;
@@ -59,7 +60,9 @@ export default {
                     }
                 }
             });
-            
+
+
+
             if (hasAccounts) {
                 if (hasContextAccount) {
                     state.emojiKey = [];
@@ -82,6 +85,9 @@ export default {
                 state.handlers[PB.EVENT_TYPES.NEW]();              
                 callback(state);               
             }
+
+          
+        
         }
     },
 
