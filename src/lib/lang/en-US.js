@@ -10,9 +10,9 @@ export default {
     },
     emojiKey: {
         createTitle: "Step 1: Create EmojiKey",
-        create: "Select a sequence of emojis in the above grid to create your EmojiKey.",
+        create: "In the above grid, select a sequence of emojis that you can easily remember.",
         confirmTitle: "Step 2: Confirm EmojiKey",
-        confirm: "Re-enter the sequence of emojis for confirmation.",
+        confirm: "Re-enter the emojis for confirmation.<br/>Important: Access to your PhotoBlock is only possible with your EmojiKey.",
         title: ["Nice photo!", "Pretty Pixels!", "Sweet Pic!", "Awesome Shot!", "Super Snap!", "Great Picture!"],
         intro: "Let's create a PhotoBlock:",
         step1: "Create EmojiKey",
@@ -25,7 +25,7 @@ export default {
     },
     download: {
         currentTitle: "Step 3: Save PhotoBlock",
-        currentText: "OK, ready for blastoff! Select the download button to create and save your PhotoBlock with an embedded account for Bitcoin, Ethereum and Web.",
+        currentText: "OK, ready for blastoff! Select the download button to save your PhotoBlock. ",
         error: "An error occurred while creating the PhotoBlock. If the problem persists, try using a different photo."
     },
     error: {
