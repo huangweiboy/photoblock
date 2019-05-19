@@ -7,6 +7,7 @@ PhotoBlock provides user-friendly visual account and login capability to blockch
 Follow these steps to get started developing:
 
 * `npm install`
+* `npm run build:sprite`
 * `npm run dev` to transpile both the lib and docs folder in watch mode and serve the docs page for you.
 * Go to http://127.0.0.1:8000 to see the demo in action. Whenever you change the code in either src/lib or src/docs, the page will automatically update.
 

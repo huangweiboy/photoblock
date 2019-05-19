@@ -2,13 +2,15 @@
   "name": "photoblock",
   "version": "0.1.0",
   "description": "PhotoBlock (ALPHA Release) provides user-friendly visual account and login capability to blockchain dapps and websites",
-  "browser": "lib/index.js",
+  "browser": "dist/index.js",
   "scripts": {
-    "dev": "concurrently \"npm run lib:watch\" \"npm run docs\"",
-    "lib": "babel src/lib -d lib --copy-files",
-    "lib:watch": "babel src/lib -w -d lib --copy-files",
-    "docs": "webpack-dev-server --mode development",
-    "docs:prod": "webpack --mode production",
+    "dev": "concurrently \"npm run lib:watch\" \"npm run app\" \"npm run auth\"",
+    "lib": "babel src/packages/photoblock -d lib --copy-files",
+    "lib:watch": "babel src/packages/photoblock -w -d lib --copy-files",
+    "app": "webpack-dev-server --mode development --port 8000 --open-page app.html",
+    "auth": "webpack-dev-server --mode development --port 8001 --open-page auth.html",
+    "prod": "webpack --mode production",
+    "prod:map": "webpack --mode production --devtool source-map",
     "build:sprite": "node build/sprite.js"
   },
   "keywords": [
@@ -36,6 +38,7 @@
     "@babel/preset-react": "^7.0.0-beta.46",
     "@babel/runtime-corejs2": "7.3.1",
     "babel-loader": "^8.0.0-beta.0",
+    "caver-js": "0.8.0",
     "colors": "1.3.2",
     "concurrently": "^4.0.1",
     "copy-webpack-plugin": "4.6.0",
@@ -51,7 +54,7 @@
     "spritesmith": "^3.3.1",
     "style-loader": "^0.23.1",
     "webpack": "^4.6.0",
-    "webpack-cli": "^3.1.2",
+    "webpack-cli": "3.3.0",
     "webpack-dev-server": "3.1.14"
   },
   "author": {
@@ -64,6 +67,8 @@
   "dependencies": {
     "bitcoin-ts": "1.4.0",
     "blakejs": "1.1.0",
-    "ethers": "4.0.26"
+    "ethers": "4.0.26",
+    "superstatic": "6.0.4",
+    "tweetnacl": "1.0.1"
   }
 }

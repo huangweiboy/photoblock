@@ -1,13 +1,26 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+//const dependencies = Object.keys(require("./package.json").dependencies);
 
 module.exports = {
-  entry: path.join(__dirname, "src/docs"),
-  output: {
-    path: path.join(__dirname, "docs"),
-    filename: "bundle.js"
+  entry: {
+    'PhotoBlock': path.join(__dirname, "src/packages/photoblock"),
+    'EthereumContext': path.join(__dirname, "src/packages/contexts/ethereum"),
+    'TronContext': path.join(__dirname, "src/packages/contexts/tron"),
+    'KlaytnContext': path.join(__dirname, "src/packages/contexts/klaytn"),
+    'WebContext': path.join(__dirname, "src/packages/contexts/web"),
+    'BitcoinContext': path.join(__dirname, "src/packages/contexts/bitcoin")
   },
+  output: {
+    path: path.join(__dirname, "dist"),
+    filename: "[name].min.js",
+    sourceMapFilename: "[name].min.js.map",
+    library: "[name]",
+    libraryExport: "default",
+    libraryTarget: "var"
+  },
+ // externals: dependencies,
   module: {
     rules: [
       {
@@ -22,21 +35,15 @@ module.exports = {
       {
         test: /\.(png|svg|jpg|gif)$/,
         use: [
-          'file-loader'
+          {
+            loader: 'file-loader', options: { name: 'img/[name].[ext]?[hash]' } 
+          }
         ]
       },
       {
         test: /\.html$/,
         use: "html-loader",
         exclude: /node_modules/
-      },
-      {
-        test: /[\\\/]tweetnacl[\\\/]/,
-        use: 'exports-loader?window.nacl!imports-loader?this=>window,module=>{},require=>false'
-      },
-      {
-          test: /[\\\/]tweetnacl-auth[\\\/]/,
-          use: 'exports-loader?window.nacl.auth!imports-loader?this=>window,module=>{},require=>false'
       }
     ],
     noParse: [
@@ -45,22 +52,26 @@ module.exports = {
     ]
   },
   plugins: [
-    new HtmlWebpackPlugin({ 
-      template: path.join(__dirname, "src/docs/index.html")
-    }),
+
     new CopyWebpackPlugin([
-      { from: 'src/lib/components/emoji/11/img', to: 'img' },
-      { from: 'src/lib/img', to: 'img' },
-      { from: 'src/lib/contexts/**/*.png', to: 'img/contexts', flatten: true }
+      { from: 'src/packages/photoblock/components/emoji/11/img', to: 'img' },
+      { from: 'src/packages/photoblock/img', to: 'img' },
+      { from: 'src/app/img/trycrypto.png', to: 'img' },
+      { from: 'src/app/index.html' },
+      { from: 'src/app/app.html' },
+      { from: 'src/app/app.js' },
+      { from: 'src/app/auth.html' },
+      { from: 'src/app/auth.js' },
+      { from: 'src/app/styles.css' },
+      { from: 'src/packages/contexts/**/*.png', to: 'img/contexts', flatten: true }
     ])
   ],
   resolve: {
     extensions: [".js"]
   },
   devServer: {
-    contentBase: path.join(__dirname, "docs"),
+    contentBase: path.join(__dirname, "dist"),
     host: "0.0.0.0",
-    port: 8000,
     stats: "minimal"
   }
 };

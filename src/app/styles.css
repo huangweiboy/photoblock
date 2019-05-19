@@ -1,0 +1,107 @@
+body {
+    font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+}
+
+.animated {
+    animation:  shake 1s linear;
+}
+
+@keyframes shake {
+
+    8%, 41% {
+        transform: translateX(-10px);
+    }
+    25%, 58% {
+        transform: translateX(10px);
+    }
+    75% {
+        transform: translateX(-5px);
+    }
+    92% {
+        transform: translateX(5px);
+    }
+    0%, 100% {
+        transform: translateX(0);
+    }
+}
+
+.navbar-brand {
+    display: inline-block;
+    width: 256px;
+    height: 80px;
+    background-image: url("img/trycrypto-logo-512.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+header.masthead {
+    position: relative;
+    background-color: #343a40;
+    background-size: cover;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+header.masthead h1 {
+    font-size: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    header.masthead {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    header.masthead h1 {
+        font-size: 2.5rem;
+        padding-top: 4rem;
+    }
+}
+
+.features-icons {
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+}
+
+.features-icons .features-icons-item {
+    max-width: 20rem;
+}
+
+.features-icons .features-icons-item .features-icons-icon {
+    height: 7rem;
+}
+
+.features-icons .features-icons-item .features-icons-icon i {
+    font-size: 4.5rem;
+}
+
+.features-icons .features-icons-item:hover .features-icons-icon i {
+    font-size: 5rem;
+}
+
+.pb-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+footer.footer {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+}
+
+/*!
+   * Start Bootstrap - Landing Page v5.0.3 (https://startbootstrap.com/template-overviews/landing-page)
+   * Copyright 2013-2019 Start Bootstrap
+   * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-landing-page/blob/master/LICENSE)
+*/

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>PhotoBlock</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.4.1/css/simple-line-icons.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-light bg-light static-top">
+        <div class="container">
+            <a class="navbar-brand" href="https://www.trycrypto.com"></a>
+        </div>
+    </nav>
+
+    <!-- Masthead -->
+    <header class="masthead text-white text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-8 mx-auto">
+                    <h1 class="mb-5">PhotoBlock provides user-friendly visual account and login capability for
+                        websites and blockchain dapps</h1>
+                    <h3 style="color:#00c6f6;margin-top:20px;">Photo + Emojis = PhotoBlock</h3>
+                </div>
+                <div class="col-md-4 col-lg-8 col-xl-8 mx-auto pt-4 pb-col">
+                    <div id="photoblock-container" class="animated"></div>
+                    <div class="lead mt-4">Use PhotoBlock for: <select class="lead" id="context-switch" style="width:150px;padding:4px;"></select></div>
+                    <div class="mt-2" style="color:#777;">(Hint: Select the PhotoBlock icon)</div>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <section class="pt-3 pb-0 bg-light">
+        <div class="container  ">
+            <div class="row justify-content-between">
+                    <div class="col-12 col-md-12 col-lg-3 pb-5">
+                            <a href="https://www.trycrypto.com/photoblock" target="_blank"><img id="photoblock-screen" src="https://ipfs.infura.io/ipfs/QmP3aWTXXL8nnTuF1xz3stZeEmJGruLnsoJmhMBhV1BtiT" class="img-fluid" alt="PhotoBlock screen" /></a>
+                            <p class="mt-4 text-center"><a href="https://www.trycrypto.com/photoblock" target="_blank" class="btn btn-lg btn-primary">Learn More</a></p>
+                        </div>
+                    <div class="col-12 col-md-12 col-lg-9 pb-5">
+                    <h4 class="mb-3">How PhotoBlock Works?</h4>
+                    <p class="lead">PhotoBlock works with a photo you provide (any JPEG will do) and your personal
+                        emoji sequence called an EmojiKey. The photo is transformed into a downloadable PhotoBlock file
+                        with embedded accounts for Web, Bitcoin and Ethereum (the three platforms currently supported). You
+                        can then use your PhotoBlock with your EmojiKey to unlock and access the accounts anywhere
+                        PhotoBlock is integrated.
+                    </p>
+                    <p class="lead">PhotoBlock can be added to any dapp or website by a developer in just a few
+                        minutes, making it easy for users to authenticate and access the dapp/website without the
+                        hassle of usernames, passwords, private keys, mnemonic passphrases
+                        and generally everything that users dislike. <b>Developers can focus on building awesome apps for
+                        their users &mdash; PhotoBlock does the rest!</b></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="pt-3 pb-0">
+        <div class="container  ">
+            <div class="row justify-content-between">
+                <div class="col-12 col-md-12 mx-auto pb-5">
+                    <h4 class="mb-3">PhotoBlock ALPHA Release Notes</h4>
+                    <p class="lead mt-4">PhotoBlock is a free, Open Source (MIT License) library for use on websites and dapps. It combines user accounts, two-factor authentication and message signing into a unified user experience. In this Alpha Release, you can create PhotoBlocks, then use them for Web, Bitcoin and Ethereum. Development is ongoing and documentation/technical white paper are also in progress.  
+
+                    </p>
+
+                    <p class="lead mt-4">For more 
+                            information, head on over to the <a href="https://www.trycrypto.com/photoblock" target="_blank">TryCrypto website</a> or view the <a href="https://github.com/trycrypto/photoblock" target="_blank">source code</a>.
+                        Also, we'd love to hear your feedback about PhotoBlock on the <a href="https://support.trycrypto.com" target="_blank">TryCrypto Community</a> website.
+                        </p>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Icons Grid -->
+    <section class="features-icons bg-light text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
+                        <div class="features-icons-icon d-flex">
+                            <i class="icon-link m-auto text-primary"></i>
+                        </div>
+                        <h3>Blockchain-agnostic</h3>
+                        <p class="lead mb-0">Use the same PhotoBlock with any supported blockchain.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
+                        <div class="features-icons-icon d-flex">
+                            <i class="icon-screen-smartphone m-auto text-primary"></i>
+                        </div>
+                        <h3>Mobile-friendly</h3>
+                        <p class="lead mb-0">Works with dapps and websites on most popular mobile browsers.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                        <div class="features-icons-icon d-flex">
+                            <i class="icon-check m-auto text-primary"></i>
+                        </div>
+                        <h3>Easy to Use</h3>
+                        <p class="lead mb-0">Photos and emojis &mdash; everybody knows how to use them.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-icons text-center">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
+                            <div class="features-icons-icon d-flex">
+                                <i class="icon-shield m-auto text-primary"></i>
+                            </div>
+                            <h3>Secure & Private</h3>
+                            <p class="lead mb-0">Designed with focus on security and privacy.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
+                            <div class="features-icons-icon d-flex">
+                                <i class="icon-like m-auto text-primary"></i>
+                            </div>
+                            <h3>Convenient</h3>
+                            <p class="lead mb-0">No passwords, private keys or mnemonic passphrases to save.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                            <div class="features-icons-icon d-flex">
+                                <i class="icon-globe m-auto text-primary"></i>
+                            </div>
+                            <h3>Use Anywhere</h3>
+                            <p class="lead mb-0">Use cloud file-sharing to access your PhotoBlocks everywhere.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    
+
+    <!-- Footer -->
+    <footer class="footer bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 h-100 text-center text-lg-left my-auto">
+                    <p class="text-muted small mb-4 mb-lg-0">Copyright &copy; 2019 <a href="https://www.kalyani.com">Nik
+                            Kalyani</a> and <a href="https://www.trycrypto.com">TryCrypto</a>. All Rights Reserved.</p>
+                </div>
+                <div class="col-lg-6 h-100 text-center text-lg-right my-auto">
+
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

@@ -12,7 +12,7 @@ const sprite = () => {
     let pack = {
         name: "photoblock",
         source: "build/11",
-        dest: "src/lib/components/emoji/11",
+        dest: "src/packages/photoblock/components/emoji/11",
         size: 72
     };
 
@@ -75,7 +75,7 @@ const sprite = () => {
                         emojis[categoryCount].items.push({
                             code: code,
                             name: name,
-                            keywords: Array.from(new Set(keywords)), // Make unique
+                           // keywords: Array.from(new Set(keywords)), // Make unique
                             skin: null
                         });
                         maincount++;
