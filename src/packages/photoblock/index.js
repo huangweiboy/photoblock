@@ -10,6 +10,7 @@ import Download from './components/download';
 import Dashboard from './components/dashboard';
 
 import photoBlockFrame from './img/photoblock-frame.svg';
+import photoBlockFrameHorz from './img/photoblock-frame-horz.svg';
 import photoBlockIcon from './img/photoblock-icon.svg';
 import './photoblock.css';
 
@@ -167,22 +168,23 @@ export default class PhotoBlock {
       self.element = document.querySelector(`#${self.containerId}`);
       self.element.innerHTML = '';
       let wrapper = DOM.div({
-        id: 'photoblock-widget-wrapper'
+        id: 'photoblock-widget-wrapper',
+        className: (self.options.horizontal ? 'horz' : '')
       });
       self.element.appendChild(wrapper);
       wrapper.appendChild(DOM.img({
         id: 'photoblock-widget-photo',
-        className: 'photoblock-button'
+        className: 'photoblock-button' + (self.options.horizontal ? ' horz' : '')
       }));
       wrapper.appendChild(DOM.img({
         id: 'photoblock-widget-icon',
-        className: 'photoblock-button',
+        className: 'photoblock-button' + (self.options.horizontal ? ' horz' : ''),
         src: photoBlockIcon
       }));
       wrapper.appendChild(DOM.img({
         id: 'photoblock-widget-frame',
-        className: 'photoblock-button',
-        src: photoBlockFrame
+        className: 'photoblock-button' + (self.options.horizontal ? ' horz' : ''),
+        src: (self.options.horizontal ? photoBlockFrameHorz : photoBlockFrame)
       }));
 
       if (self.context !== null) {
