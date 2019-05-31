@@ -1,7 +1,7 @@
 
 /*     BEGIN: PHOTOBLOCK INTEGRATION       */
 let photoBlockContainerId = "photoblock-container";
-let photoBlock = new PhotoBlock(photoBlockContainerId, { horizontal: false });
+let photoBlock = new PhotoBlock(photoBlockContainerId, { horizontal: true });
 photoBlock.registerContext(EthereumContext);
 photoBlock.registerContext(TronContext);
 photoBlock.registerContext(KlaytnContext);
