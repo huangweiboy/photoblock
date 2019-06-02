@@ -12,43 +12,36 @@ export default class WebContext {
     static Name = 'Web';
     static Symbol = 'WWW';
     static LogoUrl = logo;
-    static Count = 1;
+    static Count = 5;
     static HdPath = 'm/255\'/255\'/255\'/255';
-    static Attributes = ['name', 'userId', '\'publicKey']; 
+    static Attributes = ['userId', 'displayName', '\'publicKey']; 
     static Handlers = {
         'generateAccounts': WebContext.generateAccounts,
         'sign': WebContext.sign
     }
 
     static generateAccounts(accountSeed) {
-        console.log('Web', accountSeed);
-        let hashArray = WebContext.arrayify(accountSeed.entropy);
-
-console.log(hashArray);
         let adjectives = [];
         for(let adj=0; adj < accountSeed.count; adj++) {
-            let idx = hashArray[adj];
-            adjectives.push(WebContext.ADJECTIVES[idx]);
+            adjectives.push(WebContext.ADJECTIVES[accountSeed.entropy[adj]]);
         }
 
-        let name = Phonetic.generate({
-            seed: accountSeed.entropy
-        });
-
-        console.log(name);
         let accounts = [];
         for (let c = 0; c < accountSeed.count; c++) {
             let hash = new Uint8Array(accountSeed.entropy);
             hash[c] = c;
             let keyPair = nacl.box.keyPair.fromSecretKey(hash);
-           
+
+            let name = Phonetic.generate({
+                seed: hash
+            });
+    
             accounts.push({
-                name: `${adjectives[c]}-${name}`,
-                userId: 'ABCD',
+                userId: `${adjectives[c]}-${name}`,
+                displayName: `${adjectives[c].substr(0,1).toUpperCase()}${adjectives[c].substr(1)} ${name.substr(0,1).toUpperCase()}${name.substr(1)}`,
                 publicKey: WebContext.arr2hex(keyPair.publicKey)
             });
         }
-
         return accounts;
     }
 
@@ -57,76 +50,5 @@ console.log(hashArray);
     static arr2hex(arr) {
         return Array.prototype.map.call(arr, x => ('00' + x.toString(16)).slice(-2)).join('');
     }
-    // https://github.com/ethers-io/ethers.js/
-    static arrayify(value) {
-        if (value == null) {
-            errors.throwError('cannot convert null value to array', errors.INVALID_ARGUMENT, {
-                arg: 'value',
-                value: value
-            });
-        }
-        if (WebContext.isHexable(value)) {
-            value = value.toHexString();
-        }
-        if (typeof (value) === 'string') {
-            var match = value.match(/^(0x)?[0-9a-fA-F]*$/);
-            if (!match) {
-                errors.throwError('invalid hexidecimal string', errors.INVALID_ARGUMENT, {
-                    arg: 'value',
-                    value: value
-                });
-            }
-            if (match[1] !== '0x') {
-                errors.throwError('hex string must have 0x prefix', errors.INVALID_ARGUMENT, {
-                    arg: 'value',
-                    value: value
-                });
-            }
-            value = value.substring(2);
-            if (value.length % 2) {
-                value = '0' + value;
-            }
-            var result = [];
-            for (var i = 0; i < value.length; i += 2) {
-                result.push(parseInt(value.substr(i, 2), 16));
-            }
-            return WebContext.addSlice(new Uint8Array(result));
-        }
-        if (WebContext.isArrayish(value)) {
-            return WebContext.addSlice(new Uint8Array(value));
-        }
-        errors.throwError('invalid arrayify value', null, {
-            arg: 'value',
-            value: value,
-            type: typeof (value)
-        });
-        return null;
-    }
 
-    static addSlice(array) {
-        if (array.slice) {
-            return array;
-        }
-        array.slice = function () {
-            var args = Array.prototype.slice.call(arguments);
-            return WebContext.addSlice(new Uint8Array(Array.prototype.slice.apply(array, args)));
-        };
-        return array;
-    }
-    static isArrayish(value) {
-        if (!value || parseInt(String(value.length)) != value.length || typeof (value) === 'string') {
-            return false;
-        }
-        for (var i = 0; i < value.length; i++) {
-            var v = value[i];
-            if (v < 0 || v >= 256 || parseInt(String(v)) != v) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static isHexable(value) {
-        return !!(value.toHexString);
-    }
 }

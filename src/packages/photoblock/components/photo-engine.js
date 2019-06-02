@@ -169,8 +169,8 @@ export default class PhotoEngine {
                 if (accounts !== null) {
                     for(let a=0; a<accounts.length; a++) {
                         let account = accounts[a];
-                        if (account.name && (account.name !== null) && (account.name !== '')) {
-                            fileNameSuffix = account.name;
+                        if (account.userId && (account.userId !== null) && (account.userId !== '')) {
+                            fileNameSuffix = account.userId;
                         }    
                         // Object.keys(account).map((key) => {
                         //     account[key] = account[key]; //PhotoEngine.hashHex(account[key]);
@@ -271,7 +271,7 @@ export default class PhotoEngine {
 
         const _savePhotoBlockMobile = (suffix) => {
             let self = this;
-            let fileName = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, suffix);
+            let fileName = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, suffix).replace(' ()', '');
             // other browsers
             let file = new File([self.buffer], fileName, {
                 type: 'image/jpeg'
