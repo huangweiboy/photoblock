@@ -1,4 +1,3 @@
-//import Caver from 'caver-js';
 import { ethers } from 'ethers';
 import logo from './klaytn.png';
 

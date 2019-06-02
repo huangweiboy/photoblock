@@ -2,11 +2,10 @@
 /*     BEGIN: PHOTOBLOCK INTEGRATION       */
 let photoBlockContainerId = "photoblock-container";
 let photoBlock = new PhotoBlock(photoBlockContainerId, { horizontal: true });
+
 photoBlock.registerContext(EthereumContext);
-photoBlock.registerContext(TronContext);
-photoBlock.registerContext(KlaytnContext);
-photoBlock.registerContext(WebContext);
 photoBlock.registerContext(BitcoinContext);
+photoBlock.registerContext(WebContext);
 
 photoBlock.on(PhotoBlock.eventTypes().CREATE, () => console.log('PhotoBlock was created'));
 photoBlock.on(PhotoBlock.eventTypes().HIDE, () => console.log('PhotoBlock modal was hidden'));
@@ -21,16 +20,6 @@ photoBlock.on(PhotoBlock.eventTypes().UNLOCK, (account) => {
 
 /*    render() method is called each time demo context changes in updateContexts()      */
 /*    END: PHOTOBLOCK INTEGRATION     */
-
-
-let iconShakeHandle = window.setInterval(() => {
-    let pc = document.getElementById('photoblock-container');
-    if (pc.className === 'animated') {
-        pc.className = '';
-    } else {
-        pc.className = 'animated';
-    }
-}, 4000)
 
 
 function updateContexts(contexts, callback) {

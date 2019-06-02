@@ -7,7 +7,6 @@ module.exports = {
   entry: {
     'PhotoBlock': path.join(__dirname, "src/packages/photoblock"),
     'EthereumContext': path.join(__dirname, "src/packages/contexts/ethereum"),
-    'TronContext': path.join(__dirname, "src/packages/contexts/tron"),
     'KlaytnContext': path.join(__dirname, "src/packages/contexts/klaytn"),
     'WebContext': path.join(__dirname, "src/packages/contexts/web"),
     'BitcoinContext': path.join(__dirname, "src/packages/contexts/bitcoin")

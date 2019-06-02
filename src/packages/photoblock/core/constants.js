@@ -23,7 +23,7 @@ export default {
     STATE_READY: 'ready',
     STATE_FIND: 'find',
     STATE_BROWSE: 'browse',
-    REQUIRED_EMOJIS: 4,
+    REQUIRED_EMOJIS: 2,
     MAX_UNLOCK_ATTEMPTS: 3,
     FILE_NAME_SUFFIX_PLACEHOLDER: 'DEFAULT',
     DEFAULT_FILE_NAME: 'Photoblock (DEFAULT).jpg',
