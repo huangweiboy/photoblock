@@ -1,15 +1,22 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 //const dependencies = Object.keys(require("./package.json").dependencies);
 
 module.exports = {
+  optimization: {
+    minimizer: [new UglifyJsPlugin({
+      test: /\.js(\?.*)?$/i,
+      exclude: /BitcoinContext\.min\.js/
+    })]
+  },
   entry: {
     'PhotoBlock': path.join(__dirname, "src/packages/photoblock"),
-    'EthereumContext': path.join(__dirname, "src/packages/contexts/ethereum"),
     'KlaytnContext': path.join(__dirname, "src/packages/contexts/klaytn"),
-    'WebContext': path.join(__dirname, "src/packages/contexts/web"),
     'BitcoinContext': path.join(__dirname, "src/packages/contexts/bitcoin")
+   // 'EthereumContext': path.join(__dirname, "src/packages/contexts/ethereum"),
+   // 'WebContext': path.join(__dirname, "src/packages/contexts/web"),
   },
   output: {
     path: path.join(__dirname, "dist"),

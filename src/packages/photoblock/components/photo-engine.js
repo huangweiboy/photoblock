@@ -83,7 +83,7 @@ export default class PhotoEngine {
                         isMatch = false;
                         break;
                     }
-                    if (xmpAccounts[0][attribute] !== pbAccount[attribute]) { //PhotoEngine.hashHex(pbAccount[attribute])) {
+                    if (xmpAccounts[0][attribute] !== PhotoEngine.hashHex(pbAccount[attribute])) {
                         isMatch = false;
                         break;
                     }
@@ -172,10 +172,9 @@ export default class PhotoEngine {
                         if (account.userId && (account.userId !== null) && (account.userId !== '')) {
                             fileNameSuffix = account.userId;
                         }    
-                        // Object.keys(account).map((key) => {
-                        //     account[key] = account[key]; //PhotoEngine.hashHex(account[key]);
-        
-                        // });    
+                        Object.keys(account).map((key) => {
+                            account[key] = PhotoEngine.hashHex(account[key]);
+                        });    
                         contextAccounts[contextName].push(account);
                     }
                 }    

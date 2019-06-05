@@ -25,6 +25,9 @@ const TAG_RDF_LI = NS_RDF + ":li";
 const TAG_XPACKET = "xpacket";
 const XMP_GUID = "W5M0MpCehiHzreSzNTczkc9d";
 
+const PACKET_BEGIN = `<?${TAG_XPACKET} begin=\"\" id=\"${XMP_GUID}\"?><${TAG_X_XMPMETA} ${NS_XML}:${NS_X}=\"${NS_IRI_X}\">`;
+const PACKET_END = `</${TAG_X_XMPMETA}><?${TAG_XPACKET} end=\"w\"?>`;
+
 export default class Xmp {
 
 
@@ -106,7 +109,9 @@ export default class Xmp {
     let postBytes = new Uint8Array(buffer, jpegPhoto.xmpMarker + jpegPhoto.xmpLength);
 
     // Bytes for new XMP packet
-    let newXmpText = new XMLSerializer().serializeToString(jpegPhoto.doc);
+    //let newXmpText = new XMLSerializer().serializeToString(jpegPhoto.doc);
+    let newXmpText = serializeDoc(jpegPhoto.doc);
+    
     newXmpText = newXmpText.replace(/>\s*/g, ">").replace(/\s*</g, "<"); // Strip whitespace
     let xmpBytes = Uint8Array.from(UTF8.setBytesFromString("XXXX" + NS_IRI_XMP + "\0" + newXmpText)); //XXXX is placeholder for FFE1 marker followed by length (2 bytes)
     let newXmpDV = new DataView(xmpBytes.buffer);
@@ -125,17 +130,42 @@ export default class Xmp {
 
 
 
+    // XMLSerializer().serializeToString is inconsistent across browsers
+    // and strips namespaces (I'm looking at you Chrome!).
+    // This is needed to keep the code consistent.
+    function serializeDoc(xmpDoc) {
+
+        return `${PACKET_BEGIN}${serializeElements(xmpDoc.documentElement)}${PACKET_END}`;
+
+        function serializeAttributes(node) {
+          let attrString = '';
+          let attributes = node.attributes;
+          for(let a = 0; a<attributes.length; a++) {
+            attrString += ` ${attributes[a].nodeName}="${attributes[a].value}"`;
+          }
+          return attrString;
+        }
+
+        function serializeElements(node) {
+          let elemString = '';
+          let children = node.children;
+          for(let c=0; c<children.length; c++) {
+            let child = children[c];
+            elemString += `<${child.nodeName}${serializeAttributes(child)}>${serializeElements(child)}</${child.nodeName}>`;
+          }
+          return elemString;
+        }
+    }
+
 
     function _updateXmpPacketDoc(xmpDoc, accounts, contexts) {
 
 
       if (xmpDoc === null) {
         let xmpText =
-          `<?${TAG_XPACKET} begin=\"\" id=\"${XMP_GUID}\"?><${TAG_X_XMPMETA} ${NS_XML}:${NS_X}=\"${NS_IRI_X}\">
-          <${TAG_RDF_RDF} ${NS_XML}:${NS_RDF}=\"${NS_IRI_RDF}\">
+          `${PACKET_BEGIN}<${TAG_RDF_RDF} ${NS_XML}:${NS_RDF}=\"${NS_IRI_RDF}\">
             <${TAG_RDF_DESCRIPTION} ${NS_RDF}:${NS_ABOUT}=\"\" ${NS_XML}:${NS_XMP}=\"${NS_IRI_XMP}\"></${TAG_RDF_DESCRIPTION}>
-          </${TAG_RDF_RDF}>
-        </${TAG_X_XMPMETA}><?${TAG_XPACKET} end=\"w\"?>`;
+          </${TAG_RDF_RDF}>${PACKET_END}`;
 
         xmpDoc = new DOMParser().parseFromString(xmpText, "text/xml")
       }

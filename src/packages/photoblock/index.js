@@ -14,6 +14,8 @@ import photoBlockFrameHorz from './img/photoblock-frame-horz.svg';
 import photoBlockIcon from './img/photoblock-icon.svg';
 import './photoblock.css';
 
+import EthereumContext from '../contexts/ethereum';
+import WebContext from '../contexts/web';
 
 export default class PhotoBlock {
 
@@ -21,6 +23,7 @@ export default class PhotoBlock {
   constructor(containerId, options) {
     this.containerId = containerId;
     this.options = options || {};
+    this.srcUrl = null;
     this.element = null;
     this.modal = null;
     this.loader = null;
@@ -39,8 +42,36 @@ export default class PhotoBlock {
     this.handlers[PB.EVENT_TYPES.SHOW] = () => {};
     this.handlers[PB.EVENT_TYPES.UNLOCK] = (account) => { console.log(`Account ${Object.values(account)[0]} unlocked.`); };
     this.handlers[PB.EVENT_TYPES.UPDATE] = (account, callback) => { console.log(`Account ${Object.values(account)[0]} update requested.`); callback(`<h1>${Object.values(account)[0]}</h1>`) };
+    this.registerContext(EthereumContext);
+    this.registerContext(WebContext);
+    this.verify((result) => {
+      console.log(result ? 'Verify succeeded' : 'Verify failed');
+    });
   }
 
+
+  verify(callback) {
+    let self = this;
+    let scripts = document.getElementsByTagName('script');
+    for(let s=0; s<scripts.length; s++) {
+      let currentScript = scripts[s];
+      let src = currentScript.getAttribute('src');
+      if (!src) { continue; }   
+      let idx = src.toLowerCase().indexOf('photoblock');   
+      if (idx > -1) {
+        fetch(src)
+          .then(function(response) {
+            return response.text().then(function(code) {
+              self.srcUrl = src.substr(0, idx);
+              console.log('SrcUrl', self.srcUrl, src);
+              console.log(code);
+              callback(true);
+            });
+          });
+        break;
+      }
+    };
+  }
 
   registerContext(context) {
 
@@ -95,6 +126,25 @@ export default class PhotoBlock {
     let self = this;
     self.context.handlers.sign(data, reason, callback);
   }
+
+  loadContext = (context, callback) => {
+
+    context = context.substr(0,1).toUpperCase() + context.substr(1).toLowerCase();
+    const existingScript = DOM.elid(`${context}Context`);
+  
+    if (!existingScript) {
+      const script = document.createElement('script');
+      script.src = ``;
+      script.id = 'googleMaps';
+      document.body.appendChild(script);
+  
+      script.onload = () => {
+        if (callback) callback();
+      };
+    }
+  
+    if (existingScript && callback) callback();
+  };
 
   on(eventType, callback) {
     let self = this;

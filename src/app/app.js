@@ -3,9 +3,7 @@
 let photoBlockContainerId = "photoblock-container";
 let photoBlock = new PhotoBlock(photoBlockContainerId, { horizontal: true });
 
-photoBlock.registerContext(EthereumContext);
 photoBlock.registerContext(BitcoinContext);
-photoBlock.registerContext(WebContext);
 
 photoBlock.on(PhotoBlock.eventTypes().CREATE, () => console.log('PhotoBlock was created'));
 photoBlock.on(PhotoBlock.eventTypes().HIDE, () => console.log('PhotoBlock modal was hidden'));
@@ -15,7 +13,6 @@ photoBlock.on(PhotoBlock.eventTypes().NEW, () => console.log('New photo was load
 photoBlock.on(PhotoBlock.eventTypes().SHOW, () => console.log('PhotoBlock modal was displayed'));
 photoBlock.on(PhotoBlock.eventTypes().UNLOCK, (account) => {
     console.log('PhotoBlock was unlocked', account);
-    window.clearInterval(iconShakeHandle);
 }); 
 
 /*    render() method is called each time demo context changes in updateContexts()      */

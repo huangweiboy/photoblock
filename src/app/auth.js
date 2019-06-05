@@ -24,21 +24,10 @@ photoBlock.on(PhotoBlock.eventTypes().NEW, () => console.log('New photo was load
 photoBlock.on(PhotoBlock.eventTypes().SHOW, () => console.log('PhotoBlock modal was displayed'));
 photoBlock.on(PhotoBlock.eventTypes().UNLOCK, (account) => {
     console.log('PhotoBlock was unlocked', account);
-    window.clearInterval(iconShakeHandle);
 });
 
 /*    render() method is called each time demo context changes in updateContexts()      */
 /*    END: PHOTOBLOCK INTEGRATION     */
-
-
-let iconShakeHandle = window.setInterval(() => {
-    let pc = document.getElementById('photoblock-container');
-    if (pc.className === 'animated') {
-        pc.className = '';
-    } else {
-        pc.className = 'animated';
-    }
-}, 4000)
 
 
 function updateContexts(contexts, callback) {

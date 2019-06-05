@@ -220,8 +220,6 @@ export default class Phonetic {
 		for (let i = 0; i < hash.length; i++) {
 			numeric += hash[i];
 		}
-
-		console.log('GetNumericHash', data, numeric);
 		return numeric;
 	}
 

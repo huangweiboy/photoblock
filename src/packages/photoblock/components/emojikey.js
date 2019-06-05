@@ -140,7 +140,6 @@ export default class EmojiKey extends Component {
                     }); 
     
                     DOM.elid('photoblock-emoji-unlock').removeAttribute('style');
-
                     if (store.state.unlockCount > 0) {
                         DOM.elid('photoblock-photo-wrapper').setAttribute('style','background-color: #cc0000;');
                         window.setTimeout(() => DOM.elid('photoblock-photo-wrapper').removeAttribute('style'), 3000);
@@ -342,8 +341,15 @@ export default class EmojiKey extends Component {
 
         // Redraw the cells
         self.renderCells();
+        self.serializeEmojiKey();
+    }
 
-    
+    serializeEmojiKey() {
+        let self = this;
+        let serialized = '';
+        self.emojiKey.map((item) => {
+            serialized += item.cell + ':' + item.emoji + '|';
+        })
 
     }
 
