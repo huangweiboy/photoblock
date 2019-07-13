@@ -6,7 +6,7 @@ export default class KlaytnContext {
     static Name = 'Klaytn';
     static Symbol = 'KLAY';
     static LogoUrl = logo;
-    static Count = 1;
+    static Count = 3;
     static HdPath = 'm/44\'/60\'/0\'/10';
     static Attributes = ['address', '\'publicKey'];
     static Handlers = {

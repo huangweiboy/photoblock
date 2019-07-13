@@ -3,6 +3,7 @@ import PB from '../core/constants';
 import Xmp from './xmp';
 import photoblockTemplate from '../img/photoblock-template.png';
 import blake from 'blakejs';
+import Recent from './recent';
 
 export default class PhotoEngine {
     constructor(buffer, contexts) {
@@ -159,7 +160,7 @@ export default class PhotoEngine {
             // persisted on disk and will remain unchanged regardless of browser.
             let hdInfo = self._getPhotoBlockEntropy(emojiKey);
 
-            let fileNameSuffix = '';
+            let photoBlockKey = '';
             let contextAccounts = {};
             contextNames.map((contextName) => {
                 let context = self.contexts[contextName];
@@ -169,8 +170,11 @@ export default class PhotoEngine {
                 if (accounts !== null) {
                     for(let a=0; a<accounts.length; a++) {
                         let account = accounts[a];
-                        if (account.userId && (account.userId !== null) && (account.userId !== '')) {
-                            fileNameSuffix = account.userId;
+
+                        // WebContext userId is the unique key for this account
+                        if ((contextName === PB.WEB_CONTEXT_NAME) && (a === 0) && account.userId && (account.userId !== null) && (account.userId !== '')) {
+                            console.log('HdInfo', hdInfo);
+                            photoBlockKey = account.userId;
                         }    
                         Object.keys(account).map((key) => {
                             account[key] = PhotoEngine.hashHex(account[key]);
@@ -183,11 +187,10 @@ export default class PhotoEngine {
 
             if (self.buffer !== null) {
                 if (_isMobile()) {
-                    _savePhotoBlockMobile(fileNameSuffix);
+                    _savePhotoBlockMobile(photoBlockKey, callback);
                 } else {
-                    _savePhotoBlock(fileNameSuffix);
+                    _savePhotoBlock(photoBlockKey, callback);
                 }
-                callback();
             } else {
                 callback('An error occurred');
             }
@@ -247,30 +250,39 @@ export default class PhotoEngine {
         }
 
 
-        const _savePhotoBlock = (suffix) => {
+        const _savePhotoBlock = (key, callback) => {
             let self = this;
-            if (window.navigator && window.navigator.msSaveOrOpenBlob) { //IE11 support
+            let fileName = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, key).replace(' ()', '');
+            let recent = new Recent();
+            console.log(self.buffer);
+            recent.add({
+                key: key,
+                lastUsed: Date.now(),
+                photo: self.buffer,
+                saved: false
+            }, callback);
+            // if (window.navigator && window.navigator.msSaveOrOpenBlob) { //IE11 support
 
-                let blob = new Blob([self.buffer], {
-                    type: 'image/jpeg'
-                });
-                window.navigator.msSaveOrOpenBlob(blob, fileName);
-            } else {
-                let a = document.createElement('a');
-                document.body.appendChild(a);
-                a.style = 'display: none';
-                a.download = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, suffix);
-                a.setAttribute('rel', 'noopener noreferrer');
-                _getBlobUri((img) => {
-                    a.href = img;
-                    a.click();
-                });
-            }
+            //     let blob = new Blob([self.buffer], {
+            //         type: 'image/jpeg'
+            //     });
+            //     window.navigator.msSaveOrOpenBlob(blob, fileName);
+            // } else {
+            //     let a = document.createElement('a');
+            //     document.body.appendChild(a);
+            //     a.style = 'display: none';
+            //     a.download = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, key);
+            //     a.setAttribute('rel', 'noopener noreferrer');
+            //     _getBlobUri((img) => {
+            //         a.href = img;
+            //         a.click();
+            //     });
+            // }
         }
 
-        const _savePhotoBlockMobile = (suffix) => {
+        const _savePhotoBlockMobile = (key, callback) => {
             let self = this;
-            let fileName = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, suffix).replace(' ()', '');
+            let fileName = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, key).replace(' ()', '');
             // other browsers
             let file = new File([self.buffer], fileName, {
                 type: 'image/jpeg'

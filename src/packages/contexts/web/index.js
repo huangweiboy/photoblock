@@ -1,6 +1,7 @@
 import nacl from 'tweetnacl/nacl-fast';
 import logo from './web.png';
 import Phonetic from './phonetic';
+import PB from '../../photoblock/core/constants';
 
 export default class WebContext {
 
@@ -8,10 +9,10 @@ export default class WebContext {
 
     //["agreeable", "alert", "alluring", "ambitious", "amused", "boundless", "brave", "bright", "calm", "capable", "charming", "cheerful", "coherent", "comfortable", "confident", "cooperative", "courageous", "credible", "cultured", "dashing", "dazzling", "debonair", "decisive", "decorous", "delightful", "detailed", "determined", "diligent", "discreet", "dynamic", "eager", "efficient", "elated", "eminent", "enchanting", "encouraging", "endurable", "energetic", "entertaining", "enthusiastic", "excellent", "excited", "exclusive", "exuberant", "fabulous", "fair", "faithful", "fantastic", "fearless", "fine", "frank", "friendly", "funny", "generous", "gentle", "glorious", "good", "happy", "harmonious", "helpful", "hilarious", "honorable", "impartial", "industrious", "instinctive", "jolly", "joyous", "kind", "kind-hearted", "knowledgeable", "level", "likeable", "lively", "lovely", "loving", "lucky", "mature", "modern", "nice", "obedient", "painstaking", "peaceful", "perfect", "placid", "plausible", "pleasant", "plucky", "productive", "protective", "proud", "punctual", "quiet", "receptive", "reflective", "relieved", "resolute", "responsible", "rhetorical", "righteous", "romantic", "sedate", "seemly", "selective", "self-assured", "sensitive", "shrewd", "silly", "sincere", "skillful", "smiling", "splendid", "steadfast", "stimulating", "successful", "succinct", "talented", "thoughtful", "thrifty", "tough", "trustworthy", "unbiased", "unusual", "upbeat", "vigorous", "vivacious", "warm", "willing", "wise", "witty", "wonderful"];
 
-    static Name = 'Web';
+    static Name = PB.WEB_CONTEXT_NAME;
     static Symbol = 'WWW';
     static LogoUrl = logo;
-    static Count = 5;
+    static Count = 1; // Used for email and other purposes...do not increase
     static HdPath = 'm/255\'/255\'/255\'/255';
     static Attributes = ['userId', 'displayName', '\'publicKey']; 
     static Handlers = {

@@ -10,7 +10,7 @@ export default class BitcoinContext {
     static Name = 'Bitcoin';
     static Symbol = 'BTC';
     static LogoUrl = logo;
-    static Count = 1;
+    static Count = 3;
     static HdPath = 'm/44\'/0\'/0\'/0';
     static Attributes = ['address', '\'publicKey'];
     static Handlers = {

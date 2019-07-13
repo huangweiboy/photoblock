@@ -1,17 +1,17 @@
 
 /*     BEGIN: PHOTOBLOCK INTEGRATION       */
 let photoBlockContainerId = "photoblock-container";
-let photoBlock = new PhotoBlock(photoBlockContainerId, { horizontal: true });
+let photoBlock = new PhotoBlockClient(photoBlockContainerId, { horizontal: true });
 
 photoBlock.registerContext(BitcoinContext);
 
-photoBlock.on(PhotoBlock.eventTypes().CREATE, () => console.log('PhotoBlock was created'));
-photoBlock.on(PhotoBlock.eventTypes().HIDE, () => console.log('PhotoBlock modal was hidden'));
-photoBlock.on(PhotoBlock.eventTypes().LOAD, () => console.log('PhotoBlock photo was loaded'));
-photoBlock.on(PhotoBlock.eventTypes().LOCK, () => console.log('PhotoBlock was locked'));
-photoBlock.on(PhotoBlock.eventTypes().NEW, () => console.log('New photo was loaded'));
-photoBlock.on(PhotoBlock.eventTypes().SHOW, () => console.log('PhotoBlock modal was displayed'));
-photoBlock.on(PhotoBlock.eventTypes().UNLOCK, (account) => {
+photoBlock.on(PhotoBlockClient.eventTypes().CREATE, () => console.log('PhotoBlock was created'));
+photoBlock.on(PhotoBlockClient.eventTypes().HIDE, () => console.log('PhotoBlock modal was hidden'));
+photoBlock.on(PhotoBlockClient.eventTypes().LOAD, () => console.log('PhotoBlock photo was loaded'));
+photoBlock.on(PhotoBlockClient.eventTypes().LOCK, () => console.log('PhotoBlock was locked'));
+photoBlock.on(PhotoBlockClient.eventTypes().NEW, () => console.log('New photo was loaded'));
+photoBlock.on(PhotoBlockClient.eventTypes().SHOW, () => console.log('PhotoBlock modal was displayed'));
+photoBlock.on(PhotoBlockClient.eventTypes().UNLOCK, (account) => {
     console.log('PhotoBlock was unlocked', account);
 }); 
 

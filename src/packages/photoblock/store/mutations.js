@@ -12,6 +12,10 @@ export default {
         callback(state);
     },
 
+    navigateAuth(state, payload, callback) {
+        location.href = "https://ipfs.auth1.com:8001/auth.html?session=1&context=Ethereum";
+    },
+
     showModal(state, payload, callback) {
         state.isModalVisible = true;
         if (state.currentState === PB.STATE_INIT) {
@@ -39,6 +43,11 @@ export default {
         
         state.handlers[PB.EVENT_TYPES.HIDE]();    
         callback(state);
+    },
+
+    createPhoto(state, payload, callback) {
+        state.currentState = PB.STATE_CREATE;
+        callback(state);    
     },
 
     loadPhoto(state, payload, callback) {

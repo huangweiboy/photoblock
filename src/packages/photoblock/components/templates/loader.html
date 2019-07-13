@@ -1,14 +1,21 @@
 <div id="photoblock-loader-wrapper" class="noselect" unselectable="on" onselectstart="return false;">
     <div id="photoblock-drop-area" class="photoblock-loader-section noselect" unselectable="on" onselectstart="return false;">
-        <p id="photoblock-new-message" style="display:none;">${loader.new}</p>
-        <p id="photoblock-fresh-message" style="display:none;">${loader.fresh}</p>
-        <p id="photoblock-error-message" style="display:none;">${error}</p>
+        <p id="photoblock-greet-message" style="display:none;">${loader.titleRandom}</p>
         <input type="file" id="photoblock-files" accept="image/jpeg" >                
+        <p id="photoblock-error-message" style="display:none;">${error}</p>
         <label id="photoblock-button-label" for="photoblock-files">${loader.select}</label>
-        <a href="https://www.trycrypto.com/photoblock" target="_new">${loader.whatis}</a>
+        <p id="photoblock-new-message" style="display:none;">${loader.help}</p>
+        <p class="photoblock-spacer-b150">&nbsp;</p>        
     </div>
 
-    <div id="photoblock-collection-wrapper"></div>
+    <div id="photoblock-recent-wrapper">
+        <div id="photoblock-recent-scroll">
+            <div>
+                <img src="../../img/photoblock-create.png" id="photoblock-action-create" />
+                <p>${loader.new}</p>
+            </div>
+        </div>
+    </div>
 
 </div>
 <div id="photoblock-controls">

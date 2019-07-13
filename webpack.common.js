@@ -12,7 +12,8 @@ module.exports = {
     })]
   },
   entry: {
-    'PhotoBlock': path.join(__dirname, "src/packages/photoblock"),
+    'PhotoBlockAuth': path.join(__dirname, "src/packages/photoblock/auth.js"),
+    'PhotoBlockClient': path.join(__dirname, "src/packages/photoblock/client.js"),
     'KlaytnContext': path.join(__dirname, "src/packages/contexts/klaytn"),
     'BitcoinContext': path.join(__dirname, "src/packages/contexts/bitcoin")
    // 'EthereumContext': path.join(__dirname, "src/packages/contexts/ethereum"),
@@ -68,6 +69,7 @@ module.exports = {
       { from: 'src/app/app.js' },
       { from: 'src/app/auth.html' },
       { from: 'src/app/auth.js' },
+      { from: 'src/app/shim.js' },
       { from: 'src/app/styles.css' },
       { from: 'src/packages/contexts/**/*.png', to: 'img/contexts', flatten: true }
     ])
@@ -79,5 +81,10 @@ module.exports = {
     contentBase: path.join(__dirname, "dist"),
     host: "0.0.0.0",
     stats: "minimal"
+  },
+  node: {
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty'
   }
 };

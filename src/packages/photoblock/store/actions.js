@@ -4,6 +4,10 @@ export default {
         context.commit('ready', payload);
     },
 
+    navigateAuth(context, payload) {
+        context.commit('navigateAuth', payload);
+    },
+
     showModal(context, payload) {
         context.commit('showModal', payload);
     },
@@ -14,6 +18,10 @@ export default {
 
     loadPhoto(context, payload) { 
         context.commit('loadPhoto', payload);
+    },
+
+    createPhoto(context, payload) { 
+        context.commit('createPhoto', payload);
     },
 
     newEmojiKey(context, payload) {

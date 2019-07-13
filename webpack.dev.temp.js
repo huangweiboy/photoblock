@@ -6,8 +6,8 @@ module.exports = merge(common, {
   devtool: 'inline-source-map',
   devServer: {
     openPage: 'auth.html',
-    port: 8001,
-    host: 'ipfs.auth1.com',
+    port: 8002,
+    host: 'ipfs.auth2.com',
     https: true,
     contentBase: './dist'
   }

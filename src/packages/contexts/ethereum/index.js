@@ -6,7 +6,7 @@ export default class EthereumContext {
     static Name = 'Ethereum';
     static Symbol = 'ETH';
     static LogoUrl = logo;
-    static Count = 1;
+    static Count = 3;
     static HdPath = 'm/44\'/60\'/0\'/0';
     static Attributes = ['address', '\'publicKey'];
     static Handlers = {

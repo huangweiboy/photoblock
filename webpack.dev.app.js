@@ -7,6 +7,7 @@ module.exports = merge(common, {
   devServer: {
     openPage: 'app.html',
     port: 8000,
+    host: 'www.site1.com',
     https: true,
     contentBase: './dist'
   }

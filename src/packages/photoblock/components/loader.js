@@ -4,6 +4,8 @@ import DOM from '../core/dom';
 import Component from '../core/component';
 import store from '../store/index';
 import LoaderTemplate from "./templates/loader.html";
+import CreatorTemplate from "./templates/loader-create.html";
+import Recent from './recent';
 
 export default class Loader extends Component {
     constructor(modal) {
@@ -15,6 +17,7 @@ export default class Loader extends Component {
         this.dropArea = null;
         this.dropFiles = null;
         this.modal = modal;
+        this.recent = new Recent();
     }
     
     render() {
@@ -22,33 +25,38 @@ export default class Loader extends Component {
         let self = this;
         self.log('loader...render');
 
-        if (store.state.currentState === PB.STATE_LOAD) {
-            let template = LoaderTemplate;
+        if ((store.state.currentState === PB.STATE_LOAD) || (store.state.currentState === PB.STATE_CREATE)) {
+            let template = store.state.currentState === PB.STATE_LOAD ? LoaderTemplate : CreatorTemplate;
             if (store.state.error == PB.ERROR.NO_CONTEXT) {
                 template = template.replace('\{error\}', '\{error.noContext\}');
             }
-            self.modal.content.innerHTML = '';
+            self.modal.content.innerHTML = ''; 
             self.modal.content.insertAdjacentHTML('beforeend', self.localizer.localize(template));
             self.element = DOM.elid('photoblock-loader-wrapper'); 
         
-            if (store.state.fresh) {
-                DOM.elid('photoblock-fresh-message').removeAttribute('style');
-                DOM.elid('photoblock-loader-wrapper').className = "photoblock-fresh";
+            if (store.state.error !== null) {
+                DOM.elid('photoblock-error-message').removeAttribute('style');
             } else {
-                if (store.state.error !== null) {
-                    DOM.elid('photoblock-error-message').removeAttribute('style');
-                } else {
-                    DOM.elid('photoblock-new-message').removeAttribute('style');
-                }
-                DOM.elid('photoblock-loader-wrapper').className = "photoblock-new";    
+                DOM.elid('photoblock-greet-message').removeAttribute('style');
+                DOM.elid('photoblock-new-message').removeAttribute('style');
             }
-
+            DOM.elid('photoblock-loader-wrapper').className = "photoblock-new";    
             self.dropFiles = DOM.elid("photoblock-files");
             self.dropArea = DOM.elid("photoblock-drop-area");
             self.dropFiles.onchange = (evt) => {
                 self.handleFiles(evt.target.files);
             }
  
+            if (store.state.currentState === PB.STATE_LOAD) {
+                DOM.elid('photoblock-action-create').addEventListener("click", () => {
+                    store.dispatch('createPhoto', { });
+                });
+            } else {
+                DOM.elid('photoblock-action-cancel').addEventListener("click", () => {
+                    store.dispatch('cancelPhoto', { });
+                });
+            }
+
             // Prevent default drag behaviors
             ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
                 self.dropArea.addEventListener(eventName, (e) => { self.preventDefaults(e); }, false);
@@ -66,9 +74,44 @@ export default class Loader extends Component {
      
             // Handle dropped files
             self.dropArea.addEventListener("drop", (e) => { self.handleDrop(e); }, false);
+
+            window.setTimeout(() => {
+                self.toggleRecent(true);
+                self.loadRecents();
+            }, 10);
     
         }
 
+    }
+
+    loadRecents() {
+        let self = this;
+        let scroller = DOM.elid('photoblock-recent-scroll');
+        self.recent.all((recents) => {
+            recents.map((item) => {
+                let photo = (window.webkitURL || window.URL).createObjectURL(new Blob([item.photo], { type: 'image/jpeg' }));
+                window.setTimeout(() => {
+                    (window.webkitURL || window.URL).revokeObjectURL(photo);
+                }, 100);
+                let div = DOM.div(); 
+                let img = DOM.img({
+                    src: photo,
+                    id: item.key
+                });
+                img.addEventListener('click', (e) => {
+                    self.processRecent(e.target.id);
+                });
+                if (!item.saved) {  
+                    let trash = DOM.img({
+                        src: 'img/trash.svg',
+                        className: 'trash'
+                    });
+                    div.appendChild(trash);    
+                }
+                div.appendChild(img);
+                scroller.appendChild(div);
+            })
+        })
     }
 
     preventDefaults(e) {
@@ -106,4 +149,21 @@ export default class Loader extends Component {
         reader.readAsArrayBuffer(file);
     }
 
+    processRecent(key) {
+        let self = this;
+        self.recent.get(key, (item) => {
+            store.dispatch('loadPhoto', { imgBuffer: item.photo });
+        });
+    }
+
+    toggleRecent(show) {
+        let self = this;
+
+        self.dashboard = show || !self.dashboard;
+        let dashboardWrapper = DOM.elid('photoblock-recent-wrapper');
+        dashboardWrapper.className = self.dashboard ? 'photoblock-recent-slide' : '';
+
+        if (self.dashboard) {
+        }
+    }
 }

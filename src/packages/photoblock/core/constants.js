@@ -1,4 +1,6 @@
 export default {
+    REQUIRED_EMOJIS: 2,
+    MAX_UNLOCK_ATTEMPTS: 3,
     EMOJI_VERSION: '11',
     PHOTO_INFO: {
         FRAME_WIDTH: 1400,
@@ -13,6 +15,7 @@ export default {
     },
     STATE_INIT: 'init',
     STATE_LOAD: 'load',
+    STATE_CREATE: 'create',
     STATE_NEW: 'new',
     STATE_DEFINE: 'define',
     STATE_CONFIRM: 'confirm',
@@ -23,13 +26,16 @@ export default {
     STATE_READY: 'ready',
     STATE_FIND: 'find',
     STATE_BROWSE: 'browse',
-    REQUIRED_EMOJIS: 4,
-    MAX_UNLOCK_ATTEMPTS: 3,
     FILE_NAME_SUFFIX_PLACEHOLDER: 'DEFAULT',
     DEFAULT_FILE_NAME: 'Photoblock (DEFAULT).jpg',
     ERROR: {
         NO_CONTEXT: 'no-context'
     },
+    DB: {
+        NAME: 'photoblock',
+        VERSION: 1,        
+    },
+    WEB_CONTEXT_NAME: 'Web',
     EVENT_TYPES: {
         CLEAR: 'clear',
         CREATE: 'create',
