@@ -39,14 +39,12 @@ export default class Xmp {
   }
 
   static addAccounts(buffer, contexts, contextAccounts) {
-
     // Read the image
     let jpegPhoto = Xmp._parseBuffer(buffer, contexts, false);
     if (jpegPhoto.dataLength === null) {
       return null;
     }
     let contextNames = Object.keys(contextAccounts);
-
     contextNames.map((contextName) => {
       let isValid = true;
 
@@ -56,48 +54,50 @@ export default class Xmp {
       }
 
       let accounts = contextAccounts[contextName];
-      for (let a = 0; a < accounts.length; a++) {
-        let account = accounts[a];
+      if (accounts !== null) {
+        for (let a = 0; a < accounts.length; a++) {
+          let account = accounts[a];
 
-        if (!account) {
-          isValid = null;
-        }
+          if (!account) {
+            isValid = null;
+          }
 
-        if (isValid) {
-          // Validate that all attributes are present
-          contexts[contextName].attributes.map((attribute) => {
-            if (attribute.indexOf('\'') !== 0) {
-              if (!account.hasOwnProperty(attribute) || (account[attribute] === null)) {
-                isValid = false;
-              }
-            }
-          });
-        }
-
-        if (isValid) {
-          // Validate that the account does not allready exist
-          let attribute = contexts[contextName].attributes[0];
-          if (jpegPhoto.accounts.hasOwnProperty(contextName)) {
-            jpegPhoto.accounts[contextName].map((acct) => {
-              if (acct[attribute] === account[attribute]) {
-                isValid = false;
+          if (isValid) {
+            // Validate that all attributes are present
+            contexts[contextName].attributes.map((attribute) => {
+              if (attribute.indexOf('\'') !== 0) {
+                if (!account.hasOwnProperty(attribute) || (account[attribute] === null)) {
+                  isValid = false;
+                }
               }
             });
           }
-        }
 
-        if (isValid) {
-          if (!jpegPhoto.accounts.hasOwnProperty(contextName) || (!jpegPhoto.accounts[contextName])) {
-            jpegPhoto.accounts[contextName] = [];
+          if (isValid) {
+            // Validate that the account does not allready exist
+            let attribute = contexts[contextName].attributes[0];
+            if (jpegPhoto.accounts.hasOwnProperty(contextName)) {
+              jpegPhoto.accounts[contextName].map((acct) => {
+                if (acct[attribute] === account[attribute]) {
+                  isValid = false;
+                }
+              });
+            }
           }
-          jpegPhoto.accounts[contextName].push(account);
-        }
 
+          if (isValid) { 
+            if (!jpegPhoto.accounts.hasOwnProperty(contextName) || (!jpegPhoto.accounts[contextName])) {
+              jpegPhoto.accounts[contextName] = [];
+            }
+            jpegPhoto.accounts[contextName].push(account);
+          }
+        }
       }
     });
 
 
-    jpegPhoto.doc = _updateXmpPacketDoc(jpegPhoto.doc, jpegPhoto.accounts, contexts);
+    jpegPhoto.doc = _updateXmpPacketDoc(jpegPhoto.doc, contexts, jpegPhoto.accounts);
+   
     if (jpegPhoto.xmpMarker === null) {
       jpegPhoto.xmpMarker = jpegPhoto.sosMarker; // If no XMP packet, insert before start of stream
       jpegPhoto.xmpLength = 0;
@@ -110,8 +110,8 @@ export default class Xmp {
 
     // Bytes for new XMP packet
     //let newXmpText = new XMLSerializer().serializeToString(jpegPhoto.doc);
-    let newXmpText = serializeDoc(jpegPhoto.doc);
-    
+    let newXmpText = _serializeDoc(jpegPhoto.doc);
+
     newXmpText = newXmpText.replace(/>\s*/g, ">").replace(/\s*</g, "<"); // Strip whitespace
     let xmpBytes = Uint8Array.from(UTF8.setBytesFromString("XXXX" + NS_IRI_XMP + "\0" + newXmpText)); //XXXX is placeholder for FFE1 marker followed by length (2 bytes)
     let newXmpDV = new DataView(xmpBytes.buffer);
@@ -133,33 +133,32 @@ export default class Xmp {
     // XMLSerializer().serializeToString is inconsistent across browsers
     // and strips namespaces (I'm looking at you Chrome!).
     // This is needed to keep the code consistent.
-    function serializeDoc(xmpDoc) {
+    function _serializeDoc(xmpDoc) {
 
-        return `${PACKET_BEGIN}${serializeElements(xmpDoc.documentElement)}${PACKET_END}`;
+      return `${PACKET_BEGIN}${serializeElements(xmpDoc.documentElement)}${PACKET_END}`;
 
-        function serializeAttributes(node) {
-          let attrString = '';
-          let attributes = node.attributes;
-          for(let a = 0; a<attributes.length; a++) {
-            attrString += ` ${attributes[a].nodeName}="${attributes[a].value}"`;
-          }
-          return attrString;
+      function serializeAttributes(node) {
+        let attrString = '';
+        let attributes = node.attributes;
+        for (let a = 0; a < attributes.length; a++) {
+          attrString += ` ${attributes[a].nodeName}="${attributes[a].value}"`;
         }
+        return attrString;
+      }
 
-        function serializeElements(node) {
-          let elemString = '';
-          let children = node.children;
-          for(let c=0; c<children.length; c++) {
-            let child = children[c];
-            elemString += `<${child.nodeName}${serializeAttributes(child)}>${serializeElements(child)}</${child.nodeName}>`;
-          }
-          return elemString;
+      function serializeElements(node) {
+        let elemString = '';
+        let children = node.children;
+        for (let c = 0; c < children.length; c++) {
+          let child = children[c];
+          elemString += `<${child.nodeName}${serializeAttributes(child)}>${serializeElements(child)}</${child.nodeName}>`;
         }
+        return elemString;
+      }
     }
 
 
-    function _updateXmpPacketDoc(xmpDoc, accounts, contexts) {
-
+    function _updateXmpPacketDoc(xmpDoc, contexts, accounts) {
 
       if (xmpDoc === null) {
         let xmpText =
@@ -181,7 +180,7 @@ export default class Xmp {
               if (!inserted) {
 
                 for (let contextName in contexts) {
-                  if (!contexts.hasOwnProperty(contextName) || (accounts[contextName].length === 0)) {
+                  if (!contexts.hasOwnProperty(contextName) || !accounts.hasOwnProperty(contextName) || (accounts[contextName].length === 0)) {
                     continue;
                   }
 

@@ -8,6 +8,7 @@ import Loader from './components/loader';
 import EmojiKey from './components/emojikey';
 import Download from './components/download';
 import Dashboard from './components/dashboard';
+import parseDomain from 'parse-domain';
 
 import './photoblock.css';
 
@@ -37,13 +38,38 @@ export default class PhotoBlockAuth {
     this.handlers[PB.EVENT_TYPES.NEW] = () => {};
     this.handlers[PB.EVENT_TYPES.SHOW] = () => {};
     this.handlers[PB.EVENT_TYPES.UNLOCK] = (account) => { console.log(`Account ${Object.values(account)[0]} unlocked.`); };
-    this.handlers[PB.EVENT_TYPES.UPDATE] = (account, callback) => { console.log(`Account ${Object.values(account)[0]} update requested.`); callback(`<h1>${Object.values(account)[0]}</h1>`) };
+    this.handlers[PB.EVENT_TYPES.UPDATE] = (account, callback) => { 
+      let self = this;
+      let address = Object.values(account)[0];
+      console.log(`Account ${address} update requested.`); 
+      callback(`
+        <div style="margin-top:20px;font-size:18px;text-align:center;">${self.context.name}</div>
+        <div style="margin:20px auto;text-align:center;width:150px;"><a href="${self.context.explorerUrl.replace("[ADDRESS]", address)}" target="_new" title="Address: ${address}" 
+        style="display:block;padding:20px;text-decoration:none;border:1px solid #000;border-radius:5px;color:#333;background-color:#ffd200;">Account</a></div>`)
+      };
+    this.setOrigin();
     this.registerContext(EthereumContext);
     this.registerContext(WebContext);
 
   }
 
 
+  // This is necessary to ensure that when the app is run from 
+  // different IPFS hosts in a cluster with different host names
+  // but the same domain, the IndexedDB database is visible
+  // regardless of which server is accessed
+  setOrigin() {
+    let domainInfo = parseDomain(location.hostname, { customTlds: ['auth']}); // We use photoblock.auth for testing
+    let newOrigin = null;
+    if (domainInfo) {
+      newOrigin = `${domainInfo.domain}.${domainInfo.tld}`;
+      if (location.host.indexOf(':') > -1) {
+        newOrigin += ':' + location.host.split(':')[1];
+      }
+      document.domain = newOrigin;
+    }
+    console.log('Domain Info', domainInfo, newOrigin, document.domain);
+  }
 
 
   registerContext(context) {
@@ -83,9 +109,9 @@ export default class PhotoBlockAuth {
           symbol: context.Symbol,
           logoUrl: context.LogoUrl,
           hdPath: context.HdPath,
-          count: context.Count || 1,
           attributes: context.Attributes,
-          handlers: context.Handlers
+          handlers: context.Handlers,
+          explorerUrl: context.ExplorerUrl
         }
         if (context.Handlers.hasOwnProperty('init')) {
           context.Handlers['init']();
@@ -103,10 +129,10 @@ export default class PhotoBlockAuth {
   loadContext = (context, callback) => {
 
     context = context.substr(0,1).toUpperCase() + context.substr(1).toLowerCase();
-    const existingScript = DOM.elid(`${context}Context`);
+    let existingScript = DOM.elid(`${context}Context`);
   
     if (!existingScript) {
-      const script = document.createElement('script');
+      let script = document.createElement('script');
       script.src = ``;
       script.id = existingScript;
       document.body.appendChild(script);

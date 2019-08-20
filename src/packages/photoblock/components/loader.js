@@ -40,6 +40,7 @@ export default class Loader extends Component {
                 DOM.elid('photoblock-greet-message').removeAttribute('style');
                 DOM.elid('photoblock-new-message').removeAttribute('style');
             }
+
             DOM.elid('photoblock-loader-wrapper').className = "photoblock-new";    
             self.dropFiles = DOM.elid("photoblock-files");
             self.dropArea = DOM.elid("photoblock-drop-area");
@@ -88,7 +89,12 @@ export default class Loader extends Component {
         let self = this;
         let scroller = DOM.elid('photoblock-recent-scroll');
         self.recent.all((recents) => {
-            recents.map((item) => {
+            if (recents.length === 0) {
+                DOM.elid('photoblock-new-message').setAttribute('style', 'display:none;');
+                DOM.elid('photoblock-newalt-message').removeAttribute('style');
+            }
+            for(let r=0; r<recents.length; r++) {
+                let item = recents[r];
                 let photo = (window.webkitURL || window.URL).createObjectURL(new Blob([item.photo], { type: 'image/jpeg' }));
                 window.setTimeout(() => {
                     (window.webkitURL || window.URL).revokeObjectURL(photo);
@@ -99,19 +105,23 @@ export default class Loader extends Component {
                     id: item.key
                 });
                 img.addEventListener('click', (e) => {
-                    self.processRecent(e.target.id);
+                    self.selectRecent(e.target.id);
                 });
-                if (!item.saved) {  
+                if (!item.saved) {  //TODO: Change to item.saved
                     let trash = DOM.img({
                         src: 'img/trash.svg',
+                        id: item.key,
                         className: 'trash'
+                    });
+                    trash.addEventListener('click', (e) => {
+                        self.deleteRecent(e.target.id);
                     });
                     div.appendChild(trash);    
                 }
                 div.appendChild(img);
                 scroller.appendChild(div);
-            })
-        })
+            }
+        });
     }
 
     preventDefaults(e) {
@@ -149,10 +159,25 @@ export default class Loader extends Component {
         reader.readAsArrayBuffer(file);
     }
 
-    processRecent(key) {
+    selectRecent(key) {
         let self = this;
         self.recent.get(key, (item) => {
-            store.dispatch('loadPhoto', { imgBuffer: item.photo });
+            self.recent.updateLastUsed(key, () => {
+                store.dispatch('loadPhoto', { imgBuffer: item.photo });
+            });
+        });
+    }
+
+    confirmDeleteRecent(key) {
+        let self = this;
+        DOM.elid('photoblock-recent-confirm').removeAttribute('style');
+    }
+
+
+    deleteRecent(key) {
+        let self = this;
+        self.recent.delete(key, () => {
+            store.dispatch('cancelPhoto', { });
         });
     }
 
@@ -161,8 +186,9 @@ export default class Loader extends Component {
 
         self.dashboard = show || !self.dashboard;
         let dashboardWrapper = DOM.elid('photoblock-recent-wrapper');
-        dashboardWrapper.className = self.dashboard ? 'photoblock-recent-slide' : '';
-
+        if (dashboardWrapper) {
+            dashboardWrapper.className = self.dashboard ? 'photoblock-recent-slide' : '';
+        }
         if (self.dashboard) {
         }
     }

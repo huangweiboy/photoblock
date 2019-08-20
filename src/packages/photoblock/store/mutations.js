@@ -13,7 +13,7 @@ export default {
     },
 
     navigateAuth(state, payload, callback) {
-        location.href = "https://ipfs.auth1.com:8001/auth.html?session=1&context=Ethereum";
+        location.href = "https://ipfs1.auth1.com:8001/auth.html?session=1&context=" + state.currentContext.name;
     },
 
     showModal(state, payload, callback) {
@@ -59,7 +59,7 @@ export default {
                 if ((accounts[contextName] !== null) && (accounts[contextName].length) && (accounts[contextName].length > 0)){
                     hasAccounts = true;
 
-                    if (contextName === state.currentContext.name) {
+                    if (contextName === PB.WEB_CONTEXT_NAME) {
                         hasContextAccount = true;
                     }
                 }
@@ -72,7 +72,7 @@ export default {
                     state.emojiKey = [];
                     state.fresh = false;
                     state.unlockCount = 0;
-                    state.xmpAccounts = accounts[state.currentContext.name];
+                    state.xmpAccounts = accounts[PB.WEB_CONTEXT_NAME];
                     state.photoEngine = new PhotoEngine(payload.imgBuffer, state.contexts);
                     state.currentState = PB.STATE_UNLOCK;      
                     state.handlers[PB.EVENT_TYPES.LOAD]();              
@@ -144,7 +144,7 @@ export default {
     unlock(state, payload, callback) {
         
         state.unlockCount++;
-        state.currentAccount = state.photoEngine.unlockPhotoBlock(state.currentContext, payload.emojiKey, state.xmpAccounts);
+        state.currentAccount = state.photoEngine.unlockPhotoBlock(state.contexts[PB.WEB_CONTEXT_NAME], state.currentContext, payload.emojiKey, state.xmpAccounts);
         if (state.currentAccount !== null) {
             state.currentState = PB.STATE_READY;
             state.handlers[PB.EVENT_TYPES.UNLOCK](state.currentAccount);              

@@ -343,7 +343,7 @@
   cursor: pointer;
   border: 2px solid #000000;
   border-radius: 5px;
-  margin: 20px auto;
+  margin: 10px auto;
 }
 
 .photoblock-fresh #photoblock-button-label {
@@ -483,7 +483,7 @@
 
 #photoblock-emoji-intro h2 {
   color: #00c6f6;
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: bold;
   margin-bottom:20px;
 }
@@ -632,7 +632,7 @@
   background-color: #000000;
   color: #ffffff;
   opacity: 0.9;
-  padding: 20px 10px;
+  padding: 10px;
   height: 170px;
   overflow: auto;
 
@@ -640,7 +640,6 @@
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
-  align-content: stretch;
   max-width: 328px;
 
 }
@@ -653,8 +652,9 @@
   display: block;
   float: left;
   flex: 0 0 auto;
-  width: calc(80%/3);
-  margin: 10px;
+  width: calc(80%/3); 
+  min-height: 111px;
+  margin: 10px 10px 20px 10px;
   cursor: pointer;
   text-align: center;
   position: relative;
@@ -685,6 +685,14 @@
 #photoblock-dashboard-scroll,
 #photoblock-emoji-scroll {
   height: 170px;
+}
+
+#photoblock-recent-confirm {
+  height: 150px;
+  overflow: hidden;
+  background-color: #fdd106;
+  line-height: 1.1rem;
+  padding: 10px;
 }
 
 #photoblock-emoji-scroll button {
@@ -777,6 +785,15 @@
 #photoblock-action-next > div {
   background-image: url("img/right.svg");
 }
+
+#photoblock-action-gear {
+  background-image: url("img/gear.svg");
+}
+
+#photoblock-action-user {
+  background-image: url("img/user.svg");
+}
+
 
 #photoblock-controls #photoblock-action-download {
   padding: 8px;
@@ -890,7 +907,7 @@
 }
 
 #photoblock-loader {
-  animation: photoblock-flip-horizontal 4s infinite;
+  animation: photoblock-flip-horizontal 1s infinite;
   width: 100px;
   top: 50px;
   left: 120px;
@@ -898,6 +915,7 @@
 }
 
 #photoblock-new-message,
+#photoblock-newalt-message,
 #photoblock-greet-message,
 #photoblock-fresh-message,
 #photoblock-error-message {
@@ -906,9 +924,11 @@
 
 #photoblock-greet-message {
   font-size: 2rem;
+  margin-top: 20px;
   margin-bottom: 10px;
 }
 
+#photoblock-newalt-message,
 #photoblock-new-message {
   display: block;
   margin: 10px auto;
@@ -984,5 +1004,6 @@
 
 
 #photoblock-modal .photoblock-spacer-b150 {
-  margin-bottom: 150px;
+  margin-top: 20px;
+  margin-bottom: 130px;
 }

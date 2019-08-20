@@ -6,17 +6,19 @@ const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 module.exports = {
   optimization: {
-    minimizer: [new UglifyJsPlugin({
-      test: /\.js(\?.*)?$/i,
-      exclude: /BitcoinContext\.min\.js/
-    })]
+    // minimizer: [new UglifyJsPlugin({
+    //   test: /\.js(\?.*)?$/i,
+    //   exclude: /BitcoinContext\.min\.js/
+    // })]
   },
   entry: {
     'PhotoBlockAuth': path.join(__dirname, "src/packages/photoblock/auth.js"),
     'PhotoBlockClient': path.join(__dirname, "src/packages/photoblock/client.js"),
+    'EthereumContext': path.join(__dirname, "src/packages/contexts/ethereum"),
+    'BitcoinContext': path.join(__dirname, "src/packages/contexts/bitcoin"),
     'KlaytnContext': path.join(__dirname, "src/packages/contexts/klaytn"),
-    'BitcoinContext': path.join(__dirname, "src/packages/contexts/bitcoin")
-   // 'EthereumContext': path.join(__dirname, "src/packages/contexts/ethereum"),
+    'HarmonyContext': path.join(__dirname, "src/packages/contexts/harmony"),
+    'NearContext': path.join(__dirname, "src/packages/contexts/near")
    // 'WebContext': path.join(__dirname, "src/packages/contexts/web"),
   },
   output: {
@@ -69,7 +71,6 @@ module.exports = {
       { from: 'src/app/app.js' },
       { from: 'src/app/auth.html' },
       { from: 'src/app/auth.js' },
-      { from: 'src/app/shim.js' },
       { from: 'src/app/styles.css' },
       { from: 'src/packages/contexts/**/*.png', to: 'img/contexts', flatten: true }
     ])

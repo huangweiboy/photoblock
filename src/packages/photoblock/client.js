@@ -85,7 +85,6 @@ export default class PhotoBlockClient {
           symbol: context.Symbol,
           logoUrl: context.LogoUrl,
           hdPath: context.HdPath,
-          count: context.Count || 1,
           attributes: context.Attributes,
           handlers: context.Handlers
         }
@@ -105,10 +104,10 @@ export default class PhotoBlockClient {
   loadContext = (context, callback) => {
 
     context = context.substr(0,1).toUpperCase() + context.substr(1).toLowerCase();
-    const existingScript = DOM.elid(`${context}Context`);
+    let existingScript = DOM.elid(`${context}Context`);
   
     if (!existingScript) {
-      const script = document.createElement('script');
+      let script = document.createElement('script');
       script.src = ``;
       script.id = existingScript;
       document.body.appendChild(script);

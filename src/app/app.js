@@ -4,6 +4,9 @@ let photoBlockContainerId = "photoblock-container";
 let photoBlock = new PhotoBlockClient(photoBlockContainerId, { horizontal: true });
 
 photoBlock.registerContext(BitcoinContext);
+photoBlock.registerContext(KlaytnContext);
+photoBlock.registerContext(NearContext);
+photoBlock.registerContext(HarmonyContext);
 
 photoBlock.on(PhotoBlockClient.eventTypes().CREATE, () => console.log('PhotoBlock was created'));
 photoBlock.on(PhotoBlockClient.eventTypes().HIDE, () => console.log('PhotoBlock modal was hidden'));

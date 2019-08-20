@@ -3,7 +3,12 @@ import PB from '../core/constants';
 import Xmp from './xmp';
 import photoblockTemplate from '../img/photoblock-template.png';
 import blake from 'blakejs';
+import nacl from 'tweetnacl/nacl-fast';
 import Recent from './recent';
+import Phonetic from '../core/phonetic';
+import Share from '../vendor/share';
+import { PDFDocument } from 'pdf-lib'
+import axios from 'axios';
 
 export default class PhotoEngine {
     constructor(buffer, contexts) {
@@ -17,6 +22,9 @@ export default class PhotoEngine {
         return blake.blake2s(input);
     }
 
+    // From: https://github.com/dcposch/blakejs
+    // Javascript doesn't have 64-bit integers, and BLAKE2b is a 64-bit integer algorithm. 
+    // Writing it withUint32Array is not that fast. BLAKE2s is a 32-bit algorithm, so it's a bit faster.
     static hashHex(input) {
         return blake.blake2sHex(input);
     }
@@ -52,46 +60,177 @@ export default class PhotoEngine {
 
     getAccountSeed(context, hdInfo) {
 
-        let count = context.count < 1 ? 1 : context.count;
-        if (count > 10) {
-            count = 10;
-        }
         return {
             index: hdInfo.index,
             entropy: hdInfo.hash,
-            path: context.hdPath,
-            count: count
+            path: context.hdPath
         }
 
     }
 
-    unlockPhotoBlock(context, emojiKey, xmpAccounts) {
+    generatePdf(callback) {
+
+        let self = this;
+
+        const jpgImageBytes = self.buffer;
+        let pdfDoc = null;
+
+        PDFDocument.create()
+            .then((doc) => {
+                pdfDoc = doc; 
+                return doc.embedJpg(jpgImageBytes);
+            })
+            .then((img) => { 
+                let jpgDims = img.scale(0.25); 
+                let page = pdfDoc.addPage();
+                // Draw the JPG image in the center of the page
+                page.drawImage(img, {
+                    x: page.getWidth() / 2 - jpgDims.width / 2,
+                    y: page.getHeight() / 2 - jpgDims.height / 2,
+                    width: jpgDims.width,
+                    height: jpgDims.height,
+                });
+                return pdfDoc.save();
+              })
+            .then((pdfBytes) => {
+                console.log('PDFBytes', pdfBytes);
+                if (window.navigator && window.navigator.msSaveOrOpenBlob) { //IE11 support
+
+                    let blob = new Blob([pdfBytes], {
+                        type: 'application/pdf'
+                    });
+                    window.navigator.msSaveOrOpenBlob(blob, fileName);
+                } else {
+                    let a = document.createElement('a');
+                    document.body.appendChild(a);
+                    a.style = 'display: none';
+                    a.download = "testfile.pdf";
+                    a.setAttribute('rel', 'noopener noreferrer');
+                    let blob = new Blob([pdfBytes], {
+                        type: 'application/pdf'
+                    });
+                    a.href = (window.webkitURL || window.URL).createObjectURL(blob),
+                   // a.click();
+                    callback();
+
+
+                    // const data = new FormData();
+                    // data.append("flux capacitor", blob);
+
+
+                    // axios({
+                    //     method: 'POST',
+                    //     url: 'https://beta.trycrypto.com:5001/api/v0/add?arg=please-do-work&pin=true',
+                    //     data: data               
+                    // })
+                    // .then(function (response) {
+                    //     console.log('Axios Response', response);
+                    //     a.href = (window.webkitURL || window.URL).createObjectURL(blob),
+                    //     a.click();
+    
+                    // })
+                    // .catch(function (error) {
+                    //     console.log('Axios Error', error);
+                    // })
+
+
+
+                                        // fetch("https://ipfs.infura.io:5001/api/v0/add?arg=please-do-work&pin=true", {
+                    //     method: "POST",
+                    //     body:  data
+                    // })
+                    // .then(function(response){ 
+                    //     return response.json(); 
+                    // })
+                    // .then(function(result){ 
+                    //     console.log('Result', result)
+                    // });
+
+
+                }
+            });
+
+    }
+
+    generateAuthInfo(accountSeed, tokenDuration) {
+        let self = this;
+        let hash = new Uint8Array(accountSeed.entropy);
+        let keyPair = nacl.box.keyPair.fromSecretKey(hash);
+
+
+        return{
+            publicKey: self._arr2hex(keyPair.publicKey),
+            privateKey: self._arr2hex(keyPair.secretKey)
+        };
+    }
+
+    _arr2hex(arr) {
+        return Array.prototype.map.call(arr, x => ('00' + x.toString(16)).slice(-2)).join('');
+    }
+
+    generateUserInfo(accountSeed) {
+        let self = this;
+        let hash = new Uint8Array(accountSeed.entropy);
+        let adjIndex = hash[0];
+        let name = Phonetic.generate({
+            seed: hash
+        });
+        let keyPair = nacl.box.keyPair.fromSecretKey(accountSeed.entropy);
+
+        return{
+            userId: `${Phonetic.ADJECTIVES[adjIndex]}-${name}`,
+            displayName: `${Phonetic.ADJECTIVES[adjIndex].substr(0,1).toUpperCase()}${Phonetic.ADJECTIVES[adjIndex].substr(1)} ${name.substr(0,1).toUpperCase()}${name.substr(1)}`,
+            publicKey: keyPair.publicKey,
+            privateKey: self._arr2hex(keyPair.secretKey)
+        };
+    }
+
+    _getAccount(context, xmpAccounts, accountSeed, userInfo) {
+        let accounts = context.handlers.generateAccounts(accountSeed, userInfo);
+        if (accounts === null) { return null; }
+        let account = accounts[0];
+        let attributes = Object.keys(context.attributes);
+        let isMatch = true;
+        for(let a=0; a<attributes.length; a++) {
+            let attribute = context.attributes[a];
+            if (attribute.indexOf('\'') === 0) { continue; }
+            if (!xmpAccounts[0].hasOwnProperty(attribute)) {
+                isMatch = false;
+                break;
+            }
+            if (xmpAccounts[0][attribute] !== PhotoEngine.hashHex(account[attribute])) {
+                isMatch = false;
+                break;
+            }
+        }
+
+        if (isMatch) {
+            return account;
+        }
+        else {
+            return null;
+        }
+    }
+
+    unlockPhotoBlock(authContext, currentContext, emojiKey, xmpAccounts) {
         let self = this;
         try {
             if (xmpAccounts !== null) {
                 let hdInfo = self._getPhotoBlockEntropy(emojiKey);
-
                 let accountSeed = self.getAccountSeed(context, hdInfo);
-                let pbAccounts = context.handlers.generateAccounts(accountSeed);
-                if (pbAccounts === null) { return null; }
-                let pbAccount = pbAccounts[0];
-                let attributes = Object.keys(context.attributes);
-                let isMatch = true;
-                for(let a=0; a<attributes.length; a++) {
-                    let attribute = context.attributes[a];
-                    if (attribute.indexOf('\'') === 0) { continue; }
-                    if (!xmpAccounts[0].hasOwnProperty(attribute)) {
-                        isMatch = false;
-                        break;
-                    }
-                    if (xmpAccounts[0][attribute] !== PhotoEngine.hashHex(pbAccount[attribute])) {
-                        isMatch = false;
-                        break;
-                    }
+                // let authInfo = self.generateKeyPair(accountSeed, PB.AUTH.TOKEN_DURATION_SECONDS);
+                let userInfo = self.generateUserInfo(accountSeed);
+                let authAccount = self._getAccount(authContext, xmpAccounts, accountSeed, userInfo);
+                console.log('AuthAccount', authAccount);
+                if (authAccount !== null) {                    
+                    let accounts = currentContext.handlers.generateAccounts(accountSeed, userInfo);
+                    console.log('Accounts', accounts);
+                    if (accounts === null) { return null; }
+                    return accounts[0];            
                 }
-                if (isMatch) {
-                    return pbAccount;
-                }                    
+                else {
+                    return null;
+                }                 
             }
         } catch (e) {
         }
@@ -137,15 +276,67 @@ export default class PhotoEngine {
         // and then the completed PhotoBlock is downloaded.
 
         const _finalizeImage = () => {
-            const yPos = canvas.height - 230;
-            const logoSize = 120;
-            let xPos = 400;
+
+            let pb = canvas.toDataURL('image/jpeg', PB.PHOTO_INFO.EXPORT_QUALITY);
+            self.buffer = _dataUriToArrayBuffer(pb);
+
+            // Clean-up
+            photo = null;
+            frame = null;
+            canvas = null;
+
+            // It's very important that all binary image data usage related to account generation
+            // happens after the image is extracted from the canvas. This is because we don't trust
+            // the canvas implementation to be consistent across browsers. Once the JPEG is extracted
+            // from the canvas, we can safely use the binary (pixel) data because that will be
+            // persisted on disk and will remain unchanged regardless of browser.
+            let hdInfo = self._getPhotoBlockEntropy(emojiKey);
+
+            let contextAccounts = {};
+            for(let cname in self.contexts) {
+                if (self.contexts.hasOwnProperty(cname)) {
+                    contextAccounts[cname] = [];
+                }
+            };
+
+            let contextName = PB.WEB_CONTEXT_NAME
+            let context = self.contexts[contextName];
+            let accountSeed = self.getAccountSeed(context, hdInfo);
+            let authInfo = self.generateAuthInfo(accountSeed, PB.AUTH.TOKEN_DURATION_SECONDS);
+            let userInfo = self.generateUserInfo(accountSeed);
+            let photoBlockKey = userInfo.userId;
+
+            let accounts = context.handlers.generateAccounts(accountSeed, userInfo);
+            if (accounts !== null) {
+                for(let a=0; a<accounts.length; a++) {
+                    let account = accounts[a];
+                    Object.keys(account).map((key) => {
+                        account[key] = PhotoEngine.hashHex(account[key]);
+                    });    
+                    contextAccounts[contextName].push(account);
+                }
+            }    
+            self.buffer = Xmp.addAccounts(self.buffer, self.contexts, contextAccounts);
+            if (self.buffer !== null) {
+                _savePhotoBlock(photoBlockKey, callback);
+            } else {
+                callback('An error occurred');
+            }
+        }
+
+
+        /*
+        // This is the older version in which all contexts were written to the photo
+        const _originalFinalizeImage = () => {
+            const yPos = canvas.height - PB.PHOTO_INFO.FOOTER_HEIGHT;
+            const logoSize = PB.PHOTO_INFO.LOGO_SIZE;
+            let xPos = PB.PHOTO_INFO.CONTEXT_XPOS;
             contextNames.map((name) => {
                 ctx.drawImage(contextImages[name], xPos, yPos, logoSize, logoSize);
-                xPos += 150;
+                xPos += PB.PHOTO_INFO.CONTEXT_INCREMENT;
             });
 
-            let pb = canvas.toDataURL('image/jpeg');
+            let pb = canvas.toDataURL('image/jpeg', PB.PHOTO_INFO.EXPORT_QUALITY);
             self.buffer = _dataUriToArrayBuffer(pb);
 
             // Clean-up
@@ -165,17 +356,17 @@ export default class PhotoEngine {
             contextNames.map((contextName) => {
                 let context = self.contexts[contextName];
                 let accountSeed = self.getAccountSeed(context, hdInfo);
-                let accounts = context.handlers.generateAccounts(accountSeed);
+                let authInfo = self.generateAuthInfo(accountSeed, PB.AUTH.TOKEN_DURATION_SECONDS);
+                let userInfo = self.generateUserInfo(accountSeed);
+                userInfo.publicKey = authInfo.publicKey;
+                let accounts = context.handlers.generateAccounts(accountSeed, userInfo);
                 contextAccounts[contextName] = []
                 if (accounts !== null) {
                     for(let a=0; a<accounts.length; a++) {
                         let account = accounts[a];
-
-                        // WebContext userId is the unique key for this account
-                        if ((contextName === PB.WEB_CONTEXT_NAME) && (a === 0) && account.userId && (account.userId !== null) && (account.userId !== '')) {
-                            console.log('HdInfo', hdInfo);
-                            photoBlockKey = account.userId;
-                        }    
+                        if (photoBlockKey === '') {
+                            photoBlockKey = userInfo.userId;
+                        }
                         Object.keys(account).map((key) => {
                             account[key] = PhotoEngine.hashHex(account[key]);
                         });    
@@ -186,15 +377,14 @@ export default class PhotoEngine {
             self.buffer = Xmp.addAccounts(self.buffer, self.contexts, contextAccounts);
 
             if (self.buffer !== null) {
-                if (_isMobile()) {
-                    _savePhotoBlockMobile(photoBlockKey, callback);
-                } else {
-                    _savePhotoBlock(photoBlockKey, callback);
-                }
+                _savePhotoBlock(photoBlockKey, callback);
             } else {
                 callback('An error occurred');
             }
         }
+        */
+
+        
 
         // https://codereview.stackexchange.com/questions/128587/check-if-images-are-loaded-es6-promises
         const _loadImage = name => {
@@ -254,30 +444,50 @@ export default class PhotoEngine {
             let self = this;
             let fileName = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, key).replace(' ()', '');
             let recent = new Recent();
-            console.log(self.buffer);
-            recent.add({
-                key: key,
-                lastUsed: Date.now(),
-                photo: self.buffer,
-                saved: false
-            }, callback);
-            // if (window.navigator && window.navigator.msSaveOrOpenBlob) { //IE11 support
 
-            //     let blob = new Blob([self.buffer], {
-            //         type: 'image/jpeg'
-            //     });
-            //     window.navigator.msSaveOrOpenBlob(blob, fileName);
-            // } else {
-            //     let a = document.createElement('a');
-            //     document.body.appendChild(a);
-            //     a.style = 'display: none';
-            //     a.download = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, key);
-            //     a.setAttribute('rel', 'noopener noreferrer');
-            //     _getBlobUri((img) => {
-            //         a.href = img;
-            //         a.click();
-            //     });
-            // }
+
+            if (window.navigator && window.navigator.msSaveOrOpenBlob) { //IE11 support
+
+                let blob = new Blob([self.buffer], {
+                    type: 'image/jpeg'
+                });
+                window.navigator.msSaveOrOpenBlob(blob, fileName);
+            } else {
+                let a = document.createElement('a');
+                document.body.appendChild(a);
+                a.style = 'display: none';
+                a.download = PB.DEFAULT_FILE_NAME.replace(PB.FILE_NAME_SUFFIX_PLACEHOLDER, key);
+                a.setAttribute('rel', 'noopener noreferrer');
+                let blob = new Blob([self.buffer], {
+                    type: 'image/jpeg'
+                });
+                a.href = (window.webkitURL || window.URL).createObjectURL(blob);
+                a.click();
+                self.generatePdf(() => {
+                    recent.add({
+                        key: key,
+                        lastUsed: Date.now(),
+                        photo: self.buffer,
+                        saved: false
+                    }, callback);
+                        });
+
+            }
+
+
+
+
+
+//            let blobInfo = _getBlobUri();
+
+//            window.open("mailto:" + '' + '?subject=PhotoBlock&body=' + blobInfo.url);
+            // Share.share({
+            //     title: 'Save PhotoBlock',
+            //     url: blobInfo.url
+            // }).then(() => {
+               // _revokeObjectURL(blobInfo.blob);
+            // });
+
         }
 
         const _savePhotoBlockMobile = (key, callback) => {
@@ -296,15 +506,20 @@ export default class PhotoEngine {
         }
 
 
-        const _getBlobUri = (callback) => {
+        const _getBlobUri = () => {
             let blob = new Blob([this.buffer], {
                 type: 'image/jpeg'
             });
-            callback((window.webkitURL || window.URL).createObjectURL(blob));
-            window.setTimeout(() => {
-                (window.webkitURL || window.URL).revokeObjectURL(blob);
-            }, 5000);
+            return {
+                url: (window.webkitURL || window.URL).createObjectURL(blob),
+                blob: blob
+            };
         }
+
+        const _revokeBlobUri = (blob) => {
+            (window.webkitURL || window.URL).revokeObjectURL(blob);
+        }
+
 
 
     }

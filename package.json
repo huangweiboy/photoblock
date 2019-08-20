@@ -4,13 +4,13 @@
   "description": "PhotoBlock (ALPHA Release) provides user-friendly visual account and login capability to blockchain dapps and websites",
   "browser": "dist/index.js",
   "scripts": {
-    "dev": "concurrently \"npm run lib:watch\" \"npm run app\" \"npm run auth\" \"npm run temp\"",
+    "dev": "concurrently \"npm run lib:watch\" \"npm run app\" \"npm run auth\"",
     "lib": "babel src/packages/photoblock -d lib --copy-files",
     "lib:watch": "babel src/packages/photoblock -w -d lib --copy-files",
     "app": "webpack-dev-server --config webpack.dev.app",
     "auth": "webpack-dev-server --config webpack.dev.auth",
-    "temp": "webpack-dev-server --config webpack.dev.temp",
-    "prod": "webpack --config webpack.prod",
+    "auth1": "webpack-dev-server --config webpack.dev.auth1",
+    "prod": "webpack --config webpack.prod --display verbose",
     "prod:map": "webpack --devtool source-map --config webpack.prod",
     "build:sprite": "node build/sprite.js"
   },
@@ -38,6 +38,8 @@
     "@babel/preset-env": "^7.0.0-beta.46",
     "@babel/preset-react": "^7.0.0-beta.46",
     "@babel/runtime-corejs2": "7.3.1",
+    "@harmony-js/account": "0.1.6",
+    "axios": "0.19.0",
     "babel-loader": "^8.0.0-beta.0",
     "clear-sans-webfont": "1.1.1",
     "colors": "1.3.2",
@@ -53,6 +55,8 @@
     "imagemin-pngquant": "6.0.1",
     "imports-loader": "0.8.0",
     "jsdom": "13.0.0",
+    "parse-domain": "2.3.1",
+    "pdf-lib": "1.0.0",
     "spritesmith": "^3.3.1",
     "style-loader": "^0.23.1",
     "uglifyjs-webpack-plugin": "2.1.3",
@@ -71,8 +75,8 @@
   "dependencies": {
     "bitcoin-ts": "1.4.0",
     "blakejs": "1.1.0",
+    "bs58": "4.0.1",
     "ethers": "4.0.26",
-    "superstatic": "6.0.4",
     "tweetnacl": "1.0.1"
   }
 }

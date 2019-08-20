@@ -10,8 +10,8 @@ export default class BitcoinContext {
     static Name = 'Bitcoin';
     static Symbol = 'BTC';
     static LogoUrl = logo;
-    static Count = 3;
     static HdPath = 'm/44\'/0\'/0\'/0';
+    static ExplorerUrl = 'https://www.blockchain.com/btc/address/[ADDRESS]';
     static Attributes = ['address', '\'publicKey'];
     static Handlers = {
         'generateAccounts': BitcoinContext.generateAccounts,
@@ -26,13 +26,13 @@ export default class BitcoinContext {
         }
     }
 
-    static generateAccounts(accountSeed) {
+    static generateAccounts(accountSeed, userInfo, count = 1) {
         try {
             let accounts = [];
             let hdNode = ethers.utils.HDNode.fromMnemonic(ethers.utils.HDNode.entropyToMnemonic(accountSeed.entropy));
 
-            for (let c = 0; c < accountSeed.count; c++) {
-                let derive = hdNode.derivePath(`${accountSeed.path}/${accountSeed.index + c}`);
+            for (let c = 0; c < count; c++) {
+                let derive = hdNode.derivePath(`${BitcoinContext.HdPath}/${accountSeed.index + c}`);
                 let wallet = BitcoinContext.cryptoHelper.wallet(derive.privateKey.substring(2));
                
                 accounts.push({

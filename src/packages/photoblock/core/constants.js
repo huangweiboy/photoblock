@@ -1,17 +1,20 @@
 export default {
-    REQUIRED_EMOJIS: 2,
+    REQUIRED_EMOJIS: 4,
     MAX_UNLOCK_ATTEMPTS: 3,
     EMOJI_VERSION: '11',
     PHOTO_INFO: {
-        FRAME_WIDTH: 1400,
-        FRAME_HEIGHT: 1900,
         THUMB_WIDTH: 140,
         THUMB_HEIGHT: 170,
-        WIDTH: 1320, 
-        HEIGHT: 1520,
+        FRAME_WIDTH: 1400,
+        FRAME_HEIGHT: 1900,
         SLICE_ROWS: 170,
         SLICE_HASH_BYTES: 4096,
-        BYTES_PER_PIXEL: 4
+        BYTES_PER_PIXEL: 4,
+        FOOTER_HEIGHT: 230,
+        LOGO_SIZE: 120,
+        CONTEXT_XPOS: 400,
+        CONTEXT_INCREMENT: 150,
+        EXPORT_QUALITY: 0.6
     },
     STATE_INIT: 'init',
     STATE_LOAD: 'load',
@@ -35,6 +38,9 @@ export default {
         NAME: 'photoblock',
         VERSION: 1,        
     },
+    AUTH: {
+        TOKEN_DURATION_SECONDS: 3600
+    },
     WEB_CONTEXT_NAME: 'Web',
     EVENT_TYPES: {
         CLEAR: 'clear',
@@ -45,5 +51,14 @@ export default {
         SHOW: 'show',
         UNLOCK: 'unlock',
         UPDATE: 'update'
+    },
+    SETTINGS: {
+        WALLPAPER: 'wallpaper'
+    },
+    DOMAINS: {
+        PRIMARY: 'photoblock.org',
+        SECONDARY: [
+            'gateway.ipfs.io', 'ipfs.io', 'cloudflare-ipfs.com'
+        ]
     }
 };

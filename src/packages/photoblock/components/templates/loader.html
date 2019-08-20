@@ -5,10 +5,14 @@
         <p id="photoblock-error-message" style="display:none;">${error}</p>
         <label id="photoblock-button-label" for="photoblock-files">${loader.select}</label>
         <p id="photoblock-new-message" style="display:none;">${loader.help}</p>
+        <p id="photoblock-newalt-message" style="display:none;">${loader.helpAlt}</p>
         <p class="photoblock-spacer-b150">&nbsp;</p>        
     </div>
 
     <div id="photoblock-recent-wrapper">
+        <div id="photoblock-recent-confirm" style="display:none;">
+            <p>${loader.deleteConfirm}</p>
+        </div>
         <div id="photoblock-recent-scroll">
             <div>
                 <img src="../../img/photoblock-create.png" id="photoblock-action-create" />
